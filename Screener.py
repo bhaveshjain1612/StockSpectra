@@ -1,4 +1,4 @@
-!pip install yfinance
+#!pip install yfinance
 
 #importing libraries
 import yfinance as yf
