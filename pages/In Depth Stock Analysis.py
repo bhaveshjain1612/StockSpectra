@@ -163,7 +163,7 @@ def show_all(data):
 
 def main():
 
-    data = load_data("database.csv")
+    data = load_data("backend_data/database.csv")
     #try:
     show_all(data)
     #except:
