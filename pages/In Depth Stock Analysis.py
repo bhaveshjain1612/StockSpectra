@@ -140,8 +140,8 @@ def show_all(data):
         df = data[data["Symbol"]==symbol.upper()].reset_index().drop(['index'],axis=1)
         company_name = df["Name"].values[0]
         company_symbol = df["Symbol"].values[0].split(".NS")[0]
-        updated_date = df.created_on.values[0].split(" ")[0]
-        updated_time = df.created_on.values[0].split(" ")[1][:5]
+        updated_date = df['Latest created_on].values[0].split(" ")[0]
+        updated_time = df['Latest created_on].values[0].split(" ")[1][:5]
         
         title = company_name+" ("+company_symbol+")"
         st.title(title)
