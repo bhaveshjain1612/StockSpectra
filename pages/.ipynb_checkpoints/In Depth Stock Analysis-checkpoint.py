@@ -72,12 +72,13 @@ def generate_stock(data, symbol):
     ]
     
     ma_durations = [5,10,15,20,25,30,40,50,75,100,150,200]
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns([2,2,3,3])
          
-    sma_filter = col2.multiselect('Select SMAs to show',ma_durations)
-    ema_filter = col3.multiselect('Select EMAs to show',ma_durations)   
-    filter_interval = col1.selectbox('Select a Time Interval', ["1 Day", "5 Days", "1 Month","3 Months", "6 Months", "1 Year", "2 Years"])
-    
+    sma_filter = col3.multiselect('Select SMAs to show',ma_durations)
+    ema_filter = col4.multiselect('Select EMAs to show',ma_durations)   
+    filter_interval = col1.selectbox('Select a Time Interval', ["6 Months","1 Day", "5 Days", "1 Month","3 Months",  "1 Year", "2 Years"])
+    plot_filter = col2.selectbox('Select Bottom Plot',['Volume','MACD'])
+       
     if filter_interval: 
         if filter_interval == "1 Day":
             if historical_with_ma.date_only.values[-1] <= historical_with_ma.date_only.values[0] - np.timedelta64(1, "D"):
@@ -115,20 +116,18 @@ def generate_stock(data, symbol):
             else:
                 historical_sample = historical_with_ma
             
-            
     selected_mas = []
-    #creating filtering names   for sma
+    #creating filtering names for sma
     for i in sma_filter:
         selected_mas.append("sma_"+str(i)+"_trace")
             
-    #creating filtering names   for ema   :                         
+    #creating filtering names for ema   :                         
     for i in ema_filter:
         selected_mas.append("ema_"+str(i)+"_trace")
     
-    fig = generate_charts(historical_sample,selected_mas,holiday_list)
-    
-    st.plotly_chart(fig,theme="streamlit", use_container_height=True, use_container_width=True, height=800)
-    
+    fig = generate_charts(historical_sample,selected_mas,holiday_list, plot_filter)
+        
+    st.plotly_chart(fig,theme="streamlit", use_container_height=True, use_container_width=True, height=1000)
 
 def show_all(data):
     symbol = st.sidebar.text_input("Enter stock Ticker")
@@ -141,8 +140,8 @@ def show_all(data):
         df = data[data["Symbol"]==symbol.upper()].reset_index().drop(['index'],axis=1)
         company_name = df["Name"].values[0]
         company_symbol = df["Symbol"].values[0].split(".NS")[0]
-        updated_date = df['Latest created_on'].values[0].split(" ")[0]
-        updated_time = df['Latest created_on'].values[0].split(" ")[1][:5]
+        updated_date = df.created_on.values[0].split(" ")[0]
+        updated_time = df.created_on.values[0].split(" ")[1][:5]
         
         title = company_name+" ("+company_symbol+")"
         st.title(title)
@@ -164,7 +163,7 @@ def show_all(data):
 
 def main():
 
-    data = load_data("backend_data/database.csv")
+    data = load_data("database.csv")
     #try:
     show_all(data)
     #except:
