@@ -300,5 +300,5 @@ database = add_sector_industry_pe_median(database)
 
 #exporting the final db
 database["Latest created_on"] = datetime.now()
-database.to_csv('database.csv', index=False)
+database.to_csv('database.csv', index=False,mode='w')
 print("Data Updated")
