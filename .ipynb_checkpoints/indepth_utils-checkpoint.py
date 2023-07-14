@@ -246,8 +246,10 @@ def dividends_splits(data):
     else:
         date_object = datetime.strptime(str(data[data['Stock Splits']>0].reset_index()['date_only'][0]), '%Y-%m-%d %H:%M:%S')
         split_date = "Most Recent Split date: "+str(date_object.strftime('%d-%m-%y'))
-        split = data[data['Stock Splits']>0].reset_index()['Stock Splits'][0]
+        split = str(data[data['Stock Splits']>0].reset_index()['Stock Splits'][0])+":1"
     normal_dividend = fy23.Dividends.sum()
     if normal_dividend==0:
         normal_dividend = "No Dividend"   
+    else:
+        normal_dividend = "Rs. "+str(round(normal_dividend,2))
     return {"Normal dividend":normal_dividend,"split ratio":split, "split date":split_date}

@@ -42,24 +42,27 @@ def generate_stock(data, symbol):
     dividend_split_data = dividends_splits(historical_with_ma)
     
     
-    #intial KPIS
-    col1, col2, col3, col4 = st.columns([1,1,1,1])
+   col1, col2, col3, col4 = st.columns([1,1,1,1])
     latest_close= historical_data[historical_data['Trading Day']==1].Close.values[0]
     second_latest_close= historical_data[historical_data['Trading Day']==2].Close.values[0]
     latest_volume= historical_data[historical_data['Trading Day']==1].Volume.values[0]
+    second_latest_volume= historical_data[historical_data['Trading Day']==2].Volume.values[0]
     latest_High= historical_data[historical_data['Trading Day']==1].High.values[0]
     latest_Low= historical_data[historical_data['Trading Day']==1].Low.values[0]   
     
-    change_abs  = round(latest_close-second_latest_close,2)
-    col1.metric(label ="Close",value=round(latest_close,2), delta=str(str(change_abs)+ " ( "+ str(data['Close_change_1d'].values[0]).strip("-")+" %)"))
-    col2.metric(label ="Volume",value=round(latest_volume,2))
-    col3.metric(label ="High",value=round(latest_High,2)) 
-    col4.metric(label ="Low",value=round(latest_Low,2)) 
+    change_abs_p = round(latest_close-second_latest_close,2)
+    change_abs_v = round(latest_volume-second_latest_volume,2)
     
-    col1.metric(label ="Normal Dividend",value=dividend_split_data['Normal dividend'], delta = "Financial year FY23")
-    col2.metric(label ="Stock Split",value=dividend_split_data['split ratio'], delta = dividend_split_data["split date"])
-    col3.metric(label ="52 Week High",value=round(week52_data['52 Week High'],2)) 
-    col4.metric(label ="52 Week Low",value=round(week52_data['52 Week Low'],2)) 
+    col1.metric(label ="Close",value=round(latest_close,2), delta=str(str(change_abs_p)+ " ( "+ str(data['Close_change_1d'].values[0]).strip("-")+" %)"))
+    col2.metric(label ="Volume",value=round(latest_volume,2), delta=str(str(change_abs_v)+ " ( "+ str(data['Volume_change_1d'].values[0]).strip("-")+" %)"))
+    
+    col1.metric(label ="High",value=round(latest_High,2), delta='') 
+    col2.metric(label ="Low",value=round(latest_Low,2), delta='') 
+    
+    col3.metric(label ="Normal Dividend",value=dividend_split_data['Normal dividend'], delta = "Financial year FY23")
+    col4.metric(label ="Stock Split",value=dividend_split_data['split ratio'], delta = dividend_split_data["split date"])
+    col3.metric(label ="52 Week High",value=round(week52_data['52 Week High'],2), delta='') 
+    col4.metric(label ="52 Week Low",value=round(week52_data['52 Week Low'],2), delta='') 
     
     
     #stock_market_holidays
