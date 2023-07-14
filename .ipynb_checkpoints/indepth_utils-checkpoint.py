@@ -89,6 +89,69 @@ def generate_ma_signals(df, list_period):
         df = calc_sma(calc_ema(df, i),i)
     return df
 
+#52 week data
+def week_52(data):
+    end = data['date_only'][0]
+    start = end-np.timedelta64(52, "W")
+    high = data[data['date_only']>=start]['High'].max()
+    low = data[data['date_only']>=start]['Low'].min()
+    high_perc = (high - data.Close.values[0])*100 / high
+    low_perc = (low - data.Close.values[0])*100 / -low
+    return {'52 Week High':high, '52 Week Low':low,'Diff between high':high_perc, 'Diff between low':low_perc}
+
+#generate ADX signals
+def ADX(data: pd.DataFrame, period: int):
+    """
+    Computes the ADX indicator.
+    """
+    
+    df = data.copy()
+    df = df.sort_values('Trading Day', ascending=False)
+    
+    alpha = 1/period
+
+    # TR
+    df['H-L'] = df['High'] - df['Low']
+    df['H-C'] = np.abs(df['High'] - df['Close'].shift(1))
+    df['L-C'] = np.abs(df['Low'] - df['Close'].shift(1))
+    df['TR'] = df[['H-L', 'H-C', 'L-C']].max(axis=1)
+    del df['H-L'], df['H-C'], df['L-C']
+
+    # ATR
+    df['ATR'] = df['TR'].ewm(alpha=alpha, adjust=False).mean()
+
+    # +-DX
+    df['H-pH'] = df['High'] - df['High'].shift(1)
+    df['pL-L'] = df['Low'].shift(1) - df['Low']
+    df['+DX'] = np.where(
+        (df['H-pH'] > df['pL-L']) & (df['H-pH']>0),
+        df['H-pH'],
+        0.0
+    )
+    df['-DX'] = np.where(
+        (df['H-pH'] < df['pL-L']) & (df['pL-L']>0),
+        df['pL-L'],
+        0.0
+    )
+    del df['H-pH'], df['pL-L']
+
+    # +- DMI
+    df['S+DM'] = df['+DX'].ewm(alpha=alpha, adjust=False).mean()
+    df['S-DM'] = df['-DX'].ewm(alpha=alpha, adjust=False).mean()
+    df['+DMI'] = (df['S+DM']/df['ATR'])*100
+    df['-DMI'] = (df['S-DM']/df['ATR'])*100
+    del df['S+DM'], df['S-DM']
+
+    # ADX
+    df['DX'] = (np.abs(df['+DMI'] - df['-DMI'])/(df['+DMI'] + df['-DMI']))*100
+    df['ADX'] = df['DX'].ewm(alpha=alpha, adjust=False).mean()
+    del df['DX'], df['ATR'], df['TR'], df['-DX'], df['+DX'], df['+DMI'], df['-DMI']
+    
+    df = df.sort_values('Trading Day', ascending=True)
+
+    return df
+
+#generate charts
 def generate_charts(historical_sample, selected_ma, holiday_list, to_show):
     candlesticks = go.Candlestick(
                         x=historical_sample['date_only'],
@@ -121,6 +184,12 @@ def generate_charts(historical_sample, selected_ma, holiday_list, to_show):
                            mode='lines', 
                             legendgroup = '2',
                            name = "Signal")
+    
+    ADX_line = go.Scatter(x=historical_sample['date_only'],
+                           y=historical_sample["ADX"], 
+                           mode='lines', 
+                            legendgroup = '2',
+                           name = "ADX")
 
     ma_traces = {}
     for i in [5,10,15,20,25,30,40,50,75,100,150,200]:
@@ -131,7 +200,7 @@ def generate_charts(historical_sample, selected_ma, holiday_list, to_show):
     
     # Create subplots and mention plot grid size
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, 
-                   vertical_spacing=0.05,  
+                   vertical_spacing=0.1,  
                    row_width=[0.3, 0.7])
 
     # Plot OHLC on 1st row
@@ -147,6 +216,10 @@ def generate_charts(historical_sample, selected_ma, holiday_list, to_show):
         # Bar trace for volumes on 2nd row without legend
         fig.add_trace(volume_bars, row=2, col=1)
         fig.update_yaxes(title_text="Volume", row=2, col=1)
+    elif to_show.upper() =="ADX":
+        # Bar trace for volumes on 2nd row without legend
+        fig.add_trace(ADX_line, row=2, col=1)
+        fig.update_yaxes(title_text="ADX", row=2, col=1)
     else:
         #adding mACD
         fig.add_trace(macd_line, row=2, col=1)
@@ -161,6 +234,20 @@ def generate_charts(historical_sample, selected_ma, holiday_list, to_show):
     fig.update_layout(autosize=False,width=1200,height=800,legend_tracegroupgap = legend_gap,template="plotly_white")
     if legend_gap==440:
         fig.update_layout(legend={"yanchor":"top","y": 0.3})
-        
+    
     return fig
 
+def dividends_splits(data):
+    fy23 = data[data.date_only > pd.to_datetime("2022-03-31", format='%Y-%m-%d')]
+    fy23 = fy23[fy23.date_only < pd.to_datetime("2023-04-01", format='%Y-%m-%d')]
+    if data[data['Stock Splits']>0].reset_index().empty:
+        split_date = 'in past 2 years'
+        split = "No Stock split"
+    else:
+        date_object = datetime.strptime(str(data[data['Stock Splits']>0].reset_index()['date_only'][0]), '%Y-%m-%d %H:%M:%S')
+        split_date = "Most Recent Split date: "+str(date_object.strftime('%d-%m-%y'))
+        split = data[data['Stock Splits']>0].reset_index()['Stock Splits'][0]
+    normal_dividend = fy23.Dividends.sum()
+    if normal_dividend==0:
+        normal_dividend = "No Dividend"   
+    return {"Normal dividend":normal_dividend,"split ratio":split, "split date":split_date}

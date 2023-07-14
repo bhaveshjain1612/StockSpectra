@@ -34,23 +34,33 @@ def generate_stock(data, symbol):
     
     historical_data = pd.read_csv(file_name)
     
+    ma_priod_list = [5,10,15,20,25,30,40,50,75,100,150,200]
+    historical_with_ma = ADX(generate_ma_signals(historical_data,ma_priod_list),14)
+    historical_with_ma['date_only'] = pd.to_datetime(historical_with_ma['date_only'], format='%Y-%m-%d').astype('datetime64[ns]')
+    
+    week52_data = week_52(historical_with_ma)
+    dividend_split_data = dividends_splits(historical_with_ma)
+    
+    
     #intial KPIS
-    col1, col2, col3 = st.columns([1,1,2])
+    col1, col2, col3, col4 = st.columns([1,1,1,1])
     latest_close= historical_data[historical_data['Trading Day']==1].Close.values[0]
     second_latest_close= historical_data[historical_data['Trading Day']==2].Close.values[0]
     latest_volume= historical_data[historical_data['Trading Day']==1].Volume.values[0]
-    
+    latest_High= historical_data[historical_data['Trading Day']==1].High.values[0]
+    latest_Low= historical_data[historical_data['Trading Day']==1].Low.values[0]   
     
     change_abs  = round(latest_close-second_latest_close,2)
     col1.metric(label ="Close",value=round(latest_close,2), delta=str(str(change_abs)+ " ( "+ str(data['Close_change_1d'].values[0]).strip("-")+" %)"))
-    col1.metric(label ="Volume",value=round(latest_volume,2))
+    col2.metric(label ="Volume",value=round(latest_volume,2))
+    col3.metric(label ="High",value=round(latest_High,2)) 
+    col4.metric(label ="Low",value=round(latest_Low,2)) 
     
-    #charting and filters
+    col1.metric(label ="Normal Dividend",value=dividend_split_data['Normal dividend'], delta = "Financial year FY23")
+    col2.metric(label ="Stock Split",value=dividend_split_data['split ratio'], delta = dividend_split_data["split date"])
+    col3.metric(label ="52 Week High",value=round(week52_data['52 Week High'],2)) 
+    col4.metric(label ="52 Week Low",value=round(week52_data['52 Week Low'],2)) 
     
-    ma_priod_list = [5,10,15,20,25,30,40,50,75,100,150,200]
-    
-    historical_with_ma = generate_ma_signals(historical_data,ma_priod_list)
-    historical_with_ma['date_only'] = pd.to_datetime(historical_with_ma['date_only'], format='%Y-%m-%d').astype('datetime64[ns]')
     
     #stock_market_holidays
     holiday_list = [
@@ -77,7 +87,7 @@ def generate_stock(data, symbol):
     sma_filter = col3.multiselect('Select SMAs to show',ma_durations)
     ema_filter = col4.multiselect('Select EMAs to show',ma_durations)   
     filter_interval = col1.selectbox('Select a Time Interval', ["6 Months","1 Day", "5 Days", "1 Month","3 Months",  "1 Year", "2 Years"])
-    plot_filter = col2.selectbox('Select Bottom Plot',['Volume','MACD'])
+    plot_filter = col2.selectbox('Select Bottom Plot',['Volume','MACD','ADX'])
        
     if filter_interval: 
         if filter_interval == "1 Day":
@@ -156,10 +166,12 @@ def show_all(data):
                 st.warning("Stock Ticker is invalid or company is no longer be traded")
             
         with tab2:
-            ##try:
-            generate_stock(df, company_symbol)
-            ##except:
-            #st.warning("Stock Ticker is invalid or company is no longer be traded")
+            try:
+                generate_stock(df, company_symbol)
+            except:
+                st.warning("Stock Ticker is invalid or company is no longer be traded")
+    else:
+        st.write("Enter the stock symbol/ticker in the text box in the sidebar")
 
 def main():
 
