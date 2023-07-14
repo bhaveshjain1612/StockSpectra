@@ -89,8 +89,7 @@ def generate_ma_signals(df, list_period):
         df = calc_sma(calc_ema(df, i),i)
     return df
 
-#generate graph based on df and inputs
-def generate_charts(historical_sample, selected_ma, holiday_list):
+def generate_charts(historical_sample, selected_ma, holiday_list, to_show):
     candlesticks = go.Candlestick(
                         x=historical_sample['date_only'],
                         open=historical_sample['Open'],
@@ -98,7 +97,8 @@ def generate_charts(historical_sample, selected_ma, holiday_list):
                         low=historical_sample['Low'],
                         close=historical_sample['Close'],
                         showlegend=False,
-                        name= 'Price'
+                        name= 'Price',
+                        legendgroup = '1'
                     )
 
     volume_bars = go.Bar(
@@ -106,73 +106,60 @@ def generate_charts(historical_sample, selected_ma, holiday_list):
                     y=historical_sample['Volume'],
                     name = 'Volume',
                     showlegend=False,
+                    legendgroup = '2',
                     marker={
-                        "color": "rgba(128,128,128,0.5)",
-                    }
-                )
-    ma_traces = {
-        'ema_5_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['ema_5'], mode='lines', name = 'EMA 5 days'),
-        'sma_5_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['sma_5'], mode='lines', name = 'SMA 5 days'),
-        'ema_10_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['ema_10'], mode='lines', name = 'EMA 10 days'),
-        'sma_10_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['sma_10'], mode='lines', name = 'SMA 10 days'),
-        'ema_15_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['ema_15'], mode='lines', name = 'EMA 15 days'),
-        'sma_15_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['sma_15'], mode='lines', name = 'SMA 15 days'),
-        'ema_20_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['ema_20'], mode='lines', name = 'EMA 20 days'),
-        'sma_20_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['sma_20'], mode='lines', name = 'SMA 20 days'),
-        'ema_25_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['ema_25'], mode='lines', name = 'EMA 25 days'),
-        'sma_25_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['sma_25'], mode='lines', name = 'SMA 25 days'),
-        'ema_30_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['ema_30'], mode='lines', name = 'EMA 30 days'),
-        'sma_30_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['sma_30'], mode='lines', name = 'SMA 30 days'),
-        'ema_40_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['ema_40'], mode='lines', name = 'EMA 40 days'),
-        'sma_40_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['sma_40'], mode='lines', name = 'SMA 40 days'),
-        'ema_50_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['ema_50'], mode='lines', name = 'EMA 50 days'),
-        'sma_50_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['sma_50'], mode='lines', name = 'SMA 50 days'),
-        'ema_75_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['ema_75'], mode='lines', name = 'EMA 75 days'),
-        'sma_75_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['sma_75'], mode='lines', name = 'SMA 75 days'),
-        'ema_100_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['ema_100'], mode='lines', name = 'EMA 100 days'),
-        'sma_100_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['sma_100'], mode='lines', name = 'SMA 100 days'),
-        'ema_150_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['ema_150'], mode='lines', name = 'EMA 150 days'),
-        'sma_150_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['sma_150'], mode='lines', name = 'SMA 150 days'),
-        'ema_200_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['ema_200'], mode='lines', name = 'EMA 200 days'),
-        'sma_200_trace':go.Scatter(x=historical_sample['date_only'], y=historical_sample['sma_200'], mode='lines', name = 'SMA 200 days')}
+                        "color": "rgba(128,128,128,0.5)"})
+    
+    macd_line = go.Scatter(x=historical_sample['date_only'],
+                           y=historical_sample["macd"], 
+                           mode='lines', 
+                           legendgroup = '2',
+                           name = "MACD")
+    
+    macd_signal_line = go.Scatter(x=historical_sample['date_only'],
+                           y=historical_sample["macd_ema_9"], 
+                           mode='lines', 
+                            legendgroup = '2',
+                           name = "Signal")
 
+    ma_traces = {}
+    for i in [5,10,15,20,25,30,40,50,75,100,150,200]:
+        for j in ['ema','sma']:
+            name = j+"_"+str(i)+"_trace"
+            plot = go.Scatter(x=historical_sample['date_only'], y=historical_sample[j+"_"+str(i)], mode='lines', name = j.upper()+" "+str(i)+" days",legendgroup = '1')
+            ma_traces[name] = plot
+    
     # Create subplots and mention plot grid size
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, 
-                   vertical_spacing=0.03, subplot_titles=('Price', 'Volume'), 
-                   row_width=[0.2, 0.7])
+                   vertical_spacing=0.05,  
+                   row_width=[0.3, 0.7])
 
     # Plot OHLC on 1st row
     fig.add_trace(candlesticks,row=1, col=1)
-
-    # Bar trace for volumes on 2nd row without legend
-    fig.add_trace(volume_bars, row=2, col=1)
-
+    fig.update_yaxes(title_text="Price", row=1, col=1)
+    
+    legend_gap = 440
     for i in selected_ma:    
         fig.add_trace(ma_traces[i],row=1, col=1)
-
-    # Do not show OHLC's rangeslider plot 
-    #fig.update_yaxes(title="Price", showgrid=True, minor=dict(showgrid=True))
-    fig.update_yaxes(title="Volume", showgrid=False, minor=dict(showgrid=False))
+        legend_gap=legend_gap-20
+        
+    if to_show.upper() =="VOLUME":
+        # Bar trace for volumes on 2nd row without legend
+        fig.add_trace(volume_bars, row=2, col=1)
+        fig.update_yaxes(title_text="Volume", row=2, col=1)
+    else:
+        #adding mACD
+        fig.add_trace(macd_line, row=2, col=1)
+        fig.add_trace(macd_signal_line, row=2, col=1)
+        fig.update_yaxes(title_text="MACD", row=2, col=1)
+        
+    fig.update_yaxes(showgrid=True, minor=dict(showgrid=False),showline=True, linewidth=2)
     fig.update_xaxes(
-            rangeslider_visible=False,showgrid=True,
-            rangebreaks=[
-                 dict(values=holiday_list),
-                dict(bounds=["sat", "mon"]),  # hide weekends, eg. hide sat to before mon
-            ]
-        )
-    
-    #fig.update_xaxes(major=dict(showgrid=True))
-    #fig.update_yaxes(major=dict(showgrid=True))
-    
-    return fig
+            rangeslider_visible=False,showgrid=True,showline=True, linewidth=2,
+            rangebreaks=[dict(values=holiday_list),dict(bounds=["sat", "mon"])])  # hide weekends, eg. hide sat to before mon
 
-def ohlc(hist,df):
-    fig = go.Figure(data=go.Ohlc(x=['Day','52 Week'],
-                    open=[hist[hist['Trading Day']==1].Open.values[0],hist[hist['Trading Day']==1].Open.values[0]],
-                    high=[hist[hist['Trading Day']==1].High.values[0],df['52 Week High'].values[0]],
-                    low=[hist[hist['Trading Day']==1].Low.values[0],df['52 Week Low'].values[0]],
-                    close=[hist[hist['Trading Day']==1].Close.values[0],hist[hist['Trading Day']==1].Close.values[0]]))
-    fig.update_xaxes(
-            rangeslider_visible=False)
-    fig.update_traces(tickwidth=0.5)
+    fig.update_layout(autosize=False,width=1200,height=800,legend_tracegroupgap = legend_gap,template="plotly_white")
+    if legend_gap==440:
+        fig.update_layout(legend={"yanchor":"top","y": 0.3})
+        
     return fig
