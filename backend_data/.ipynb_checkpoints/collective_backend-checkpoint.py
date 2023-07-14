@@ -299,5 +299,6 @@ database['P/E ratio']=database['Latest Close']/database['EPS (trailing)']
 database = add_sector_industry_pe_median(database)
 
 #exporting the final db
+database["Latest created_on"] = datetime.now()
 database.to_csv('database.csv', index=False)
 print("Data Updated")
