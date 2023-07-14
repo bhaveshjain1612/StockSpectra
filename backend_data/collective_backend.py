@@ -139,7 +139,7 @@ compiled.to_csv('db_firmo.csv', index=False)
 ####################################################################################################################################################
 #Financials
 ####################################################################################################################################################
-
+'''
 #historical data
 def get_hist_data(result):
     date_today = date.today()
@@ -266,7 +266,7 @@ for i in tqdm(symbol_list):
     except:
         continue
 kpi_df.to_csv("historical_kpis.csv", index=False)
-
+'''
 ####################################################################################################################################################
 #Merging
 #################################################################################################################################################### 
@@ -288,8 +288,8 @@ def add_sector_industry_pe_median(collective):
     return new_collective
 
 #reading data
-firmo = pd.read_csv("backend_data/db_firmo.csv")
-kpis = pd.read_csv("backend_data/historical_kpis.csv")
+firmo = pd.read_csv("db_firmo.csv")
+kpis = pd.read_csv("historical_kpis.csv")
 
 #merging the dfs
 database = pd.merge(firmo, kpis, left_on='Symbol', right_on='symbol')
