@@ -42,7 +42,7 @@ def generate_stock(data, symbol):
     dividend_split_data = dividends_splits(historical_with_ma)
     
     
-   col1, col2, col3, col4 = st.columns([1,1,1,1])
+    col1, col2, col3, col4 = st.columns([1,1,1,1])
     latest_close= historical_data[historical_data['Trading Day']==1].Close.values[0]
     second_latest_close= historical_data[historical_data['Trading Day']==2].Close.values[0]
     latest_volume= historical_data[historical_data['Trading Day']==1].Volume.values[0]
