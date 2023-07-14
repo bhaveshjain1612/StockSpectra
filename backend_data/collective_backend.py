@@ -260,8 +260,11 @@ kpi_df = pd.DataFrame()
 
 #creating historical files for all companies
 for i in tqdm(symbol_list):
-    x = collect_features(compile_single(i))
-    kpi_df = pd.concat([kpi_df,x],axis=0)
+    try:
+        x = collect_features(compile_single(i))
+        kpi_df = pd.concat([kpi_df,x],axis=0)
+    except:
+        continue
 kpi_df.to_csv("historical_kpis.csv", index=False)
 
 ####################################################################################################################################################
