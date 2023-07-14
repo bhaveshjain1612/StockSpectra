@@ -58,8 +58,8 @@ def colour_coded_table(x):
 # Create dashboard
 def create_dashboard(data):
     st.title("Screener")
-    updated_date = data.created_on.values[0].split(" ")[0]
-    updated_time = data.created_on.values[0].split(" ")[1][:5]
+    updated_date = data['Latest created_on'].values[0].split(" ")[0]
+    updated_time = data['Latest created_on'].values[0].split(" ")[1][:5]
     st.write(' '.join(["Data updated on:",updated_date,updated_time]))
 
     to_process = ["Name",
