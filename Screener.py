@@ -233,13 +233,13 @@ if __name__ == "__main__":
     
     main()
 #    '''
-    while True:
-        now = pd.Timestamp.now().time()
-        
-        if now.hour == 20 and now.minute == 00 and now.second == 00:
-            subprocess.run([f"{sys.executable}", "backend_data/collective_backend.py"])
-            data = load_data("backend_data/database.csv")
-            #subprocess.terminate()
-            st.experimental_rerun()
-        time.sleep(1)
+#    while True:
+#       now = pd.Timestamp.now().time()
+#        
+ #       if now.hour == 20 and now.minute == 00 and now.second == 00:
+  #          subprocess.run([f"{sys.executable}", "backend_data/collective_backend.py"])
+   #         data = load_data("backend_data/database.csv")
+     #       #subprocess.terminate()
+      #      st.experimental_rerun()
+        #time.sleep(1)
 #        '''
