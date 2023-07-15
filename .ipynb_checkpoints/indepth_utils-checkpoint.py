@@ -190,6 +190,12 @@ def generate_charts(historical_sample, selected_ma, holiday_list, to_show):
                            mode='lines', 
                             legendgroup = '2',
                            name = "ADX")
+    
+    RSI_line = go.Scatter(x=historical_sample['date_only'],
+                           y=historical_sample["rsi"], 
+                           mode='lines', 
+                            legendgroup = '2',
+                           name = "RSI")
 
     ma_traces = {}
     for i in [5,10,15,20,25,30,40,50,75,100,150,200]:
@@ -220,6 +226,10 @@ def generate_charts(historical_sample, selected_ma, holiday_list, to_show):
         # Bar trace for volumes on 2nd row without legend
         fig.add_trace(ADX_line, row=2, col=1)
         fig.update_yaxes(title_text="ADX", row=2, col=1)
+    elif to_show.upper() =="RSI":
+        # Bar trace for volumes on 2nd row without legend
+        fig.add_trace(RSI_line, row=2, col=1)
+        fig.update_yaxes(title_text="RSI", row=2, col=1)
     else:
         #adding mACD
         fig.add_trace(macd_line, row=2, col=1)
@@ -237,6 +247,7 @@ def generate_charts(historical_sample, selected_ma, holiday_list, to_show):
     
     return fig
 
+#get info about splits and ividends
 def dividends_splits(data):
     fy23 = data[data.date_only > pd.to_datetime("2022-03-31", format='%Y-%m-%d')]
     fy23 = fy23[fy23.date_only < pd.to_datetime("2023-04-01", format='%Y-%m-%d')]
@@ -253,3 +264,34 @@ def dividends_splits(data):
     else:
         normal_dividend = "Rs. "+str(round(normal_dividend,2))
     return {"Normal dividend":normal_dividend,"split ratio":split, "split date":split_date}
+
+#RSI
+def RSI(df,window_length):
+    df = df.sort_values('Trading Day', ascending=False)
+    diff = []
+    for i in range(itc_h.shape[0]-1):
+        diff.append(itc_h.Close[i] - itc_h.Close[i+1])
+    diff.append(np.nan)
+    df['diff'] = diff
+    df['gain'] = df['diff'].clip(lower=0).round(2)
+    df['loss'] = df['diff'].clip(upper=0).abs().round(2)
+    df['avg_gain'] = df['gain'].rolling(window=window_length, min_periods=window_length).mean()[:window_length+1]
+    df['avg_loss'] = df['loss'].rolling(window=window_length, min_periods=window_length).mean()[:window_length+1]
+    #avg_gain
+    for i, row in enumerate(df['avg_gain'].iloc[window_length+1:]):
+        df['avg_gain'].iloc[i + window_length + 1] =\
+            (df['avg_gain'].iloc[i + window_length] *
+             (window_length - 1) +
+             df['gain'].iloc[i + window_length + 1])/ window_length
+    #abg_loss
+    for i, row in enumerate(df['avg_loss'].iloc[window_length+1:]):
+        df['avg_loss'].iloc[i + window_length + 1] =\
+            (df['avg_loss'].iloc[i + window_length] *
+             (window_length - 1) +
+             df['loss'].iloc[i + window_length + 1])/ window_length
+    df['rs'] = df['avg_gain'] / df['avg_loss']
+    # Calculate RSI
+    df['rsi'] = 100 - (100 / (1.0 + df['rs']))
+    df = df.drop(['gain','loss','rs','avg_gain','avg_loss','diff'],axis=1)
+    df = df.sort_values('Trading Day', ascending=True)
+    return df

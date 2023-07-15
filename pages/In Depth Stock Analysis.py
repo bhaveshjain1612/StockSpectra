@@ -91,7 +91,7 @@ def generate_stock(data, symbol):
     sma_filter = col3.multiselect('Select SMAs to show',ma_durations)
     ema_filter = col4.multiselect('Select EMAs to show',ma_durations)   
     filter_interval = col1.selectbox('Select a Time Interval', ["6 Months","1 Day", "5 Days", "1 Month","3 Months",  "1 Year", "2 Years"])
-    plot_filter = col2.selectbox('Select Bottom Plot',['Volume','MACD','ADX'])
+    plot_filter = col2.selectbox('Select Bottom Plot',['Volume','MACD','ADX','RSI'])
        
     if filter_interval: 
         if filter_interval == "1 Day":
