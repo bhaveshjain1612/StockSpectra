@@ -35,7 +35,7 @@ def generate_stock(data, symbol):
     historical_data = pd.read_csv(file_name)
     
     ma_priod_list = [5,10,15,20,25,30,40,50,75,100,150,200]
-    historical_with_ma = ADX(generate_ma_signals(historical_data,ma_priod_list),14)
+    historical_with_ma = RSI(ADX(generate_ma_signals(historical_data,ma_priod_list),14),14)
     historical_with_ma['date_only'] = pd.to_datetime(historical_with_ma['date_only'], format='%Y-%m-%d').astype('datetime64[ns]')
     
     week52_data = week_52(historical_with_ma)
