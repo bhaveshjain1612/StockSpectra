@@ -217,7 +217,7 @@ def create_dashboard(data):
     pd.set_option('display.max_colwidth', 1)
 
     def add_ind_depth_url(Symbol):
-        return [f'http://localhost:8501/In_Depth_Stock_Analysis/?symbol={t[:-3]}' for t in Symbol]
+        return [f'https://stockproject-bhaveshjain.streamlit.app/In_Depth_Stock_Analysis/?symbol={t[:-3]}' for t in Symbol]
 
     def make_clickable(url, text):
         return f'<a target="_blank" href="{url}">{text}</a>'
