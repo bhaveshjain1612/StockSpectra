@@ -223,8 +223,8 @@ def create_dashboard(data):
         return f'<a target="_blank" href="{url}">{text}</a>'
 
     # show data
-    merged_df['preview'] = add_ind_depth_url(merged_df.Symbol)
-    merged_df['preview'] = merged_df['preview'].apply(make_clickable, text='See in Depth')
+    merged_df['Analysis'] = add_ind_depth_url(merged_df.Symbol)
+    merged_df['Analysis'] = merged_df['Analysis'].apply(make_clickable, text='See in Depth')
         
     if merged_df.empty:
         st.error("No companies found for the selection")
@@ -240,7 +240,8 @@ def create_dashboard(data):
 # Main function
 def main():     
     data = load_data("backend_data/database.csv")
-    create_dashboard(data)
+    with st.spinner('Lading, PLease Wait...'):
+        create_dashboard(data)
     
 
 if __name__ == "__main__":
