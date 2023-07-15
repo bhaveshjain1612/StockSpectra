@@ -215,7 +215,7 @@ def create_dashboard(data):
         return [f'https://stockproject-bhaveshjain.streamlit.app/In_Depth_Stock_Analysis/?symbol={t[:-3]}' for t in Symbol]
 
     def make_clickable(url, text):
-        return f'<a target="_blank" href="{url}">{text}</a>'
+        return f'<a target="_self" href="{url}">{text}</a>'
 
     # show data
     merged_df['Analysis'] = add_ind_depth_url(merged_df.Symbol)
