@@ -1,5 +1,3 @@
-#!pip install yfinance
-
 #importing libraries
 import yfinance as yf
 from datetime import date
@@ -58,8 +56,8 @@ def colour_coded_table(x):
 # Create dashboard
 def create_dashboard(data):
     st.title("Screener")
-    updated_date = data['Latest created_on'].values[0].split(" ")[0]
-    updated_time = data['Latest created_on'].values[0].split(" ")[1][:5]
+    updated_date = data.created_on.values[0].split(" ")[0]
+    updated_time = data.created_on.values[0].split(" ")[1][:5]
     st.write(' '.join(["Data updated on:",updated_date,updated_time]))
 
     to_process = ["Name",
@@ -213,13 +211,29 @@ def create_dashboard(data):
                  "Trend",
                  "Risk",
                  "Recommendation"]
+    
+    merged_df = merged_df[to_display]
+    
+    pd.set_option('display.max_colwidth', 1)
 
+    def add_ind_depth_url(Symbol):
+        return [f'http://localhost:8501/In_Depth_Stock_Analysis/?symbol={t[:-3]}' for t in Symbol]
+
+    def make_clickable(url, text):
+        return f'<a target="_blank" href="{url}">{text}</a>'
+
+    # show data
+    merged_df['preview'] = add_ind_depth_url(merged_df.Symbol)
+    merged_df['preview'] = merged_df['preview'].apply(make_clickable, text='See in Depth')
+        
     if merged_df.empty:
         st.error("No companies found for the selection")
         st.empty()
     else:
-        st.write(str(merged_df[to_display].shape[0])+" Companies found")
-        st.dataframe(merged_df[to_display])
+        st.write(str(merged_df.shape[0])+" Companies found")
+        st.write(merged_df.to_html(escape = False), unsafe_allow_html = True)
+        #st.table(merged_df.to_html(escape = False))
+        
         #colour_coded_table(merged_df[to_display])
 
 
@@ -234,12 +248,12 @@ if __name__ == "__main__":
     main()
 #    '''
 #    while True:
-#       now = pd.Timestamp.now().time()
+#        now = pd.Timestamp.now().time()
 #        
- #       if now.hour == 20 and now.minute == 00 and now.second == 00:
-  #          subprocess.run([f"{sys.executable}", "backend_data/collective_backend.py"])
-   #         data = load_data("backend_data/database.csv")
-     #       #subprocess.terminate()
-      #      st.experimental_rerun()
-        #time.sleep(1)
+#        if now.hour == 20 and now.minute == 05 and now.second == 00:
+#            subprocess.run([f"{sys.executable}", "backend_data/collective_backend.py"])
+#            data = load_data("backend_data/database.csv")
+#            #subprocess.terminate()
+#            st.experimental_rerun()
+#        time.sleep(1)
 #        '''

@@ -42,6 +42,7 @@ def generate_stock(data, symbol):
     dividend_split_data = dividends_splits(historical_with_ma)
     
     
+    #intial KPIS
     col1, col2, col3, col4 = st.columns([1,1,1,1])
     latest_close= historical_data[historical_data['Trading Day']==1].Close.values[0]
     second_latest_close= historical_data[historical_data['Trading Day']==2].Close.values[0]
@@ -64,7 +65,7 @@ def generate_stock(data, symbol):
     col3.metric(label ="52 Week High",value=round(week52_data['52 Week High'],2), delta='') 
     col4.metric(label ="52 Week Low",value=round(week52_data['52 Week Low'],2), delta='') 
     
-    
+    st.divider()
     #stock_market_holidays
     holiday_list = [
     "2023-01-26",#	Republic Day
@@ -142,45 +143,54 @@ def generate_stock(data, symbol):
         
     st.plotly_chart(fig,theme="streamlit", use_container_height=True, use_container_width=True, height=1000)
 
-def show_all(data):
+def show_all(data,symbol):
+
+    df = data[data["Symbol"]==symbol.upper()].reset_index().drop(['index'],axis=1)
+    company_name = df["Name"].values[0]
+    company_symbol = df["Symbol"].values[0].split(".NS")[0]
+    updated_date = df['Latest created_on'].values[0].split(" ")[0]
+    updated_time = df['Latest created_on'].values[0].split(" ")[1][:5]
+
+    title = company_name+" ("+company_symbol+")"
+    st.title(title)
+    st.write(' '.join(["Data updated on:",updated_date,updated_time]))
+
+    tab1, tab2, tab3 = st.tabs(["About", "Stock", "Financials"])
+
+    with tab1:
+        try:
+            generate_firmo(df)
+        except:
+            st.warning("Stock Ticker is invalid or company is no longer be traded")
+
+    with tab2:
+        try:
+            generate_stock(df, company_symbol)
+        except:
+            st.warning("Stock Ticker is invalid or company is no longer be traded")
+            
+def main():
+
+    data = load_data("backend_data/database.csv")
+    #st.experimental_get_query_params()['symbol']
+    
     symbol = st.sidebar.text_input("Enter stock Ticker")
     if symbol:
         if symbol.upper()[-3:] == ".NS":
             symbol = symbol.upper()
         else:
             symbol = symbol.upper()+".NS"
-            
-        df = data[data["Symbol"]==symbol.upper()].reset_index().drop(['index'],axis=1)
-        company_name = df["Name"].values[0]
-        company_symbol = df["Symbol"].values[0].split(".NS")[0]
-        updated_date = df['Latest created_on'].values[0].split(" ")[0]
-        updated_time = df['Latest created_on'].values[0].split(" ")[1][:5]
+        show_all(data,symbol)
+        st.experimental_set_query_params(symbol=symbol[:-3])
+
+    elif st.experimental_get_query_params() != {}:
         
-        title = company_name+" ("+company_symbol+")"
-        st.title(title)
-        st.write(' '.join(["Data updated on:",updated_date,updated_time]))
-
-        tab1, tab2, tab3 = st.tabs(["About", "Stock", "Financials"])
-
-        with tab1:
-            try:
-                generate_firmo(df)
-            except:
-                st.warning("Stock Ticker is invalid or company is no longer be traded")
-            
-        with tab2:
-            try:
-                generate_stock(df, company_symbol)
-            except:
-                st.warning("Stock Ticker is invalid or company is no longer be traded")
+        show_all(data,st.experimental_get_query_params()['symbol'][0].upper()+".NS")
+        
     else:
         st.write("Enter the stock symbol/ticker in the text box in the sidebar")
-
-def main():
-
-    data = load_data("backend_data/database.csv")
     #try:
-    show_all(data)
+    #show_all(data)
     #except:
     #    st.warning("Stock Ticker is invalid or company is no longer be traded")
 
