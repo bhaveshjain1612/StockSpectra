@@ -164,10 +164,10 @@ def show_all(data,symbol):
             st.warning("Stock Ticker is invalid or company is no longer be traded")
 
     with tab2:
-        try:
-            generate_stock(df, company_symbol)
-        except:
-            st.warning("Stock Ticker is invalid or company is no longer be traded")
+        #try:
+        generate_stock(df, company_symbol)
+        #except:
+            #st.warning("Stock Ticker is invalid or company is no longer be traded")
             
 def main():
 
