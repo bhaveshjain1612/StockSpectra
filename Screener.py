@@ -99,7 +99,7 @@ def create_dashboard(data):
 
             df_temp = df_temp
             #Filter for intervals
-            filter_interval = st.selectbox('Select a Time Interval for % changes', ["1 Day", "5 Days", "1 Month","3 Months", "6 Months", "1 Year"])
+            filter_interval = st.selectbox('Select a Time Interval for % changes', ["3 Months","1 Day", "5 Days", "1 Month", "6 Months", "1 Year"])
             if filter_interval: 
                 if filter_interval == "1 Day":
                     df_temp = df_temp.drop(["Close_change_5d","Close_change_1m","Close_change_3m","Close_change_6m","Close_change_1y"],axis=1)
