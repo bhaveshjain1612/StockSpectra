@@ -267,12 +267,12 @@ def dividends_splits(data):
 
 #RSI
 def RSI(df,window_length):
-    df = df.sort_values('Trading Day', ascending=False)
     diff = []
-    for i in range(itc_h.shape[0]-1):
-        diff.append(itc_h.Close[i] - itc_h.Close[i+1])
+    for i in range(df.shape[0]-1):
+        diff.append(df.Close[i] - df.Close[i+1])
     diff.append(np.nan)
     df['diff'] = diff
+    df = df.sort_values('Trading Day', ascending=False)
     df['gain'] = df['diff'].clip(lower=0).round(2)
     df['loss'] = df['diff'].clip(upper=0).abs().round(2)
     df['avg_gain'] = df['gain'].rolling(window=window_length, min_periods=window_length).mean()[:window_length+1]
