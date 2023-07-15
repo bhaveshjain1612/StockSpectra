@@ -235,12 +235,13 @@ def create_dashboard(data):
 # Main function
 def main():     
     data = load_data("backend_data/database.csv")
+    st.title("Screener")
+    updated_date = data.created_on.values[0].split(" ")[0]
+    updated_time = data.created_on.values[0].split(" ")[1][:5]
+    st.write(' '.join(["Data updated on:",updated_date,updated_time]))
     with st.spinner('Loading, PLease Wait...'):
         create_dashboard(data)
-        st.title("Screener")
-        updated_date = data.created_on.values[0].split(" ")[0]
-        updated_time = data.created_on.values[0].split(" ")[1][:5]
-        st.write(' '.join(["Data updated on:",updated_date,updated_time]))
+        
     
 
 if __name__ == "__main__":
