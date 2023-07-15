@@ -246,7 +246,22 @@ def main():
 
 if __name__ == "__main__":
     
-    main()
+    lt  = '''This product is intended solely for educational purposes and should not be utilized as a financial tool. The creator of this product makes no guarantees or warranties about the accuracy or completeness of the information provided. Any actions taken based on this product's content are at your oltwn risk, and the creator shall not be liable for any damages or losses, whether direct or indirect. Financial matters involve inherent risks and complexities, requiring professional advice. Before making any financial decisions, it is essential to consult with a qualified financial advisor.By using this product, you agree not to hold the creator responsible for any outcomes resulting from its educational content. Remember, this product does not replace professional financial advice, and its use is purely for educational and informational purposes. Proceed with this product only if you understand and accept this disclaimer. If you disagree with these terms, do not use this product for financial purposes and seek alternative financial education and guidance.'''
+
+    if 'hide' not in st.session_state:
+        st.session_state.hide = True
+
+    def show_hide():
+        st.session_state.hide = not st.session_state.hide
+
+    if st.session_state.hide:
+        secret = st.container()
+        with secret:
+            st.header('''**Disclaimer: Educational Purpose Only**''')
+            st.write(lt)
+            st.button('Agree and Proceed', on_click=show_hide)
+    else:
+        main()
 #    '''
 #    while True:
 #        now = pd.Timestamp.now().time()

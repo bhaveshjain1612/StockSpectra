@@ -55,11 +55,6 @@ def colour_coded_table(x):
 
 # Create dashboard
 def create_dashboard(data):
-    st.title("Screener")
-    updated_date = data.created_on.values[0].split(" ")[0]
-    updated_time = data.created_on.values[0].split(" ")[1][:5]
-    st.write(' '.join(["Data updated on:",updated_date,updated_time]))
-
     to_process = ["Name",
                 "Symbol",
                 "Sector",
@@ -104,7 +99,7 @@ def create_dashboard(data):
 
             df_temp = df_temp
             #Filter for intervals
-            filter_interval = st.selectbox('Select a Time Interval for % changes', ["1 Day", "5 Days", "1 Month","3 Months", "6 Months", "1 Year"])
+            filter_interval = st.selectbox('Select a Time Interval for % changes', ["3 Months","1 Day", "5 Days", "1 Month", "6 Months", "1 Year"])
             if filter_interval: 
                 if filter_interval == "1 Day":
                     df_temp = df_temp.drop(["Close_change_5d","Close_change_1m","Close_change_3m","Close_change_6m","Close_change_1y"],axis=1)
@@ -217,14 +212,14 @@ def create_dashboard(data):
     pd.set_option('display.max_colwidth', 1)
 
     def add_ind_depth_url(Symbol):
-        return [f'http://localhost:8501/In_Depth_Stock_Analysis/?symbol={t[:-3]}' for t in Symbol]
+        return [f'https://stockproject-bhaveshjain.streamlit.app/In_Depth_Stock_Analysis/?symbol={t[:-3]}' for t in Symbol]
 
     def make_clickable(url, text):
-        return f'<a target="_blank" href="{url}">{text}</a>'
+        return f'<a target="_self" href="{url}">{text}</a>'
 
     # show data
-    merged_df['preview'] = add_ind_depth_url(merged_df.Symbol)
-    merged_df['preview'] = merged_df['preview'].apply(make_clickable, text='See in Depth')
+    merged_df['Analysis'] = add_ind_depth_url(merged_df.Symbol)
+    merged_df['Analysis'] = merged_df['Analysis'].apply(make_clickable, text='See in Depth')
         
     if merged_df.empty:
         st.error("No companies found for the selection")
@@ -240,12 +235,33 @@ def create_dashboard(data):
 # Main function
 def main():     
     data = load_data("backend_data/database.csv")
-    create_dashboard(data)
+    st.title("Screener")
+    updated_date = data.created_on.values[0].split(" ")[0]
+    updated_time = data.created_on.values[0].split(" ")[1][:5]
+    st.write(' '.join(["Data updated on:",updated_date,updated_time]))
+    with st.spinner('Loading, PLease Wait...'):
+        create_dashboard(data)
+        
     
 
 if __name__ == "__main__":
     
-    main()
+    lt  = '''This product is intended solely for educational purposes and should not be utilized as a financial tool. The creator of this product makes no guarantees or warranties about the accuracy or completeness of the information provided. Any actions taken based on this product's content are at your oltwn risk, and the creator shall not be liable for any damages or losses, whether direct or indirect. Financial matters involve inherent risks and complexities, requiring professional advice. Before making any financial decisions, it is essential to consult with a qualified financial advisor.By using this product, you agree not to hold the creator responsible for any outcomes resulting from its educational content. Remember, this product does not replace professional financial advice, and its use is purely for educational and informational purposes. Proceed with this product only if you understand and accept this disclaimer. If you disagree with these terms, do not use this product for financial purposes and seek alternative financial education and guidance.'''
+
+    if 'hide' not in st.session_state:
+        st.session_state.hide = True
+
+    def show_hide():
+        st.session_state.hide = not st.session_state.hide
+
+    if st.session_state.hide:
+        secret = st.container()
+        with secret:
+            st.header('''**Disclaimer: Educational Purpose Only**''')
+            st.write(lt)
+            st.button('Agree and Proceed', on_click=show_hide)
+    else:
+        main()
 #    '''
 #    while True:
 #        now = pd.Timestamp.now().time()
