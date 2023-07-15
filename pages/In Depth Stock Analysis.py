@@ -186,6 +186,7 @@ def main():
     elif st.experimental_get_query_params() != {}:
         
         show_all(data,st.experimental_get_query_params()['symbol'][0].upper()+".NS")
+        st.experimental_set_query_params(symbol=st.experimental_get_query_params()['symbol'][0].upper())
         
     else:
         st.write("Enter the stock symbol/ticker in the text box in the sidebar")
