@@ -155,7 +155,7 @@ def show_all(data,symbol):
     st.title(title)
     st.write(' '.join(["Data updated on:",updated_date,updated_time]))
 
-    tab1, tab2, tab3 = st.tabs(["About", "Stock", "Financials"])
+    tab1, tab2 = st.tabs(["About", "Stock"])
 
     with tab1:
         try:

@@ -35,7 +35,7 @@ def generate_stock(data, symbol):
     historical_data = pd.read_csv(file_name)
     
     ma_priod_list = [5,10,15,20,25,30,40,50,75,100,150,200]
-    historical_with_ma = ADX(generate_ma_signals(historical_data,ma_priod_list),14)
+    historical_with_ma = RSI(ADX(generate_ma_signals(historical_data,ma_priod_list),14),14)
     historical_with_ma['date_only'] = pd.to_datetime(historical_with_ma['date_only'], format='%Y-%m-%d').astype('datetime64[ns]')
     
     week52_data = week_52(historical_with_ma)
@@ -155,7 +155,7 @@ def show_all(data,symbol):
     st.title(title)
     st.write(' '.join(["Data updated on:",updated_date,updated_time]))
 
-    tab1, tab2, tab3 = st.tabs(["About", "Stock", "Financials"])
+    tab1, tab2 = st.tabs(["About", "Stock"])
 
     with tab1:
         try:
@@ -164,10 +164,10 @@ def show_all(data,symbol):
             st.warning("Stock Ticker is invalid or company is no longer be traded")
 
     with tab2:
-        try:
-            generate_stock(df, company_symbol)
-        except:
-            st.warning("Stock Ticker is invalid or company is no longer be traded")
+        #try:
+        generate_stock(df, company_symbol)
+        #except:
+            #st.warning("Stock Ticker is invalid or company is no longer be traded")
             
 def main():
 
@@ -186,6 +186,7 @@ def main():
     elif st.experimental_get_query_params() != {}:
         
         show_all(data,st.experimental_get_query_params()['symbol'][0].upper()+".NS")
+        st.experimental_set_query_params(symbol=st.experimental_get_query_params()['symbol'][0].upper())
         
     else:
         st.write("Enter the stock symbol/ticker in the text box in the sidebar")
