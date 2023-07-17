@@ -1,0 +1,168 @@
+,item,2023-03-31 00:00:00,2022-03-31 00:00:00,2021-03-31 00:00:00,2020-03-31 00:00:00,sheet
+0,Tax Effect Of Unusual Items,0.0,24944231.220657,-50793375.724044,432166.208535,Income Statement
+1,Tax Rate For Calcs,0.4,0.265082,0.135713,0.151637,Income Statement
+2,Normalized EBITDA,961861000.0,1515820000.0,986780000.0,1897590000.0,Income Statement
+3,Total Unusual Items,0.0,94100000.0,-374270000.0,2850000.0,Income Statement
+4,Total Unusual Items Excluding Goodwill,0.0,94100000.0,-374270000.0,2850000.0,Income Statement
+5,Net Income From Continuing Operation Net Minority Interest,-241829000.0,250470000.0,-732640000.0,317890000.0,Income Statement
+6,Reconciled Depreciation,591189000.0,569680000.0,602530000.0,607660000.0,Income Statement
+7,Reconciled Cost Of Revenue,11592850000.0,13695050000.0,12857270000.0,19975600000.0,Income Statement
+8,EBIT,370672000.0,1040240000.0,9980000.0,1292780000.0,Income Statement
+9,Net Interest Income,-794872000.0,-769270000.0,-1093530000.0,-1231240000.0,Income Statement
+10,Interest Expense,794872000.0,699440000.0,857650000.0,918070000.0,Income Statement
+11,Interest Income,,18830000.0,26820000.0,27020000.0,Income Statement
+12,Normalized Income,-241829000.0,181314231.220657,-409163375.724044,315472166.208535,Income Statement
+13,Net Income From Continuing And Discontinued Operation,-241829000.0,250470000.0,-732640000.0,317890000.0,Income Statement
+14,Total Expenses,15288416000.0,15672330000.0,14811910000.0,22070480000.0,Income Statement
+15,Rent Expense Supplemental,,17600000.0,17770000.0,18170000.0,Income Statement
+16,Diluted Average Shares,223915741.0,223631250.0,224260970.0,224260970.0,Income Statement
+17,Basic Average Shares,223915741.0,223631250.0,224260970.0,224260970.0,Income Statement
+18,Diluted EPS,-1.08,1.12,-3.27,1.42,Income Statement
+19,Basic EPS,-1.08,1.12,-3.27,1.42,Income Statement
+20,Diluted NI Availto Com Stockholders,-241829000.0,250470000.0,-732640000.0,317890000.0,Income Statement
+21,Net Income Common Stockholders,-241829000.0,250470000.0,-732640000.0,317890000.0,Income Statement
+22,Otherunder Preferred Stock Dividend,0.0,0.0,0.0,0.0,Income Statement
+23,Net Income,-241829000.0,250470000.0,-732640000.0,317890000.0,Income Statement
+24,Net Income Including Noncontrolling Interests,-241829000.0,250470000.0,-732630000.0,317890000.0,Income Statement
+25,Net Income Continuous Operations,-241829000.0,250470000.0,-732630000.0,317890000.0,Income Statement
+26,Tax Provision,-182371000.0,90340000.0,-115040000.0,56820000.0,Income Statement
+27,Pretax Income,-424200000.0,340800000.0,-847670000.0,374710000.0,Income Statement
+28,Other Non Operating Income Expenses,422393000.0,112930000.0,27221000.0,9800000.0,Income Statement
+29,Special Income Charges,0.0,94070000.0,-374670000.0,3240000.0,Income Statement
+30,Other Special Charges,,-94070000.0,254460000.0,-3240000.0,Income Statement
+31,Write Off,,0.0,120210000.0,,Income Statement
+32,Net Non Operating Interest Income Expense,-794872000.0,-769270000.0,-1093530000.0,-1231240000.0,Income Statement
+33,Total Other Finance Cost,,88660000.0,262700000.0,340190000.0,Income Statement
+34,Interest Expense Non Operating,794872000.0,699440000.0,857650000.0,918070000.0,Income Statement
+35,Interest Income Non Operating,,18830000.0,26820000.0,27020000.0,Income Statement
+36,Operating Income,-51721000.0,1015990000.0,621060000.0,1593310000.0,Income Statement
+37,Operating Expense,3695566000.0,1977280000.0,1954640000.0,2094880000.0,Income Statement
+38,Other Operating Expenses,2336019000.0,14350000.0,-71060000.0,23250000.0,Income Statement
+39,Depreciation And Amortization In Income Statement,591189000.0,569680000.0,602530000.0,607660000.0,Income Statement
+40,Depreciation Income Statement,591189000.0,569680000.0,602530000.0,607660000.0,Income Statement
+41,Selling General And Administration,,630430000.0,681980000.0,639150000.0,Income Statement
+42,Selling And Marketing Expense,,480270000.0,507870000.0,463650000.0,Income Statement
+43,General And Administrative Expense,,150160000.0,174110000.0,175500000.0,Income Statement
+44,Rent And Landing Fees,,17600000.0,17770000.0,18170000.0,Income Statement
+45,Gross Profit,3643845000.0,2993270000.0,2575700000.0,3688190000.0,Income Statement
+46,Cost Of Revenue,11592850000.0,13695050000.0,12857270000.0,19975600000.0,Income Statement
+47,Total Revenue,15236695000.0,16688320000.0,15432970000.0,23663790000.0,Income Statement
+48,Operating Revenue,15236695000.0,16688320000.0,15432970000.0,23663790000.0,Income Statement
+0,Ordinary Shares Number,224260970.0,224260970.0,224260970.0,224260970.0,Balance Sheet
+1,Share Issued,224260970.0,224260970.0,224260970.0,224260970.0,Balance Sheet
+2,Net Debt,7362494000.0,8421510000.0,8779080000.0,7575080000.0,Balance Sheet
+3,Total Debt,7538294000.0,8599260000.0,9034090000.0,7787640000.0,Balance Sheet
+4,Tangible Book Value,10152658000.0,10448830000.0,10236640000.0,10969330000.0,Balance Sheet
+5,Invested Capital,18184240000.0,19478300000.0,19654380000.0,19148880000.0,Balance Sheet
+6,Working Capital,3402560000.0,3510160000.0,514370000.0,3672670000.0,Balance Sheet
+7,Net Tangible Assets,10152658000.0,10448830000.0,10236640000.0,10969330000.0,Balance Sheet
+8,Capital Lease Obligations,0.0,0.0,,,Balance Sheet
+9,Common Stock Equity,10645946000.0,10879040000.0,10620290000.0,11361240000.0,Balance Sheet
+10,Total Capitalization,12910667000.0,13789790000.0,11902660000.0,12576060000.0,Balance Sheet
+11,Total Equity Gross Minority Interest,10645946000.0,10879040000.0,10620290000.0,11361240000.0,Balance Sheet
+12,Minority Interest,0.0,0.0,0.0,,Balance Sheet
+13,Stockholders Equity,10645946000.0,10879040000.0,10620290000.0,11361240000.0,Balance Sheet
+14,Other Equity Interest,10421685000.0,10654790000.0,10396036000.0,,Balance Sheet
+15,Retained Earnings,,7191480000.0,6967030000.0,7707980000.0,Balance Sheet
+16,Additional Paid In Capital,,3287980000.0,3287980000.0,3287980000.0,Balance Sheet
+17,Capital Stock,224261000.0,224260000.0,224260000.0,224260000.0,Balance Sheet
+18,Common Stock,224261000.0,224260000.0,224260000.0,224260000.0,Balance Sheet
+19,Total Liabilities Net Minority Interest,11246167000.0,13029280000.0,14090900000.0,14971840000.0,Balance Sheet
+20,Total Non Current Liabilities Net Minority Interest,2336894000.0,2990950000.0,2216980000.0,2492930000.0,Balance Sheet
+21,Other Non Current Liabilities,7708000.0,8310000.0,18970000.0,22880000.0,Balance Sheet
+22,Non Current Pension And Other Postretirement Benefit Plans,,63930000.0,77380000.0,81990000.0,Balance Sheet
+23,Non Current Deferred Revenue,0.0,7960000.0,8210000.0,8460000.0,Balance Sheet
+24,Non Current Deferred Taxes Liabilities,0.0,0.0,830050000.0,1164780000.0,Balance Sheet
+25,Long Term Debt And Capital Lease Obligation,2264721000.0,2910750000.0,1282370000.0,1214820000.0,Balance Sheet
+26,Long Term Capital Lease Obligation,0.0,0.0,,,Balance Sheet
+27,Long Term Debt,2264721000.0,2910750000.0,1282370000.0,1214820000.0,Balance Sheet
+28,Long Term Provisions,64465000.0,63930000.0,77380000.0,,Balance Sheet
+29,Current Liabilities,8909273000.0,10038330000.0,11873920000.0,12478910000.0,Balance Sheet
+30,Other Current Liabilities,85863000.0,462667000.0,-10000.0,-10000.0,Balance Sheet
+31,Current Debt And Capital Lease Obligation,5273573000.0,5688510000.0,7751720000.0,6572820000.0,Balance Sheet
+32,Current Capital Lease Obligation,0.0,0.0,,,Balance Sheet
+33,Current Debt,5273573000.0,5688510000.0,7751720000.0,6572820000.0,Balance Sheet
+34,Pensionand Other Post Retirement Benefit Plans Current,,65000000.0,70020000.0,32580000.0,Balance Sheet
+35,Current Provisions,18600000.0,16986000.0,16100000.0,,Balance Sheet
+36,Payables,3187523000.0,4183160000.0,3953190000.0,5754540000.0,Balance Sheet
+37,Other Payable,,416320000.0,531280000.0,446660000.0,Balance Sheet
+38,Dividends Payable,,320000.0,380000.0,380000.0,Balance Sheet
+39,Total Tax Payable,0.0,0.0,0.0,36050000.0,Balance Sheet
+40,Accounts Payable,3187523000.0,3766520000.0,3421530000.0,5271450000.0,Balance Sheet
+41,Total Assets,21892113000.0,23908320000.0,24711190000.0,26333080000.0,Balance Sheet
+42,Total Non Current Assets,9580280000.0,10359830000.0,12322920000.0,10181500000.0,Balance Sheet
+43,Other Non Current Assets,1881590000.0,2124970000.0,2515890000.0,5020000.0,Balance Sheet
+44,Non Current Prepaid Assets,,44280000.0,43780000.0,44690000.0,Balance Sheet
+45,Non Current Deferred Taxes Assets,205688000.0,28000000.0,,,Balance Sheet
+46,Other Investments,2351000.0,2351000.0,,,Balance Sheet
+47,Investmentin Financial Assets,19614000.0,2350000.0,2350000.0,2350000.0,Balance Sheet
+48,Available For Sale Securities,19614000.0,2350000.0,2350000.0,2350000.0,Balance Sheet
+49,Investment Properties,0.0,0.0,0.0,,Balance Sheet
+50,Goodwill And Other Intangible Assets,493288000.0,430210000.0,383650000.0,391910000.0,Balance Sheet
+51,Other Intangible Assets,493288000.0,430210000.0,383650000.0,391910000.0,Balance Sheet
+52,Goodwill,0.0,0.0,0.0,,Balance Sheet
+53,Net PPE,6904286000.0,7651740000.0,8321520000.0,8606540000.0,Balance Sheet
+54,Accumulated Depreciation,,-7160560000.0,-6679110000.0,-6200080000.0,Balance Sheet
+55,Gross PPE,6904286000.0,14812300000.0,15000630000.0,14806620000.0,Balance Sheet
+56,Construction In Progress,777834000.0,850980000.0,986290000.0,1149990000.0,Balance Sheet
+57,Other Properties,6126452000.0,1982550000.0,1950520000.0,1932810000.0,Balance Sheet
+58,Machinery Furniture Equipment,,9689690000.0,9507050000.0,9267390000.0,Balance Sheet
+59,Buildings And Improvements,,1773030000.0,1750350000.0,1650010000.0,Balance Sheet
+60,Land And Improvements,,516050000.0,806420000.0,806420000.0,Balance Sheet
+61,Properties,,0.0,0.0,0.0,Balance Sheet
+62,Current Assets,12311833000.0,13548490000.0,12388290000.0,16151580000.0,Balance Sheet
+63,Other Current Assets,2189494000.0,45890000.0,53050000.0,92730000.0,Balance Sheet
+64,Restricted Cash,,320000.0,380000.0,380000.0,Balance Sheet
+65,Prepaid Assets,,1577130000.0,1980210000.0,1492720000.0,Balance Sheet
+66,Inventory,6726001000.0,6598550000.0,5878880000.0,9775510000.0,Balance Sheet
+67,Other Inventories,,174900000.0,129780000.0,145850000.0,Balance Sheet
+68,Finished Goods,,1130280000.0,1625970000.0,2424990000.0,Balance Sheet
+69,Work In Process,,3710320000.0,2981780000.0,5568850000.0,Balance Sheet
+70,Raw Materials,,1583050000.0,1141350000.0,1635820000.0,Balance Sheet
+71,Other Receivables,3732000.0,674470000.0,467930000.0,617300000.0,Balance Sheet
+72,Taxes Receivable,0.0,0.0,0.0,,Balance Sheet
+73,Accounts Receivable,2796073000.0,4469780000.0,3748260000.0,3958720000.0,Balance Sheet
+74,Allowance For Doubtful Accounts Receivable,,0.0,,0.0,Balance Sheet
+75,Gross Accounts Receivable,,4469780000.0,3748260000.0,3958720000.0,Balance Sheet
+76,Cash Cash Equivalents And Short Term Investments,596533000.0,182350000.0,259580000.0,214220000.0,Balance Sheet
+77,Other Short Term Investments,420733000.0,4600000.0,4570000.0,1660000.0,Balance Sheet
+78,Cash And Cash Equivalents,175800000.0,177750000.0,255010000.0,212560000.0,Balance Sheet
+79,Cash Equivalents,,133960000.0,236420000.0,,Balance Sheet
+80,Cash Financial,,43790000.0,18590000.0,212560000.0,Balance Sheet
+0,Free Cash Flow,1035913000.0,700350000.0,-98620000.0,2301900000.0,Cash Flow
+1,Capital Expenditure,-300601000.0,-249700000.0,-312410000.0,-547700000.0,Cash Flow
+2,End Cash Position,175800000.0,178080000.0,255390000.0,212930000.0,Cash Flow
+3,Other Cash Adjustment Outside Changein Cash,,-1000.0,,10000.0,Cash Flow
+4,Beginning Cash Position,178079000.0,255390000.0,212940000.0,213270000.0,Cash Flow
+5,Changes In Cash,-2279000.0,-77309000.0,42450000.0,-350000.0,Cash Flow
+6,Financing Cash Flow,-1855831000.0,-1193800000.0,114900000.0,-2518670000.0,Cash Flow
+7,Net Other Financing Charges,30000000.0,99990000.0,,10000.0,Cash Flow
+8,Interest Paid Cff,-794872000.0,-788100000.0,-1120350000.0,-1258260000.0,Cash Flow
+9,Cash Dividends Paid,,,-11210000.0,-13540000.0,Cash Flow
+10,Common Stock Dividend Paid,,,,-13540000.0,Cash Flow
+11,Net Issuance Payments Of Debt,-1090959000.0,-505690000.0,1246460000.0,-1246880000.0,Cash Flow
+12,Net Short Term Debt Issuance,-438576000.0,-2063210000.0,922920000.0,-162560000.0,Cash Flow
+13,Net Long Term Debt Issuance,-652383000.0,1557520000.0,323540000.0,-1084320000.0,Cash Flow
+14,Investing Cash Flow,517038000.0,166441000.0,-286240000.0,-331280000.0,Cash Flow
+15,Net Other Investing Changes,,-9000.0,,-10000.0,Cash Flow
+16,Interest Received Cfi,17262000.0,18830000.0,26820000.0,27020000.0,Cash Flow
+17,Dividends Received Cfi,0.0,10000.0,0.0,0.0,Cash Flow
+18,Net Investment Purchase And Sale,2500000.0,0.0,-2500000.0,4140000.0,Cash Flow
+19,Purchase Of Investment,,,-2500000.0,,Cash Flow
+20,Net PPE Purchase And Sale,497276000.0,147610000.0,-310560000.0,-362430000.0,Cash Flow
+21,Sale Of PPE,797877000.0,397310000.0,1850000.0,185270000.0,Cash Flow
+22,Purchase Of PPE,-300601000.0,-249700000.0,-312410000.0,-547700000.0,Cash Flow
+23,Operating Cash Flow,1336514000.0,950050000.0,213790000.0,2849600000.0,Cash Flow
+24,Taxes Refund Paid,0.0,0.0,-37130000.0,-93290000.0,Cash Flow
+25,Change In Working Capital,779263000.0,-645420000.0,-405420000.0,703600000.0,Cash Flow
+26,Change In Other Current Liabilities,-724289000.0,186690000.0,-1748260000.0,328420000.0,Cash Flow
+27,Change In Other Current Assets,1503552000.0,-832110000.0,1342840000.0,375180000.0,Cash Flow
+28,Other Non Cash Items,786333000.0,777560000.0,844360000.0,1236530000.0,Cash Flow
+29,Provisionand Write Offof Assets,2225000.0,9650000.0,-54750000.0,18340000.0,Cash Flow
+30,Deferred Tax,4685000.0,4450000.0,-133840000.0,2840000.0,Cash Flow
+31,Depreciation And Amortization,591189000.0,569680000.0,602530000.0,607660000.0,Cash Flow
+32,Depreciation,591189000.0,569680000.0,602530000.0,607660000.0,Cash Flow
+33,Pension And Employee Benefit Expense,2149000.0,-12570000.0,-8340000.0,-380000.0,Cash Flow
+34,Gain Loss On Investment Securities,-1049000.0,-30000.0,-400000.0,-390000.0,Cash Flow
+35,Gain Loss On Sale Of PPE,-404082000.0,-94070000.0,1310000.0,0.0,Cash Flow
+36,Net Income From Continuing Operations,-424199000.0,340800000.0,-594530000.0,374710000.0,Cash Flow
