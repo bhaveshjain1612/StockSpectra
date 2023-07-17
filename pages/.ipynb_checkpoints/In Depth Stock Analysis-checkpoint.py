@@ -168,11 +168,11 @@ def generate_financials(symbol):
     col4.metric("Basic EPS",kpis['Basic EPS']['current'], kpis['Basic EPS']['delta'])
     col5.metric("Net Profit Margin",kpis['Net Profit Margin']['current'], kpis['Net Profit Margin']['delta'])
     st.divider()
-    col1.metric("ROA",kpis['ROA']['current'], kpis['ROA']['delta'])
-    col2.metric("ROE",kpis['ROE']['current'], kpis['ROE']['delta'])
-    col3.metric("ROCE",kpis['ROCE']['current'], kpis['ROCE']['delta'])
-    col4.metric("Current Ratio",kpis['Current Ratio']['current'], kpis['Current Ratio']['delta'])
-    col5.metric("DE Ratio",kpis['DE Ratio']['current'], kpis['DE Ratio']['delta'])
+    col1.metric("ROA",round(kpis['ROA']['current'],2), round(kpis['ROA']['delta'],2))
+    col2.metric("ROE",round(kpis['ROE']['current'],2), round(kpis['ROE']['delta'],2))
+    col3.metric("ROCE",round(kpis['ROCE']['current'],2), round(kpis['ROCE']['delta'],2))
+    col4.metric("Current Ratio",round(kpis['Current Ratio']['current'],2), round(kpis['Current Ratio']['delta'],2))
+    col5.metric("DE Ratio",round(kpis['DE Ratio']['current'],2), round(kpis['DE Ratio']['delta'],2))
     
     
     st.json(kpis)
