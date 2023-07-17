@@ -185,8 +185,7 @@ def generate_financials(symbol):
     col4.metric("Current Ratio",round(kpis['Current Ratio']['current'],2), round(kpis['Current Ratio']['delta'],2))
     col5.metric("DE Ratio",round(kpis['DE Ratio']['current'],2), round(kpis['DE Ratio']['delta'],2))
     
-    
-    st.json(kpis)
+    #st.json(kpis)
     
     #display
     with st.expander("Income Statement"):
