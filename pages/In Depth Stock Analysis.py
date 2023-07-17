@@ -144,6 +144,17 @@ def generate_stock(data, symbol):
     st.plotly_chart(fig,theme="streamlit", use_container_height=True, use_container_width=True, height=1000)
     
 def generate_financials(symbol):
+    def simplify(x):    
+        if x >1000000000:
+            y = str(round(x/10000000))+" Cr"    
+        elif x > 10000000:
+            y = str(round(x/10000000,2))+" Cr"
+        elif x > 100000:
+            y = str(round(x/100000,2))+" L"
+        else:
+            y = x
+        return y
+        
     src = pd.read_csv("backend_data/company_financials/"+symbol+"_financials.csv")
     income_stmt = src[src['sheet']=='Income Statement'].drop("Unnamed: 0",axis=1).set_index("item").T.reset_index().rename(columns={"index" : "year"})
     balance_sheet = src[src['sheet']=='Balance Sheet'].drop("Unnamed: 0",axis=1).set_index("item").T.reset_index().rename(columns={"index" : "year"})
@@ -162,9 +173,9 @@ def generate_financials(symbol):
     
     col1, col2, col3, col4, col5 = st.columns(5)
     
-    col1.metric("Net Income",kpis['Net Income']['current'], kpis['Net Income']['delta'])
-    col2.metric("Debt",kpis['Debt']['current'], kpis['Debt']['delta'])
-    col3.metric("Free Cash Flow",kpis['Free Cash Flow']['current'], kpis['Free Cash Flow']['delta'])
+    col1.metric("Net Income",simplify(kpis['Net Income']['current']), simplify(kpis['Net Income']['delta']))
+    col2.metric("Debt",simplify(kpis['Debt']['current']), simplify(kpis['Debt']['delta']))
+    col3.metric("Free Cash Flow",simplify(kpis['Free Cash Flow']['current']), simplify(kpis['Free Cash Flow']['delta']))
     col4.metric("Basic EPS",round(kpis['Basic EPS']['current'],2), round(kpis['Basic EPS']['delta'],2))
     col5.metric("Net Profit Margin",round(kpis['Net Profit Margin']['current'],2), round(kpis['Net Profit Margin']['delta'],2))
     st.divider()

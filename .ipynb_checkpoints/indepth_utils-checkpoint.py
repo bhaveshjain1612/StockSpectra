@@ -300,6 +300,7 @@ def RSI(df,window_length):
 ### FInancials
 ####################################
 
+
 def calc_KPIs(income_stmt,balance_sheet,cash_flow):
     
     income_stmt = income_stmt[income_stmt['year']!='sheet']
