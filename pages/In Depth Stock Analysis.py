@@ -142,6 +142,30 @@ def generate_stock(data, symbol):
     fig = generate_charts(historical_sample,selected_mas,holiday_list, plot_filter)
         
     st.plotly_chart(fig,theme="streamlit", use_container_height=True, use_container_width=True, height=1000)
+    
+def generate_financials(symbol):
+    src = pd.read_csv("backend_data/company_financials/"+symbol+"_financials.csv")
+    income_stmt = src[src['sheet']=='Income Statement'].drop("Unnamed: 0",axis=1).set_index("item").T.reset_index().rename(columns={"index" : "year"})
+    balance_sheet = src[src['sheet']=='Balance Sheet'].drop("Unnamed: 0",axis=1).set_index("item").T.reset_index().rename(columns={"index" : "year"})
+    cash_flow = src[src['sheet']=='Cash Flow'].drop("Unnamed: 0",axis=1).set_index("item").T.reset_index().rename(columns={"index" : "year"})
+    
+    income_stmt['reporting_date'] = income_stmt['year'].astype('str').str.strip(" 00:00:00")
+    income_stmt_to_display = income_stmt.set_index('reporting_date').drop('year',axis=1).T.drop('sheet',axis=1)
+
+    balance_sheet['reporting_date'] = balance_sheet['year'].astype('str').str.strip(" 00:00:00")
+    balance_sheet_to_display = balance_sheet.set_index('reporting_date').drop('year',axis=1).T.drop('sheet',axis=1)
+
+    cash_flow['reporting_date'] = cash_flow['year'].astype('str').str.strip(" 00:00:00")
+    cash_flow_to_display = cash_flow.set_index('reporting_date').drop('year',axis=1).T.drop('sheet',axis=1)
+    
+    with st.expander("Income Statement"):
+        st.dataframe(income_stmt_to_display)
+        
+    with st.expander("Balance Sheet"):
+        st.dataframe(balance_sheet_to_display)
+        
+    with st.expander("Cash Flow"):
+        st.dataframe(cash_flow_to_display)  
 
 def show_all(data,symbol):
 
@@ -155,7 +179,7 @@ def show_all(data,symbol):
     st.title(title)
     st.write(' '.join(["Data updated on:",updated_date,updated_time]))
 
-    tab1, tab2 = st.tabs(["About", "Stock"])
+    tab1, tab2, tab3 = st.tabs(["About", "Stock", "Financials"])
 
     with tab1:
         try:
@@ -166,6 +190,12 @@ def show_all(data,symbol):
     with tab2:
         #try:
         generate_stock(df, company_symbol)
+        #except:
+            #st.warning("Stock Ticker is invalid or company is no longer be traded")
+            
+    with tab3:
+        #try:
+        generate_financials(company_symbol)
         #except:
             #st.warning("Stock Ticker is invalid or company is no longer be traded")
             
