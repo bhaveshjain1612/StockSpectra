@@ -301,6 +301,11 @@ def RSI(df,window_length):
 ####################################
 
 def calc_KPIs(income_stmt,balance_sheet,cash_flow):
+    
+    income_stmt = income_stmt[income_stmt['year']!='sheet']
+    balance_sheet = balance_sheet[balance_sheet['year']!='sheet']
+    cash_flow = cash_flow[cash_flow['year']!='sheet']
+        
     kpis = {}
     #ROE
     kpis['ROE'] = {'desc' : 'Efficiency of Equity utilisation'}
@@ -312,6 +317,10 @@ def calc_KPIs(income_stmt,balance_sheet,cash_flow):
         kpis['ROE']['previous'] = balance_sheet['Stockholders Equity'][1]/income_stmt['Net Income'][1]
     else:
         kpis['ROE']['previous'] = None
+    if kpis['ROE']['previous'] and kpis['ROE']['current']:
+        kpis['ROE']['delta'] = kpis['ROE']['current'] - kpis['ROE']['previous']
+    else:
+        kpis['ROE']['delta'] = None
         
     #ROA
     kpis['ROA'] = {'desc' : 'Efficiency of Assets utilisation'}
@@ -323,7 +332,11 @@ def calc_KPIs(income_stmt,balance_sheet,cash_flow):
         kpis['ROA']['previous'] = income_stmt['Net Income'][1]/balance_sheet['Total Assets'][1]
     else:
         kpis['ROA']['previous'] = None
-    
+    if kpis['ROA']['previous'] and kpis['ROA']['current']:
+        kpis['ROA']['delta'] = kpis['ROA']['current'] - kpis['ROA']['previous']
+    else:
+        kpis['ROA']['delta'] = None
+        
     #Current Ratio
     kpis['Current Ratio'] = {'desc' : 'Ability to pay short term liabilities'}
     if balance_sheet['Current Assets'][0] and balance_sheet['Current Liabilities'][0]:
@@ -334,6 +347,10 @@ def calc_KPIs(income_stmt,balance_sheet,cash_flow):
         kpis['Current Ratio']['previous'] = balance_sheet['Current Assets'][1]/balance_sheet['Current Liabilities'][1]
     else:
         kpis['Current Ratio']['previous'] = None
+    if kpis['Current Ratio']['previous'] and kpis['Current Ratio']['current']:
+        kpis['Current Ratio']['delta'] = kpis['Current Ratio']['current'] - kpis['Current Ratio']['previous']
+    else:
+        kpis['Current Ratio']['delta'] = None
         
     #Gross Margin
     kpis['Net Profit Margin'] = {'desc' : 'Profitability of a company'}
@@ -345,6 +362,10 @@ def calc_KPIs(income_stmt,balance_sheet,cash_flow):
         kpis['Net Profit Margin']['previous'] = income_stmt['Net Income'][1]/income_stmt['Total Revenue'][1]
     else:
         kpis['Net Profit Margin']['previous'] = None
+    if kpis['Net Profit Margin']['previous'] and kpis['Net Profit Margin']['current']:
+        kpis['Net Profit Margin']['delta'] = kpis['Net Profit Margin']['current'] - kpis['Net Profit Margin']['previous']
+    else:
+        kpis['Net Profit Margin']['delta'] = None
         
     #Debt to equity ratio
     kpis['DE Ratio'] = {'desc' : 'Total debt comapred to equity'}
@@ -356,6 +377,10 @@ def calc_KPIs(income_stmt,balance_sheet,cash_flow):
         kpis['DE Ratio']['previous'] = balance_sheet['Total Debt'][1]/balance_sheet['Stockholders Equity'][1]
     else:
         kpis['DE Ratio']['previous'] = None
+    if kpis['DE Ratio']['previous'] and kpis['DE Ratio']['current']:
+        kpis['DE Ratio']['delta'] = kpis['DE Ratio']['current'] - kpis['DE Ratio']['previous']
+    else:
+        kpis['DE Ratio']['delta'] = None
         
     #Net Income
     kpis['Net Income'] = {'desc' : 'Net Income of the company'}
@@ -367,6 +392,10 @@ def calc_KPIs(income_stmt,balance_sheet,cash_flow):
         kpis['Net Income']['previous'] = income_stmt['Net Income'][1]
     else:
         kpis['Net Income']['previous'] = None
+    if kpis['Net Income']['previous'] and kpis['Net Income']['current']:
+        kpis['Net Income']['delta'] = kpis['Net Income']['current'] - kpis['Net Income']['previous']
+    else:
+        kpis['Net Income']['delta'] = None
         
     #Free Cash Flow
     kpis['Free Cash Flow'] = {'desc' : 'In Hand cash flow'}
@@ -378,6 +407,10 @@ def calc_KPIs(income_stmt,balance_sheet,cash_flow):
         kpis['Free Cash Flow']['previous'] = cash_flow['Free Cash Flow'][1]
     else:
         kpis['Free Cash Flow']['previous'] = None
+    if kpis['Free Cash Flow']['previous'] and kpis['Free Cash Flow']['current']:
+        kpis['Free Cash Flow']['delta'] = kpis['Free Cash Flow']['current'] - kpis['Free Cash Flow']['previous']
+    else:
+        kpis['Free Cash Flow']['delta'] = None
         
     #Total Debt
     kpis['Debt'] = {'desc' : 'Total debt of the company'}
@@ -389,6 +422,10 @@ def calc_KPIs(income_stmt,balance_sheet,cash_flow):
         kpis['Debt']['previous'] = balance_sheet['Total Debt'][1]
     else:
         kpis['Debt']['previous'] = None
+    if kpis['Debt']['previous'] and kpis['ROE']['current']:
+        kpis['Debt']['delta'] = kpis['Debt']['current'] - kpis['Debt']['previous']
+    else:
+        kpis['Debt']['delta'] = None
         
     #Basic EPS
     kpis['Basic EPS'] = {'desc' : 'Earnings of the company per share'}
@@ -400,6 +437,10 @@ def calc_KPIs(income_stmt,balance_sheet,cash_flow):
         kpis['Basic EPS']['previous'] = income_stmt['Basic EPS'][1]
     else:
         kpis['Basic EPS']['previous'] = None
+    if kpis['Basic EPS']['previous'] and kpis['Basic EPS']['current']:
+        kpis['Basic EPS']['delta'] = kpis['Basic EPS']['current'] - kpis['Basic EPS']['previous']
+    else:
+        kpis['Basic EPS']['delta'] = None
         
     #ROCE
     kpis['ROCE'] = {'desc':"Utilization of capital employed"}
@@ -411,6 +452,10 @@ def calc_KPIs(income_stmt,balance_sheet,cash_flow):
         kpis['ROCE']['previous'] = income_stmt['EBIT'][1] / (balance_sheet['Total Assets'][1]-balance_sheet['Current Liabilities'][1])
     else:
         kpis['ROCE']['previous'] = None
+    if kpis['ROCE']['previous'] and kpis['ROCE']['current']:
+        kpis['ROCE']['delta'] = kpis['ROCE']['current'] - kpis['ROCE']['previous']
+    else:
+        kpis['ROCE']['delta'] = None
         
         
     return kpis
