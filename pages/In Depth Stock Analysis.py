@@ -164,7 +164,7 @@ def generate_financials(symbol):
     
     col1.metric("Net Income",kpis['Net Income']['current'], kpis['Net Income']['delta'])
     col2.metric("Debt",kpis['Debt']['current'], kpis['Debt']['delta'])
-    col3.metric("Free Cash Flow",kpis['Net IncomeFree Cash Flow'], kpis['Free Cash Flow']['delta'])
+    col3.metric("Free Cash Flow",kpis['Free Cash Flow'], kpis['Free Cash Flow']['delta'])
     col4.metric("Basic EPS",kpis['Basic EPS']['current'], kpis['Basic EPS']['delta'])
     col5.metric("Net Profit Margin",kpis['Net Profit Margin']['current'], kpis['Net Profit Margin']['delta'])
     st.divider()
