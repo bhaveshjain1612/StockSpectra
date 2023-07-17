@@ -145,11 +145,11 @@ def generate_stock(data, symbol):
     
 def generate_financials(symbol):
     def simplify(x):    
-        if x >1000000000:
+        if x >1000000000 or x <-1000000000:
             y = str(round(x/10000000))+" Cr"    
-        elif x > 10000000:
+        elif x > 10000000 or x < -10000000:
             y = str(round(x/10000000,2))+" Cr"
-        elif x > 100000:
+        elif x > 100000 or x <-100000:
             y = str(round(x/100000,2))+" L"
         else:
             y = x
