@@ -158,6 +158,11 @@ def generate_financials(symbol):
     cash_flow['reporting_date'] = cash_flow['year'].astype('str').str.strip(" 00:00:00")
     cash_flow_to_display = cash_flow.set_index('reporting_date').drop('year',axis=1).T.drop('sheet',axis=1)
     
+    kpis = calc_KPIs(income_stmt,balance_sheet,cash_flow)
+    
+    st.json(kpis)
+    
+    #display
     with st.expander("Income Statement"):
         st.dataframe(income_stmt_to_display)
         
