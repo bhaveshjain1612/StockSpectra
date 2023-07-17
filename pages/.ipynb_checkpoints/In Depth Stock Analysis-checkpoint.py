@@ -160,6 +160,21 @@ def generate_financials(symbol):
     
     kpis = calc_KPIs(income_stmt,balance_sheet,cash_flow)
     
+    col1, col2, col3, col4, col5 = st.columns(5)
+    
+    col1.metric("Net Income",kpis['Net Income']['current'], kpis['Net Income']['delta'])
+    col2.metric("Debt",kpis['Debt']['current'], kpis['Debt']['delta'])
+    col3.metric("Free Cash Flow",kpis['Net IncomeFree Cash Flow'], kpis['Free Cash Flow']['delta'])
+    col4.metric("Basic EPS",kpis['Basic EPS']['current'], kpis['Basic EPS']['delta'])
+    col5.metric("Net Profit Margin",kpis['Net Profit Margin']['current'], kpis['Net Profit Margin']['delta'])
+    st.divider()
+    col1.metric("ROA",kpis['ROA']['current'], kpis['ROA']['delta'])
+    col2.metric("ROE",kpis['ROE']['current'], kpis['ROE']['delta'])
+    col3.metric("ROCE",kpis['ROCE']['current'], kpis['ROCE']['delta'])
+    col4.metric("Current Ratio",kpis['Current Ratio']['current'], kpis['Current Ratio']['delta'])
+    col5.metric("DE Ratio",kpis['DE Ratio']['current'], kpis['DE Ratio']['delta'])
+    
+    
     st.json(kpis)
     
     #display
