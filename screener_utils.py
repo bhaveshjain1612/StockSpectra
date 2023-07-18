@@ -48,27 +48,15 @@ def determine_recommendation(row):
     signal = row["Latest macd_ema_9"]
     trend = row['macd_change_5d']
     
-    if macd>0:
-        if macd>=signal:
-            if trend>0:
-                return "Strong Buy"
-            elif trend<0:
-                return "Wait/ Hold"
-        elif macd<signal:
-            if trend<0:
-                return "Strong Sell"
-            elif trend>0:
-                return "Wait/ Hold"
-    elif macd<0:
-        if macd>=signal:
-            if trend>0:
-                return "Buy"
-            elif trend<0:
-                return "Wait/ Hold"
-        elif macd<signal:
-            if trend<0:
-                return "Sell"
-            elif trend>0:
-                return "Wait/ Hold"
+    if macd>signal:
+        if trend>0:
+            return "Strengthening Bullish"
+        elif trend<0:
+            return "Weakening Bullish"
+    elif macd<signal:
+        if trend<0:
+            return "Strengthening Bearish"
+        elif trend>0:
+            return "Weakening Bearish"
     else:
         return 'Wait/ Hold'
