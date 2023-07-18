@@ -17,9 +17,9 @@ from streamlit_autorefresh import st_autorefresh
 
 def determine_market_trend(row):
     if row['Price Change (%)'] > 0 and row['Volume Change (%)'] > 0:
-        return 'Bullish'
+        return 'Strong Uptrend'
     elif row['Price Change (%)'] < 0 and row['Volume Change (%)'] > 0:
-        return 'Bearish'
+        return 'Strong Downtrend'
     elif row['Price Change (%)'] > 0 and row['Volume Change (%)'] < 0:
         return 'Weak Uptrend'
     elif row['Price Change (%)'] < 0 and row['Volume Change (%)'] < 0:
