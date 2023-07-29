@@ -30,7 +30,8 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         
     - name: Run exec.py
-      run: python backend_data/collective_backend.py  # Adjust the command if necessary
+      run: python collective_backend.py  # Adjust the command if necessary
+      working-directory: backend_data
 
     - name: Commit changes
       run: |
@@ -39,3 +40,4 @@ jobs:
         git add .
         git commit -m "Auto-commit changes after running exec.py"
         git push
+      working-directory: backend_data
