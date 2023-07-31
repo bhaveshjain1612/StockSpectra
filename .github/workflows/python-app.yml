@@ -39,6 +39,5 @@ jobs:
         git config --global user.email "bhavesh.161201@gmail.com"
         git add .
         git commit -m "Auto-commit changes after running exec.py"
-        git pull origin main --rebase
         git push origin main
       working-directory: backend_data
