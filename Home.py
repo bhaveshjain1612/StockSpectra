@@ -47,7 +47,7 @@ def main():
     pd.set_option('display.max_colwidth', 1)
 
     def add_ind_depth_url(Symbol):
-        return [f'https://stockproject-bhaveshjain.streamlit.app/In_Depth_Stock_Analysis/?symbol={t.replace(".","_")}' for t in Symbol]
+        return [f'https://stock-recommendation.streamlit.app/?symbol={t.replace(".","_")}' for t in Symbol]
 
     def make_clickable(url, text):
         return f'<a target="_self" href="{url}">{text}</a>'
