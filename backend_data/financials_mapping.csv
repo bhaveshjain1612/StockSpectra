@@ -1,0 +1,240 @@
+,index,sheet
+0,Tax Effect Of Unusual Items,i
+1,Tax Rate For Calcs,i
+2,Normalized EBITDA,i
+3,Total Unusual Items,i
+4,Total Unusual Items Excluding Goodwill,i
+5,Net Income From Continuing Operation Net Minority Interest,i
+6,Reconciled Depreciation,i
+7,Reconciled Cost Of Revenue,i
+8,EBIT,i
+9,Net Interest Income,i
+10,Interest Expense,i
+11,Interest Income,i
+12,Normalized Income,i
+13,Net Income From Continuing And Discontinued Operation,i
+14,Total Expenses,i
+15,Diluted Average Shares,i
+16,Basic Average Shares,i
+17,Diluted EPS,i
+18,Basic EPS,i
+19,Diluted NI Availto Com Stockholders,i
+20,Net Income Common Stockholders,i
+21,Otherunder Preferred Stock Dividend,i
+22,Net Income,i
+23,Minority Interests,i
+24,Net Income Including Noncontrolling Interests,i
+25,Net Income Extraordinary,i
+26,Net Income Continuous Operations,i
+27,Tax Provision,i
+28,Pretax Income,i
+29,Other Income Expense,i
+30,Other Non Operating Income Expenses,i
+31,Special Income Charges,i
+32,Gain On Sale Of Business,i
+33,Other Special Charges,i
+34,Write Off,i
+35,Impairment Of Capital Assets,i
+36,Restructuring And Mergern Acquisition,i
+37,Earnings From Equity Interest,i
+38,Gain On Sale Of Security,i
+39,Net Non Operating Interest Income Expense,i
+40,Interest Expense Non Operating,i
+41,Interest Income Non Operating,i
+42,Operating Income,i
+43,Operating Expense,i
+44,Other Operating Expenses,i
+45,Provision For Doubtful Accounts,i
+46,Depreciation Amortization Depletion Income Statement,i
+47,Depreciation And Amortization In Income Statement,i
+48,Amortization,i
+49,Amortization Of Intangibles Income Statement,i
+50,Depreciation Income Statement,i
+51,Research And Development,i
+52,Selling General And Administration,i
+53,Selling And Marketing Expense,i
+54,General And Administrative Expense,i
+55,Insurance And Claims,i
+56,Salaries And Wages,i
+57,Gross Profit,i
+58,Cost Of Revenue,i
+59,Total Revenue,i
+60,Operating Revenue,i
+61,Ordinary Shares Number,b
+62,Share Issued,b
+63,Net Debt,b
+64,Total Debt,b
+65,Tangible Book Value,b
+66,Invested Capital,b
+67,Working Capital,b
+68,Net Tangible Assets,b
+69,Capital Lease Obligations,b
+70,Common Stock Equity,b
+71,Total Capitalization,b
+72,Total Equity Gross Minority Interest,b
+73,Minority Interest,b
+74,Stockholders Equity,b
+75,Other Equity Interest,b
+76,Gains Losses Not Affecting Retained Earnings,b
+77,Retained Earnings,b
+78,Additional Paid In Capital,b
+79,Capital Stock,b
+80,Common Stock,b
+81,Total Liabilities Net Minority Interest,b
+82,Total Non Current Liabilities Net Minority Interest,b
+83,Other Non Current Liabilities,b
+84,Derivative Product Liabilities,b
+85,Employee Benefits,b
+86,Non Current Pension And Other Postretirement Benefit Plans,b
+87,Non Current Deferred Liabilities,b
+88,Non Current Deferred Revenue,b
+89,Non Current Deferred Taxes Liabilities,b
+90,Long Term Debt And Capital Lease Obligation,b
+91,Long Term Capital Lease Obligation,b
+92,Long Term Debt,b
+93,Long Term Provisions,b
+94,Current Liabilities,b
+95,Other Current Liabilities,b
+96,Current Deferred Liabilities,b
+97,Current Deferred Revenue,b
+98,Current Debt And Capital Lease Obligation,b
+99,Current Capital Lease Obligation,b
+100,Current Debt,b
+101,Other Current Borrowings,b
+102,Line Of Credit,b
+103,Commercial Paper,b
+104,Current Provisions,b
+105,Payables And Accrued Expenses,b
+106,Current Accrued Expenses,b
+107,Interest Payable,b
+108,Payables,b
+109,Other Payable,b
+110,Total Tax Payable,b
+111,Income Tax Payable,b
+112,Accounts Payable,b
+113,Total Assets,b
+114,Total Non Current Assets,b
+115,Other Non Current Assets,b
+116,Defined Pension Benefit,b
+117,Non Current Prepaid Assets,b
+118,Non Current Deferred Assets,b
+119,Non Current Deferred Taxes Assets,b
+120,Non Current Note Receivables,b
+121,Non Current Accounts Receivable,b
+122,Financial Assets,b
+123,Investments And Advances,b
+124,Other Investments,b
+125,Investmentin Financial Assets,b
+126,Available For Sale Securities,b
+127,Financial Assets Designatedas Fair Value Through Profitor Loss Total,b
+128,Long Term Equity Investment,b
+129,Investmentsin Joint Venturesat Cost,b
+130,Investmentsin Associatesat Cost,b
+131,Goodwill And Other Intangible Assets,b
+132,Other Intangible Assets,b
+133,Goodwill,b
+134,Net PPE,b
+135,Accumulated Depreciation,b
+136,Gross PPE,b
+137,Construction In Progress,b
+138,Other Properties,b
+139,Machinery Furniture Equipment,b
+140,Buildings And Improvements,b
+141,Land And Improvements,b
+142,Properties,b
+143,Current Assets,b
+144,Other Current Assets,b
+145,Hedging Assets Current,b
+146,Assets Held For Sale Current,b
+147,Restricted Cash,b
+148,Prepaid Assets,b
+149,Inventory,b
+150,Finished Goods,b
+151,Work In Process,b
+152,Raw Materials,b
+153,Receivables,b
+154,Other Receivables,b
+155,Taxes Receivable,b
+156,Loans Receivable,b
+157,Accounts Receivable,b
+158,Allowance For Doubtful Accounts Receivable,b
+159,Gross Accounts Receivable,b
+160,Cash Cash Equivalents And Short Term Investments,b
+161,Other Short Term Investments,b
+162,Cash And Cash Equivalents,b
+163,Cash Equivalents,b
+164,Cash Financial,b
+165,Free Cash Flow,c
+166,Repayment Of Debt,c
+167,Issuance Of Debt,c
+168,Issuance Of Capital Stock,c
+169,Capital Expenditure,c
+170,End Cash Position,c
+171,Other Cash Adjustment Outside Changein Cash,c
+172,Beginning Cash Position,c
+173,Effect Of Exchange Rate Changes,c
+174,Changes In Cash,c
+175,Financing Cash Flow,c
+176,Cash Flow From Continuing Financing Activities,c
+177,Net Other Financing Charges,c
+178,Interest Paid Cff,c
+179,Proceeds From Stock Option Exercised,c
+180,Cash Dividends Paid,c
+181,Common Stock Dividend Paid,c
+182,Net Preferred Stock Issuance,c
+183,Preferred Stock Issuance,c
+184,Net Common Stock Issuance,c
+185,Common Stock Issuance,c
+186,Net Issuance Payments Of Debt,c
+187,Net Short Term Debt Issuance,c
+188,Short Term Debt Payments,c
+189,Short Term Debt Issuance,c
+190,Net Long Term Debt Issuance,c
+191,Long Term Debt Payments,c
+192,Long Term Debt Issuance,c
+193,Investing Cash Flow,c
+194,Cash Flow From Continuing Investing Activities,c
+195,Net Other Investing Changes,c
+196,Interest Received Cfi,c
+197,Dividends Received Cfi,c
+198,Net Investment Purchase And Sale,c
+199,Sale Of Investment,c
+200,Purchase Of Investment,c
+201,Net Business Purchase And Sale,c
+202,Sale Of Business,c
+203,Purchase Of Business,c
+204,Net Intangibles Purchase And Sale,c
+205,Purchase Of Intangibles,c
+206,Net PPE Purchase And Sale,c
+207,Sale Of PPE,c
+208,Purchase Of PPE,c
+209,Operating Cash Flow,c
+210,Cash Flow From Continuing Operating Activities,c
+211,Taxes Refund Paid,c
+212,Change In Working Capital,c
+213,Change In Other Working Capital,c
+214,Change In Other Current Liabilities,c
+215,Change In Other Current Assets,c
+216,Change In Payables And Accrued Expense,c
+217,Change In Payable,c
+218,Change In Account Payable,c
+219,Change In Inventory,c
+220,Change In Receivables,c
+221,Changes In Account Receivables,c
+222,Other Non Cash Items,c
+223,Stock Based Compensation,c
+224,Unrealized Gain Loss On Investment Securities,c
+225,Provisionand Write Offof Assets,c
+226,Asset Impairment Charge,c
+227,Deferred Tax,c
+228,Deferred Income Tax,c
+229,Depreciation Amortization Depletion,c
+230,Depreciation And Amortization,c
+231,Depreciation,c
+232,Operating Gains Losses,c
+233,Pension And Employee Benefit Expense,c
+234,Earnings Losses From Equity Investments,c
+235,Gain Loss On Investment Securities,c
+236,Net Foreign Currency Exchange Gain Loss,c
+237,Gain Loss On Sale Of Business,c
+238,Net Income From Continuing Operations,c
