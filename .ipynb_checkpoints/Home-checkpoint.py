@@ -42,12 +42,12 @@ def main():
     #displaying df ordered by top stock score and top financial score
     df = df.sort_values(by=['stkscore','finscore'],ascending=False)
     df = df.drop_duplicates(subset='Name')
-    df = df[['Name','Symbol','Latest Close','finrank']].rename(columns={'finrank': 'Company Financials'}).set_index('Name')
+    df = df[['Name','Symbol','Sector','Industry','Latest Close','finrank']].rename(columns={'finrank': 'Company Financials'}).set_index('Name')
     
     pd.set_option('display.max_colwidth', 1)
 
     def add_ind_depth_url(Symbol):
-        return [f'https://stockproject-bhaveshjain.streamlit.app/In_Depth_Stock_Analysis/?symbol={t.replace(".","_")}' for t in Symbol]
+        return [f'https://stock-recommendation.streamlit.app/In_Depth_Stock_Analysis?symbol={t.replace(".","_")}' for t in Symbol]
 
     def make_clickable(url, text):
         return f'<a target="_self" href="{url}">{text}</a>'

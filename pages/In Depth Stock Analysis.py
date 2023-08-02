@@ -185,6 +185,21 @@ def generate_financials(data):
     #st.dataframe(fin)
     fin = pd.merge(fin.set_index('Unnamed: 0'), mapping, left_on='Unnamed: 0', right_on='index', how='inner').rename(columns={'index': 'items'})
     
+    s = indicator_summary(kpis)
+    
+    col1, col2 = st.columns(2)
+    col1.subheader('Pros')
+    col2.subheader('Cons')
+    pro,con= [],[]
+    for i in s:
+        if s[i]['Tag']=='Desirable' :
+            pro.append(s[i]['To display'][0])
+            col1.write(s[i]['To display'][0])
+        elif s[i]['Tag']=='Non-Desirable' :
+            con.append(s[i]['To display'][0])
+            col2.write(s[i]['To display'][0])
+
+    
     #display
     with st.expander("Income Statement"):
         st.dataframe(fin[fin['sheet']=='i'].drop(['Unnamed: 0','sheet'],axis=1))

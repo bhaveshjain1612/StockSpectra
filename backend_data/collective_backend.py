@@ -134,7 +134,7 @@ compiled.to_csv('db_firmo.csv', index=False)
 ####################################################################################################################################################
 #Stock Data
 ####################################################################################################################################################
-
+'''
 #historical data
 def get_hist_data(result):
     date_today = date.today()
@@ -392,164 +392,214 @@ for i in tqdm(symbol_list):
         
 kpi_df.to_csv("historical_kpis.csv", index=False)
 print("Stock Historicals updated")
-
+'''
 ####################################################################################################################################################
 #Company Financials
 ####################################################################################################################################################
-'''
+
 #calculate financial KPIS
 def calc_KPIs(financials,mode):
     financials = financials.T
     kpis = {}
     #ROE
-    kpis['ROE'] = {'desc' : 'Efficiency of Equity utilisation'}
-    if financials['Stockholders Equity'][0] and financials['Net Income'][0]:
-        kpis['ROE']['current'] = financials['Stockholders Equity'][0]/financials['Net Income'][0]
-    else:
-        kpis['ROE']['current'] = None
-    if financials['Stockholders Equity'][1] and financials['Net Income'][1]:
-        kpis['ROE']['previous'] = financials['Stockholders Equity'][1]/financials['Net Income'][1]
-    else:
-        kpis['ROE']['previous'] = None
-    if kpis['ROE']['previous'] and kpis['ROE']['current']:
-        kpis['ROE']['delta'] = kpis['ROE']['current'] - kpis['ROE']['previous']
-    else:
+    try:
+        kpis['ROE'] = {'desc' : 'Efficiency of Equity utilisation'}
+        if financials['Stockholders Equity'][0] and financials['Net Income'][0]:
+            kpis['ROE']['current'] = financials['Stockholders Equity'][0]/financials['Net Income'][0]
+        else:
+            kpis['ROE']['current'] = None
+        if financials['Stockholders Equity'][1] and financials['Net Income'][1]:
+            kpis['ROE']['previous'] = financials['Stockholders Equity'][1]/financials['Net Income'][1]
+        else:
+            kpis['ROE']['previous'] = None
+        if kpis['ROE']['previous'] and kpis['ROE']['current']:
+            kpis['ROE']['delta'] = kpis['ROE']['current'] - kpis['ROE']['previous']
+        else:
+            kpis['ROE']['delta'] = None
+    except:
         kpis['ROE']['delta'] = None
-        
+        kpis['ROE']['current'] = None
+        kpis['ROE']['previous'] = None
+                
     #ROA
-    kpis['ROA'] = {'desc' : 'Efficiency of Assets utilisation'}
-    if financials['Total Assets'][0] and financials['Net Income'][0]:
-        kpis['ROA']['current'] = financials['Net Income'][0]/financials['Total Assets'][0]
-    else:
-        kpis['ROA']['current'] = None
-    if financials['Total Assets'][1] and financials['Net Income'][1]:
-        kpis['ROA']['previous'] = financials['Net Income'][1]/financials['Total Assets'][1]
-    else:
-        kpis['ROA']['previous'] = None
-    if kpis['ROA']['previous'] and kpis['ROA']['current']:
-        kpis['ROA']['delta'] = kpis['ROA']['current'] - kpis['ROA']['previous']
-    else:
+    try:
+        kpis['ROA'] = {'desc' : 'Efficiency of Assets utilisation'}
+        if financials['Total Assets'][0] and financials['Net Income'][0]:
+            kpis['ROA']['current'] = financials['Net Income'][0]/financials['Total Assets'][0]
+        else:
+            kpis['ROA']['current'] = None
+        if financials['Total Assets'][1] and financials['Net Income'][1]:
+            kpis['ROA']['previous'] = financials['Net Income'][1]/financials['Total Assets'][1]
+        else:
+            kpis['ROA']['previous'] = None
+        if kpis['ROA']['previous'] and kpis['ROA']['current']:
+            kpis['ROA']['delta'] = kpis['ROA']['current'] - kpis['ROA']['previous']
+        else:
+            kpis['ROA']['delta'] = None
+    except:
         kpis['ROA']['delta'] = None
+        kpis['ROA']['current'] = None
+        kpis['ROA']['previous'] = None        
         
-     #Current Ratio
-    kpis['Current Ratio'] = {'desc' : 'Ability to pay short term liabilities'}
-    if financials['Current Assets'][0] and financials['Current Liabilities'][0]:
-        kpis['Current Ratio']['current'] = financials['Current Assets'][0]/financials['Current Liabilities'][0]
-    else:
-        kpis['Current Ratio']['current'] = None
-    if financials['Current Assets'][1] and financials['Current Liabilities'][1]:
-        kpis['Current Ratio']['previous'] = financials['Current Assets'][1]/financials['Current Liabilities'][1]
-    else:
-        kpis['Current Ratio']['previous'] = None
-    if kpis['Current Ratio']['previous'] and kpis['Current Ratio']['current']:
-        kpis['Current Ratio']['delta'] = kpis['Current Ratio']['current'] - kpis['Current Ratio']['previous']
-    else:
+         #Current Ratio
+    try:
+        kpis['Current Ratio'] = {'desc' : 'Ability to pay short term liabilities'}
+        if financials['Current Assets'][0] and financials['Current Liabilities'][0]:
+            kpis['Current Ratio']['current'] = financials['Current Assets'][0]/financials['Current Liabilities'][0]
+        else:
+            kpis['Current Ratio']['current'] = None
+        if financials['Current Assets'][1] and financials['Current Liabilities'][1]:
+            kpis['Current Ratio']['previous'] = financials['Current Assets'][1]/financials['Current Liabilities'][1]
+        else:
+            kpis['Current Ratio']['previous'] = None
+        if kpis['Current Ratio']['previous'] and kpis['Current Ratio']['current']:
+            kpis['Current Ratio']['delta'] = kpis['Current Ratio']['current'] - kpis['Current Ratio']['previous']
+        else:
+            kpis['Current Ratio']['delta'] = None
+    except:
         kpis['Current Ratio']['delta'] = None
-        
-    #Gross Margin
-    kpis['Net Profit Margin'] = {'desc' : 'Profitability of a company'}
-    if financials['Total Revenue'][0] and financials['Net Income'][0]:
-        kpis['Net Profit Margin']['current'] = financials['Net Income'][0]/financials['Total Revenue'][0]
-    else:
-        kpis['Net Profit Margin']['current'] = None
-    if financials['Total Revenue'][1] and financials['Net Income'][1]:
-        kpis['Net Profit Margin']['previous'] = financials['Net Income'][1]/financials['Total Revenue'][1]
-    else:
-        kpis['Net Profit Margin']['previous'] = None
-    if kpis['Net Profit Margin']['previous'] and kpis['Net Profit Margin']['current']:
-        kpis['Net Profit Margin']['delta'] = kpis['Net Profit Margin']['current'] - kpis['Net Profit Margin']['previous']
-    else:
+        kpis['Current Ratio']['current'] = None
+        kpis['Current Ratio']['previous'] = None        
+
+        #Gross Margin
+    try:
+        kpis['Net Profit Margin'] = {'desc' : 'Profitability of a company'}
+        if financials['Total Revenue'][0] and financials['Net Income'][0]:
+            kpis['Net Profit Margin']['current'] = financials['Net Income'][0]/financials['Total Revenue'][0]
+        else:
+            kpis['Net Profit Margin']['current'] = None
+        if financials['Total Revenue'][1] and financials['Net Income'][1]:
+            kpis['Net Profit Margin']['previous'] = financials['Net Income'][1]/financials['Total Revenue'][1]
+        else:
+            kpis['Net Profit Margin']['previous'] = None
+        if kpis['Net Profit Margin']['previous'] and kpis['Net Profit Margin']['current']:
+            kpis['Net Profit Margin']['delta'] = kpis['Net Profit Margin']['current'] - kpis['Net Profit Margin']['previous']
+        else:
+            kpis['Net Profit Margin']['delta'] = None
+    except:
         kpis['Net Profit Margin']['delta'] = None
-        
-    #Debt to equity ratio
-    kpis['DE Ratio'] = {'desc' : 'Total debt comapred to equity'}
-    if financials['Stockholders Equity'][0] and financials['Total Debt'][0]:
-        kpis['DE Ratio']['current'] = financials['Total Debt'][0]/financials['Stockholders Equity'][0]
-    else:
-        kpis['DE Ratio']['current'] = None
-    if financials['Stockholders Equity'][1] and financials['Total Debt'][1]:
-        kpis['DE Ratio']['previous'] = financials['Total Debt'][1]/financials['Stockholders Equity'][1]
-    else:
-        kpis['DE Ratio']['previous'] = None
-    if kpis['DE Ratio']['previous'] and kpis['DE Ratio']['current']:
-        kpis['DE Ratio']['delta'] = kpis['DE Ratio']['current'] - kpis['DE Ratio']['previous']
-    else:
+        kpis['Net Profit Margin']['current'] = None
+        kpis['Net Profit Margin']['previous'] = None        
+
+        #Debt to equity ratio
+    try:
+        kpis['DE Ratio'] = {'desc' : 'Total debt comapred to equity'}
+        if financials['Stockholders Equity'][0] and financials['Total Debt'][0]:
+            kpis['DE Ratio']['current'] = financials['Total Debt'][0]/financials['Stockholders Equity'][0]
+        else:
+            kpis['DE Ratio']['current'] = None
+        if financials['Stockholders Equity'][1] and financials['Total Debt'][1]:
+            kpis['DE Ratio']['previous'] = financials['Total Debt'][1]/financials['Stockholders Equity'][1]
+        else:
+            kpis['DE Ratio']['previous'] = None
+        if kpis['DE Ratio']['previous'] and kpis['DE Ratio']['current']:
+            kpis['DE Ratio']['delta'] = kpis['DE Ratio']['current'] - kpis['DE Ratio']['previous']
+        else:
+            kpis['DE Ratio']['delta'] = None
+    except:
         kpis['DE Ratio']['delta'] = None
-        
-    #Net Income
-    kpis['Net Income'] = {'desc' : 'Net Income of the company'}
-    if financials['Net Income'][0]:
-        kpis['Net Income']['current'] = financials['Net Income'][0]
-    else:
-        kpis['Net Income']['current'] = None
-    if financials['Net Income'][1]:
-        kpis['Net Income']['previous'] = financials['Net Income'][1]
-    else:
-        kpis['Net Income']['previous'] = None
-    if kpis['Net Income']['previous'] and kpis['Net Income']['current']:
-        kpis['Net Income']['delta'] = kpis['Net Income']['current'] - kpis['Net Income']['previous']
-    else:
+        kpis['DE Ratio']['current'] = None
+        kpis['DE Ratio']['previous'] = None        
+
+        #Net Income
+    try:
+        kpis['Net Income'] = {'desc' : 'Net Income of the company'}
+        if financials['Net Income'][0]:
+            kpis['Net Income']['current'] = financials['Net Income'][0]
+        else:
+            kpis['Net Income']['current'] = None
+        if financials['Net Income'][1]:
+            kpis['Net Income']['previous'] = financials['Net Income'][1]
+        else:
+            kpis['Net Income']['previous'] = None
+        if kpis['Net Income']['previous'] and kpis['Net Income']['current']:
+            kpis['Net Income']['delta'] = kpis['Net Income']['current'] - kpis['Net Income']['previous']
+        else:
+            kpis['Net Income']['delta'] = None
+    except:
         kpis['Net Income']['delta'] = None
-        
-    #Free Cash Flow
-    kpis['Free Cash Flow'] = {'desc' : 'In Hand cash flow'}
-    if financials['Free Cash Flow'][0]:
-        kpis['Free Cash Flow']['current'] = financials['Free Cash Flow'][0]
-    else:
-        kpis['Free Cash Flow']['current'] = None
-    if financials['Free Cash Flow'][1]:
-        kpis['Free Cash Flow']['previous'] = financials['Free Cash Flow'][1]
-    else:
-        kpis['Free Cash Flow']['previous'] = None
-    if kpis['Free Cash Flow']['previous'] and kpis['Free Cash Flow']['current']:
-        kpis['Free Cash Flow']['delta'] = kpis['Free Cash Flow']['current'] - kpis['Free Cash Flow']['previous']
-    else:
-        kpis['Free Cash Flow']['delta'] = None
-        
-    #Total Debt
-    kpis['Debt'] = {'desc' : 'Total debt of the company'}
-    if financials['Total Debt'][0]:
-        kpis['Debt']['current'] = financials['Total Debt'][0]
-    else:
-        kpis['Debt']['current'] = None
-    if financials['Total Debt'][1]:
-        kpis['Debt']['previous'] = financials['Total Debt'][1]
-    else:
-        kpis['Debt']['previous'] = None
-    if kpis['Debt']['previous'] and kpis['ROE']['current']:
-        kpis['Debt']['delta'] = kpis['Debt']['current'] - kpis['Debt']['previous']
-    else:
-        kpis['Debt']['delta'] = None
-        
-    #Basic EPS
-    kpis['Basic EPS'] = {'desc' : 'Earnings of the company per share'}
-    if financials['Net Income'][0]:
-        kpis['Basic EPS']['current'] = financials['Basic EPS'][0]
-    else:
         kpis['Net Income']['current'] = None
-    if financials['Net Income'][1]:
-        kpis['Basic EPS']['previous'] = financials['Basic EPS'][1]
-    else:
-        kpis['Basic EPS']['previous'] = None
-    if kpis['Basic EPS']['previous'] and kpis['Basic EPS']['current']:
-        kpis['Basic EPS']['delta'] = kpis['Basic EPS']['current'] - kpis['Basic EPS']['previous']
-    else:
+        kpis['Net Income']['previous'] = None        
+
+        #Free Cash Flow
+    try:
+        kpis['Free Cash Flow'] = {'desc' : 'In Hand cash flow'}
+        if financials['Free Cash Flow'][0]:
+            kpis['Free Cash Flow']['current'] = financials['Free Cash Flow'][0]
+        else:
+            kpis['Free Cash Flow']['current'] = None
+        if financials['Free Cash Flow'][1]:
+            kpis['Free Cash Flow']['previous'] = financials['Free Cash Flow'][1]
+        else:
+            kpis['Free Cash Flow']['previous'] = None
+        if kpis['Free Cash Flow']['previous'] and kpis['Free Cash Flow']['current']:
+            kpis['Free Cash Flow']['delta'] = kpis['Free Cash Flow']['current'] - kpis['Free Cash Flow']['previous']
+        else:
+            kpis['Free Cash Flow']['delta'] = None
+    except:
+        kpis['Free Cash Flow']['delta'] = None
+        kpis['Free Cash Flow']['current'] = None
+        kpis['Free Cash Flow']['previous'] = None        
+
+        #Total Debt
+    try:
+        kpis['Debt'] = {'desc' : 'Total debt of the company'}
+        if financials['Total Debt'][0]:
+            kpis['Debt']['current'] = financials['Total Debt'][0]
+        else:
+            kpis['Debt']['current'] = None
+        if financials['Total Debt'][1]:
+            kpis['Debt']['previous'] = financials['Total Debt'][1]
+        else:
+            kpis['Debt']['previous'] = None
+        if kpis['Debt']['previous'] and kpis['ROE']['current']:
+            kpis['Debt']['delta'] = kpis['Debt']['current'] - kpis['Debt']['previous']
+        else:
+            kpis['Debt']['delta'] = None
+    except:
+        kpis['Debt']['delta'] = None
+        kpis['Debt']['current'] = None
+        kpis['Debt']['previous'] = None        
+
+        #Basic EPS
+    try:
+        kpis['Basic EPS'] = {'desc' : 'Earnings of the company per share'}
+        if financials['Net Income'][0]:
+            kpis['Basic EPS']['current'] = financials['Basic EPS'][0]
+        else:
+            kpis['Net Income']['current'] = None
+        if financials['Net Income'][1]:
+            kpis['Basic EPS']['previous'] = financials['Basic EPS'][1]
+        else:
+            kpis['Basic EPS']['previous'] = None
+        if kpis['Basic EPS']['previous'] and kpis['Basic EPS']['current']:
+            kpis['Basic EPS']['delta'] = kpis['Basic EPS']['current'] - kpis['Basic EPS']['previous']
+        else:
+            kpis['Basic EPS']['delta'] = None
+    except:
         kpis['Basic EPS']['delta'] = None
-        
-    #ROCE
-    kpis['ROCE'] = {'desc':"Utilization of capital employed"}
-    if financials['EBIT'][0] and financials['Total Assets'][0] and financials['Current Liabilities'][0]:
-        kpis['ROCE']['current'] = financials['EBIT'][0] / (financials['Total Assets'][0]-financials['Current Liabilities'][0])
-    else:
-        kpis['ROCE']['current'] = None
-    if financials['EBIT'][1] and financials['Total Assets'][1] and financials['Current Liabilities'][1]:
-        kpis['ROCE']['previous'] = financials['EBIT'][1] / (financials['Total Assets'][1]-financials['Current Liabilities'][1])
-    else:
-        kpis['ROCE']['previous'] = None
-    if kpis['ROCE']['previous'] and kpis['ROCE']['current']:
-        kpis['ROCE']['delta'] = kpis['ROCE']['current'] - kpis['ROCE']['previous']
-    else:
+        kpis['Basic EPS']['current'] = None
+        kpis['Basic EPS']['previous'] = None        
+
+        #ROCE
+    try:
+        kpis['ROCE'] = {'desc':"Utilization of capital employed"}
+        if financials['EBIT'][0] and financials['Total Assets'][0] and financials['Current Liabilities'][0]:
+            kpis['ROCE']['current'] = financials['EBIT'][0] / (financials['Total Assets'][0]-financials['Current Liabilities'][0])
+        else:
+            kpis['ROCE']['current'] = None
+        if financials['EBIT'][1] and financials['Total Assets'][1] and financials['Current Liabilities'][1]:
+            kpis['ROCE']['previous'] = financials['EBIT'][1] / (financials['Total Assets'][1]-financials['Current Liabilities'][1])
+        else:
+            kpis['ROCE']['previous'] = None
+        if kpis['ROCE']['previous'] and kpis['ROCE']['current']:
+            kpis['ROCE']['delta'] = kpis['ROCE']['current'] - kpis['ROCE']['previous']
+        else:
+            kpis['ROCE']['delta'] = None
+    except:
         kpis['ROCE']['delta'] = None
+        kpis['ROCE']['current'] = None
+        kpis['ROCE']['previous'] = None        
         
     if mode == "delta":
         return pd.DataFrame(kpis).loc['delta'].reset_index().set_index('index').T
@@ -595,7 +645,7 @@ for i in tqdm(symbol_list):
         continue
         
 fin_kpi_df.to_csv("financial_kpis.csv", index=False)
-'''
+
 ####################################################################################################################################################
 #Merging
 ####################################################################################################################################################
