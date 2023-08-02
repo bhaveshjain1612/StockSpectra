@@ -134,7 +134,7 @@ compiled.to_csv('db_firmo.csv', index=False)
 ####################################################################################################################################################
 #Stock Data
 ####################################################################################################################################################
-'''
+
 #historical data
 def get_hist_data(result):
     date_today = date.today()
@@ -379,7 +379,7 @@ def collect_features(df):
 
 #getting input list of signals
 db_firmo = pd.read_csv("db_firmo.csv")
-symbol_list = db_firmo.Symbol
+symbol_list = db_firmo.head(10).Symbol
 kpi_df = pd.DataFrame()
 
 #creating historical files for all companies
@@ -392,11 +392,11 @@ for i in tqdm(symbol_list):
         
 kpi_df.to_csv("historical_kpis.csv", index=False)
 print("Stock Historicals updated")
-'''
+
 ####################################################################################################################################################
 #Company Financials
 ####################################################################################################################################################
-
+'''
 #calculate financial KPIS
 def calc_KPIs(financials,mode):
     financials = financials.T
@@ -645,7 +645,7 @@ for i in tqdm(symbol_list):
         continue
         
 fin_kpi_df.to_csv("financial_kpis.csv", index=False)
-
+'''
 ####################################################################################################################################################
 #Merging
 ####################################################################################################################################################
