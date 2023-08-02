@@ -28,6 +28,7 @@ def generate_firmo(data):
     
     col1, col2 = st.columns([4,2])
     col1.write(data.Description.values[0])
+    col1.write(data.Website.values[0])
     col2.plotly_chart(holding_chart(data),use_container_width=True,height=200)
 
 #Generate Stock Based Insights
