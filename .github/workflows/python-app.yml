@@ -4,10 +4,13 @@
 name: Python application
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  schedule:
+    - cron: "30 12 * * 1"
+    - cron: "30 12 * * 2"
+    - cron: "30 12 * * 3"
+    - cron: "30 12 * * 4"
+    - cron: "30 12 * * 5"
+    
 
 permissions:
   contents: write
@@ -38,6 +41,7 @@ jobs:
         git config --global user.name "bhaveshjain1612"
         git config --global user.email "bhavesh.161201@gmail.com"
         git add .
+        git pull --rebase
         git commit -m "Auto-commit changes after running exec.py"
         git push origin main
       working-directory: backend_data
