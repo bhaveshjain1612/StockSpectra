@@ -1,5 +1,4 @@
-name: Python application
-
+name: data update
 on:
   schedule:
     - cron: "30 12 * * 1"
