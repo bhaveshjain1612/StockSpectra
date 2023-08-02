@@ -40,32 +40,24 @@ def add_links(df):
         st.write(str(df.shape[0])+" Companies found")
         st.write(df.to_html(escape = False), unsafe_allow_html = True)
 
-def top_picks(df):
-    st.header("Top Picks for the day")
-    st.write("Updated On: "+df['Latest date_only'].values[0])
+def collective(df):
     
-    #filtering stocks
-    df = df[df['finrank']=='strong']
-    df = df[df['stkrank']=='positive']
-    
-    #displaying df ordered by top stock score and top financial score
-    df = df.sort_values(by=['stkscore','finscore'],ascending=False)
-    df = df.drop_duplicates(subset='Name')
-    df = df[['Name','Symbol','Sector','Industry','Latest Close','finrank']].rename(columns={'finrank': 'Company Financials'}).set_index('Name')
-    
-    pd.set_option('display.max_colwidth', 1)
-    
-    if df.shape[0]>10:
-        df = df.head(st.slider('Companies to Display', 0, df.shape[0],10 ))
-
-    add_links(df)
-        
-def search(df):
-    
-    col1,col2,col3,col4,col5 = st.columns([1,2,2,1,1])
+    col1,col2,col3 = st.columns([1,2,1])
     
     #name
     name = col1.text_input('Enter name')
+    
+    option = col1.selectbox("View",("Top Picks", "All"))
+    
+    if option == "Top Picks":
+        #filtering stocks
+        Ltop = df[df['finrank']=='strong']
+        Ltop = Ltop[Ltop['stkrank']=='positive']
+
+        #displaying df ordered by top stock score and top financial score
+        Ltop = Ltop.sort_values(by=['stkscore','finscore'],ascending=False)
+    else:
+        Ltop=df
     
     #Sector
     sector_filter = col2.multiselect('Select Sector',np.insert(df['Sector'].unique(),0,"All"),['All'])
@@ -78,7 +70,7 @@ def search(df):
         df_filter_sector = df
     
     #industry filter
-    industry_filter = col3.multiselect('Select Industry',np.insert(df_filter_sector['Industry'].unique(),0,"All"),['All'])
+    industry_filter = col2.multiselect('Select Industry',np.insert(df_filter_sector['Industry'].unique(),0,"All"),['All'])
     if industry_filter:
         if industry_filter == ['All']:
             L1 = df_filter_sector
@@ -88,7 +80,7 @@ def search(df):
         L1 = df_filter_sector
     
     #stockrank filter
-    stkrank_filter = col4.multiselect('Select Outlook',np.insert(df_filter_sector['stkrank'].unique(),0,"All"),['All'])
+    stkrank_filter = col3.multiselect('Select Outlook',np.insert(df_filter_sector['stkrank'].unique(),0,"All"),['All'])
     if stkrank_filter:
         if stkrank_filter == ['All']:
             L2 = df
@@ -98,7 +90,7 @@ def search(df):
         L2 = df
     
     #finrank filter
-    finrank_filter = col5.multiselect('Select Financial',np.insert(df_filter_sector['finrank'].unique(),0,"All"),['All'])
+    finrank_filter = col3.multiselect('Select Financial',np.insert(df_filter_sector['finrank'].unique(),0,"All"),['All'])
     if finrank_filter:
         if finrank_filter == ['All']:
             L3 = df
@@ -115,6 +107,7 @@ def search(df):
     final = L1[L1['Symbol'].isin(L0.Symbol)]
     final = final[final['Symbol'].isin(L2.Symbol)]
     final = final[final['Symbol'].isin(L3.Symbol)]
+    final = final[final['Symbol'].isin(Ltop.Symbol)]
     
     final = final[['Name','Symbol','Sector','Industry','Latest Close','stkrank','finrank']].rename(columns={'finrank': 'Company Financials','stkrank':'Outlook'})
     final = final.drop_duplicates(subset='Name').set_index('Name')
@@ -122,12 +115,12 @@ def search(df):
     if final.shape[0]>10:
         final = final.head(st.slider('Companies to Display', 0, final.shape[0],10 ))
  
-    add_links(final)
+    with st.container():
+        add_links(final)
+    
 
 def main():
     df = load_data("backend_data/database.csv")
-    
-    tab1, tab2 = st.tabs(["Top Picks", "Search",])
     
     #add scores and ranks
     df['finscore'] = df.apply(financial_scores,axis=1)
@@ -135,10 +128,10 @@ def main():
     df['stkscore'] = df.apply(stock_scores,axis=1)
     df = stkrank(df)
     
-    with tab1:
-        top_picks(df)
-    with tab2:
-        search(df)
+    st.header("Screening Page")
+    st.write("Updated On: "+df['Latest date_only'].values[0])
+    
+    collective(df)
 
     
 if __name__ == "__main__":
