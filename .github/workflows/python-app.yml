@@ -32,9 +32,6 @@ jobs:
           git config --global user.email "bhavesh.161201@gmail.com"
           git config --global user.name "Bhavesh Jain"
           
-          git checkout main
-          git pull origin main
-          git reset --hard 
           git add .
           git commit -m "Update collective_backend output"
           git push origin main
