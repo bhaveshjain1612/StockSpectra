@@ -649,14 +649,14 @@ def check_bollinger_flag(df):
     x = {}
     i=0
         # Check the conditions for the past 3 sessions
-    if (closing_prices[i] > bollinger_band[i]) and (closing_prices[i] => df.Open.values[i]) and (closing_prices[i+1] > bollinger_band[i+1]) and (closing_prices[i+2] < bollinger_band[i+2]) and df.rsi.values[0]<70 and closing_prices[i+1]<closing_prices[i]:
+    if (closing_prices[i] > bollinger_band[i]) and (closing_prices[i] >= df.Open.values[i]) and (closing_prices[i+1] > bollinger_band[i+1]) and (closing_prices[i+2] < bollinger_band[i+2]) and df.rsi.values[0]<70 and closing_prices[i+1]<closing_prices[i]:
         flag=True
     else:
         flag=False
     
     m=0
     for i in range(1,20):
-        if (closing_prices[i] > bollinger_band[i]) and (closing_prices[i] => df.Open.values[i]) and (closing_prices[i+1] > bollinger_band[i+1]) and (closing_prices[i+2] < bollinger_band[i+2]) and df.rsi.values[0]<70 and closing_prices[i+1]<closing_prices[i]:
+        if (closing_prices[i] > bollinger_band[i]) and (closing_prices[i] >= df.Open.values[i]) and (closing_prices[i+1] > bollinger_band[i+1]) and (closing_prices[i+2] < bollinger_band[i+2]) and df.rsi.values[0]<70 and closing_prices[i+1]<closing_prices[i]:
             m+=1
         else:
             m+=0
