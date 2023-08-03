@@ -5,7 +5,6 @@ https://stock-recommendation.streamlit.app/
 
 Welcome to the Financial Dashboard - a powerful tool for screening and analyzing stocks! This application is designed to help you make informed investment decisions by providing valuable insights, in-depth analysis, and real-time stock trends. Whether you are a seasoned investor or just starting, this app offers a range of features to assist you in selecting potential stocks and understanding their performance. Please review the disclaimer before using this application for educational purposes.
 
----
 
 ## Features
 
@@ -47,9 +46,6 @@ The "About" section provides an overview of the Financial Dashboard app and its 
 - **Data Sources and Updates**: Learn about the data sources from the National Stock Exchange (NSE) and Bombay Stock Exchange (BSE) and the scheduled daily data update at 7:30 PM IST.
 - **Disclaimer**: Read the disclaimer that outlines the app's limitations and the importance of consulting a qualified financial advisor before making investment decisions.
 
-
-
----
 
 ## Disclaimer
 
