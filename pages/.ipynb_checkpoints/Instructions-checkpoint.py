@@ -232,7 +232,8 @@ def glossary():
             elif topic in ["High", "Low", "Open", "Close"]:
                 st.write(f"{topic} represents the highest, lowest, opening, and closing prices of a stock in a given trading session.")
         else:
-            st.write("Summary and formula for this topic are not available.")
+            x = 'https://www.investopedia.com/search?q='+topic.replace(" ","+")
+            st.write(f"For more details, check out [this Link]( {x} )")
     else:
         st.write(f"No topics found for your search in the {selected_topic} category.")
     
