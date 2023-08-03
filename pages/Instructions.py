@@ -44,14 +44,20 @@ def home():
 
     3. **Filter by Sector and Industry:**
        - Further refine your search by selecting specific sectors and industries. Use the multiselect dropdowns to include or exclude particular sectors/industries.
+       
+    4. **Select tiome period for change :**
+       - Select the Time period for which you want to see price change for.
+       
+    5. **Sort the companies:**
+       - Use the two dropdowns in 3rd row to sort them by Name, Price or Change for the selected interval.
 
-    4. **Display Companies:**
+    6. **Display Companies:**
        - Adjust the number of companies you want to display using the slider.
 
-    5. **Clickable Links:**
+    7. **Clickable Links:**
        - The displayed table includes a column labeled "Analysis" with clickable links. Clicking on "See in Depth" will take you to a detailed analysis page for the respective stock.
 
-    6. **Auto-Refresh:**
+    8. **Auto-Refresh:**
        - The dashboard automatically refreshes to display updated data periodically. No need to manually refresh the page.
 
     '''

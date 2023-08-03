@@ -20,6 +20,9 @@ from plotly.subplots import make_subplots
 # Home Page Fuctions
 ######################################################################################################################################
 
+#sort based on filter
+
+
 #allot scores to comapnies based on financials
 def financial_scores(row):
     def fin_test(df,param,score,type):
@@ -703,3 +706,99 @@ def indicator_summary(x):
 
     return summary
 
+#in depth stock summary
+def stock_summary(stock_data,historical,week_52,dividend_split):
+    summary = {}
+    #monthly return
+    summary['Monthly Returns'] = {}
+    if stock_data.Close_change_1m.values[0] > 10:
+        summary['Monthly Returns']['Display'] = "Up by "+str(round(stock_data.Close_change_1m.values[0],2)) +"% in 1 past month"
+        summary['Monthly Returns']['Type'] = 1
+    elif stock_data.Close_change_1m.values[0] < -10:
+        summary['Monthly Returns']['Display'] = "Fell by "+str(round(stock_data.Close_change_1m.values[0],2)*-1) +"% in 1 past month"
+        summary['Monthly Returns']['Type'] = -1
+    else:
+        summary.pop("Monthly Returns")
+
+    #yearly return   
+    summary['Yearly Returns'] = {}
+    if stock_data.Close_change_1y.values[0] > 20:
+        summary['Yearly Returns']['Display'] = "Up by "+str(round(stock_data.Close_change_1y.values[0],2)) +"% in 1 past Year"
+        summary['Yearly Returns']['Type'] = 1
+    elif stock_data.Close_change_1y.values[0] < -20:
+        summary['Yearly Returns']['Display'] = "Fell by "+str(round(stock_data.Close_change_1y.values[0],2)*-1) +"% in 1 past Year"
+        summary['Yearly Returns']['Type'] = -1
+    else:
+        summary.pop("Yearly Returns")
+
+    #52 week proximity   
+    summary['52 Week Proximity'] = {}
+    if stock_data['Latest Close'].values[0] - week_52['52 Week Low'] > -1*(stock_data['Latest Close'].values[0] - week_52['52 Week High']):
+        summary['52 Week Proximity']['Display'] = "CLoser to 52 Week High"
+        summary['52 Week Proximity']['Type'] = 1
+    elif stock_data['Latest Close'].values[0] - week_52['52 Week Low'] < -1*(stock_data['Latest Close'].values[0] - week_52['52 Week High']):
+        summary['52 Week Proximity']['Display'] = "Closer to 52 Week Low"
+        summary['52 Week Proximity']['Type'] = -1
+    else:
+        summary.pop("52 Week Proximity")
+
+    #RSI
+    summary['RSI'] = {}
+    if stock_data['Latest rsi'].values[0] < 30:
+        summary['RSI']['Display'] = "Stock appears oversold and may rise soon"
+        summary['RSI']['Type'] = 1
+    elif stock_data['Latest rsi'].values[0] > 70:
+        summary['RSI']['Display'] = "Stock appears overbought and may fall soon"
+        summary['RSI']['Type'] = -1
+    else:
+        summary.pop("RSI")
+
+    #ADX
+    summary['ADX'] = {}
+    if stock_data['Latest ADX'].values[0] > 27 and stock_data['Close_change_10d'].values[0] > 0:
+        summary['ADX']['Display'] = "Stock having strong uptrend"
+        summary['ADX']['Type'] = 1
+    elif stock_data['Latest ADX'].values[0] > 27 and stock_data['Close_change_10d'].values[0] < 0:
+        summary['ADX']['Display'] = "Stock having strong downtrend"
+        summary['ADX']['Type'] = -1
+    elif stock_data['Latest ADX'].values[0] <= 27:
+        summary['ADX']['Display'] = "Stock having weak trend"
+        summary['ADX']['Type'] = -1
+    else:
+        summary.pop("ADX")
+
+    #Dividend
+    summary['Dividend'] = {}
+    if dividend_split['Normal dividend'] != "No Dividend":
+        summary['Dividend']['Display'] = "Regular Dividend Payout"
+        summary['Dividend']['Type'] = 1
+    elif dividend_split['Normal dividend'] == "No Dividend":
+        summary['Dividend']['Display'] = "Stock doesnt pay dividend"
+        summary['Dividend']['Type'] = -1
+    else:
+        summary.pop("Dividend")
+
+    #PE Ratio
+    summary['PE Ratio'] = {}
+    if stock_data['P/E ratio'].values[0] > stock_data['Industry Median P/E Ratio'].values[0]:
+        summary['PE Ratio']['Display'] = "PE Ratio above Industry Median"
+        summary['PE Ratio']['Type'] = 1
+    elif stock_data['P/E ratio'].values[0] < stock_data['Industry Median P/E Ratio'].values[0]:
+        summary['PE Ratio']['Display'] = "PE Ratio below Industry Median"
+        summary['PE Ratio']['Type'] = -1
+    else:
+        summary.pop("PE Ratio")
+
+    #Momentum
+    summary['Momentum'] = {}
+    if stock_data['Latest Close'].values[0] > historical['sma_5'].values[0] and historical['sma_5'].values[0] > historical['sma_25'].values[0]:
+        summary['Momentum']['Display'] = "Bullish Moemntum"
+        summary['Momentum']['Type'] = 1
+    elif stock_data['Latest Close'].values[0] < historical['sma_5'].values[0] and historical['sma_5'].values[0] < historical['sma_25'].values[0]:
+        summary['Momentum']['Display'] = "Bearish Momentum"
+        summary['Momentum']['Type'] = -1
+    else:
+        summary['Momentum']['Display'] = "Mid Range Momentum"
+        summary['Momentum']['Type'] = 1
+
+    return summary

@@ -25,7 +25,7 @@ def load_data(file_path):
 def add_links(df):
     # Function to generate the URL for in-depth stock analysis
     def add_ind_depth_url(Symbol):
-        return [f'https://stock-recommendation.streamlit.app/In_Depth_Stock_Analysis?symbol={t.replace(".","_")}' for t in Symbol]
+        return [f'http://localhost:8501/In_Depth_Stock_Analysis/?symbol={t.replace(".","_")}' for t in Symbol]
 
     # Function to convert URL to clickable link
     def make_clickable(url, text):
@@ -116,16 +116,53 @@ def collective(df):
         L0 = df[df['Name'].str.contains(name, case=False) | df['Symbol'].str.contains(name, case=False)]
     else:
         L0 = df
-        
-    final = L1[L1['Symbol'].isin(L0.Symbol)]
+    
+    col1, col2, col3 = st.columns([2, 3, 3])
+    df_temp=df
+    filter_interval = col1.selectbox('Select a Time Interval for % changes', ["3 Months","1 Day", "5 Days", "1 Month", "6 Months", "1 Year"])
+    if filter_interval: 
+        if filter_interval == "1 Day":
+            df_temp = df_temp.drop(["Close_change_5d","Close_change_1m","Close_change_3m","Close_change_6m","Close_change_1y"],axis=1)
+            df_temp = df_temp.drop(["Volume_change_5d","Volume_change_1m","Volume_change_3m","Volume_change_6m","Volume_change_1y"],axis=1)
+            df_temp.rename(columns = {'Close_change_1d':'Price Change (%)','Volume_change_1d':'Volume Change (%)'}, inplace = True)
+        elif filter_interval == "5 Days":
+            df_temp = df_temp.drop(["Close_change_1d","Close_change_1m","Close_change_3m","Close_change_6m","Close_change_1y"],axis=1)
+            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_1m","Volume_change_3m","Volume_change_6m","Volume_change_1y"],axis=1)
+            df_temp.rename(columns = {'Close_change_5d':'Price Change (%)','Volume_change_5d':'Volume Change (%)'}, inplace = True)
+        elif filter_interval == "1 Month":
+            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_3m","Close_change_6m","Close_change_1y"],axis=1)
+            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_3m","Volume_change_6m","Volume_change_1y"],axis=1)
+            df_temp.rename(columns = {'Close_change_1m':'Price Change (%)','Volume_change_1m':'Volume Change (%)'}, inplace = True)
+        elif filter_interval == "3 Months":
+            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_1m","Close_change_6m","Close_change_1y"],axis=1)
+            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_1m","Volume_change_6m","Volume_change_1y"],axis=1)
+            df_temp.rename(columns = {'Close_change_3m':'Price Change (%)','Volume_change_3m':'Volume Change (%)'}, inplace = True)
+        elif filter_interval == "6 Months":
+            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_1m","Close_change_3m","Close_change_1y"],axis=1)
+            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_1m","Volume_change_3m","Volume_change_1y"],axis=1)
+            df_temp.rename(columns = {'Close_change_6m':'Price Change (%)','Volume_change_6m':'Volume Change (%)'}, inplace = True)
+        elif filter_interval == "1 Year":
+            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_1m","Close_change_3m","Close_change_6m"],axis=1)
+            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_1m","Volume_change_3m","Volume_change_6m"],axis=1)
+            df_temp.rename(columns = {'Close_change_1y':'Price Change (%)','Volume_change_1y':'Volume Change (%)'}, inplace = True)
+            
+    sort_by = col2.selectbox('Order by ', ("Name","Latest Close","Price Change (%)"))    
+    sort_type = col3.selectbox('Order method', ("None","Ascending","Descending"))
+
+                    
+    final = df_temp[df_temp['Symbol'].isin(L0.Symbol)]
+    final = final[final['Symbol'].isin(L1.Symbol)]
     final = final[final['Symbol'].isin(L2.Symbol)]
     final = final[final['Symbol'].isin(L3.Symbol)]
     final = final[final['Symbol'].isin(Ltop.Symbol)]
     final = final[final['Symbol'].isin(Lexc.Symbol)]
     
     # Display the final DataFrame with links
-    final = final[['Name', 'Symbol', 'Sector', 'Industry', 'Latest Close', 'stkrank', 'finrank']].rename(columns={'finrank': 'Company Financials', 'stkrank': 'Outlook'})
+    final = final[['Name', 'Symbol', 'Sector', 'Industry', 'Latest Close','Price Change (%)', 'stkrank', 'finrank']].rename(columns={'finrank': 'Company Financials', 'stkrank': 'Outlook'})
     final = final.drop_duplicates(subset='Name').set_index('Name')
+    
+    if sort_type != "None":
+        final = final.sort_values(by=sort_by,ascending=(sort_type=="Ascending"))
     
     if final.shape[0] > 10:
         final = final.head(st.slider('Companies to Display', 0, final.shape[0], 10))

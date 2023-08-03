@@ -28,7 +28,6 @@ def generate_firmo(data):
     
     col1, col2 = st.columns([4,2])
     col1.write(data.Description.values[0])
-    col1.write(data.Website.values[0])
     col2.plotly_chart(holding_chart(data),use_container_width=True,height=200)
 
 #Generate Stock Based Insights
@@ -68,7 +67,35 @@ def generate_stock(data):
     col4.metric(label ="52 Week Low",value=round(week52_data['52 Week Low'],2), delta='') 
     
     st.divider()
+    st.subheader("Key Takeaways")
+    stksummary = stock_summary(data,historical_with_ma,week52_data,dividend_split_data)
+    if len(stksummary)>1:
+        col1, col2, col3 = st.columns(3)
+        
+        
+        if len(stksummary)%2 ==1:
+            for m in list(stksummary.items())[:(len(stksummary)//2)+1]:
+                col2.write(m[1]['Display'])
+            #col3.subheader("_")
+            for m in list(stksummary.items())[(len(stksummary)//2)+1:]:
+                col3.write(m[1]['Display'])
+        else:
+            for m in list(stksummary.items())[:(len(stksummary)//2)]:
+                col2.write(m[1]['Display'])
+            for m in list(stksummary.items())[(len(stksummary)//2):]:
+                col3.write(m[1]['Display'])
+    else:
+        col1, col2 = st.columns(2)
+        col2.subheader("Key Takeaways")
+        for m in list(stksummary.items()):
+            col2.write(m[1]['Display'])
     
+    col1.header(data.stkrank.values[0].upper())
+    col1.write("Outlook Based on recent technicals")
+    
+    st.divider()
+    
+    st.subheader("Stock Price and technical charts")
     ##Charts
     holiday_list = [
     "2023-01-26",#	Republic Day
@@ -240,6 +267,8 @@ def load_insights(data,input_symbol):
 
 def main():
     data = load_data("backend_data/database.csv")
+    data['stkscore'] = data.apply(stock_scores, axis=1)
+    data = stkrank(data)
     
     input_symbol = st.sidebar.text_input("Enter stock Ticker")       
     
