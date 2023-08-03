@@ -20,7 +20,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r backend_data/requirements.txt
+          pip install -r requirements.txt
 
       - name: Run collective_backend
         working-directory: backend_data
