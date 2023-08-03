@@ -27,18 +27,13 @@ jobs:
         run: |
           python collective_backend.py  # Replace this with the actual command to run your script
 
-      - name: Clear other commits
-        run: |
-          git config --global user.email "bhavesh.161201@gmail.com"
-          git config --global user.name "Bhavesh Jain"
-          git checkout main
-          git pull origin main
-          git reset --hard 
-
       - name: Commit and push changes
         run: |
           git config --global user.email "bhavesh.161201@gmail.com"
           git config --global user.name "Bhavesh Jain"
           git add .
+          git checkout main
+          git pull origin main
+          git reset --hard 
           git commit -m "Update collective_backend output"
           git push origin main
