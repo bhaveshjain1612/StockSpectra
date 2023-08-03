@@ -1,6 +1,5 @@
 # StockProject
 https://stock-recommendation.streamlit.app/
-[![Dashboard status](Online)](Online)
 
 ## Introduction
 
