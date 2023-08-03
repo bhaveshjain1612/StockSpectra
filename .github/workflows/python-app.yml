@@ -39,5 +39,5 @@ jobs:
           git config --global user.name "Bhavesh Jain"
           
           git add .
-          git commit -m "Update collective_backend output"
+          git commit -m "Data updated on `date +'%d-%m-%Y'`"
           git push origin main
