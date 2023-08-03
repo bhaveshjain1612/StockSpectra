@@ -2,7 +2,7 @@
 import pandas as pd
 import yfinance as yf
 from tqdm import tqdm
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import numpy as np
 import warnings
 
@@ -116,7 +116,7 @@ compiled.to_csv('db_firmo.csv', index=False)
 # Function to retrieve historical data from Yahoo Finance API for a given result
 def get_hist_data(result):
     # Get today's date
-    date_today = date.today()
+    date_today = date.today() + timedelta(days=1)
     # Fetch historical data from 2020-01-01 until today for daily intervals
     historical = result.history(end=date_today, start="2020-01-01", period="1d")
 
