@@ -46,7 +46,8 @@ The "About" section provides an overview of the Financial Dashboard app and its 
 
 - **Key Features**: Discover how the app helps you with technical trend identification, in-depth stock analysis, access to financial statements, and short-term trading opportunities.
 - **Data Sources and Updates**: Learn about the data sources from the National Stock Exchange (NSE) and Bombay Stock Exchange (BSE) and the scheduled daily data update at 7:30 PM IST.
-- **Disclaimer**: Read the disclaimer that outlines the app's limitations and the importance of consulting a qualified financial advisor before making investment decisions.
+- **How to Use**: Understand how to navigate through the app and utilize it the best as per your needs.
+- **GLossary**: A glossary with formulae of some of the frequently mentioned technical terms.
 
 
 ## Disclaimer
