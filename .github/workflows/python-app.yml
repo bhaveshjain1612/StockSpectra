@@ -1,46 +1,41 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-
-name: Data update
+name: Run collective_backend and push to main
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-permissions:
-  contents: read
+    branches:
+      - main
 
 jobs:
-  build:
-
+  run_and_push:
     runs-on: ubuntu-latest
 
     steps:
-    - name: checkout
-      uses: actions/checkout@v3
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.11"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        
-    - name: Run exec.py
-      run: python collective_backend.py  # Adjust the command if necessary
-      working-directory: backend_data
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Commit changes
-      run: |
-        git config --global user.name "bhaveshjain1612"
-        git config --global user.email "bhavesh.161201@gmail.com"
-        git add .
-        git commit -m "Auto-commit changes after running exec.py"
-        git pull --rebase --autostash  # Autostash existing changes
-        git reset --hard
-        git push origin main
-      working-directory: backend_data
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11  # Change this to the appropriate Python version if needed
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend_data/requirements.txt
+
+      - name: Run collective_backend
+        working-directory: backend_data
+        run: |
+          python collective_backend.py  # Replace this with the actual command to run your script
+
+      - name: Clear other commits
+        run: |
+          git checkout main
+          git pull origin main
+          git reset --hard HEAD~1
+          git push origin main --force
+
+      - name: Commit and push changes
+        run: |
+          git add .
+          git commit -m "Update collective_backend output"
+          git push origin main
