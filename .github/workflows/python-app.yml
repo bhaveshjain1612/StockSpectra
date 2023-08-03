@@ -34,7 +34,6 @@ jobs:
           git checkout main
           git pull origin main
           git reset --hard 
-          git push origin main --force
 
       - name: Commit and push changes
         run: |
