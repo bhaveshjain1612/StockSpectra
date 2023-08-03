@@ -1,6 +1,4 @@
 # StockProject
-
-# Financial Dashboard - How To Use
 https://stock-recommendation.streamlit.app/
 
 ## Introduction
