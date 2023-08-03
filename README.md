@@ -1,6 +1,6 @@
 # StockProject
 https://stock-recommendation.streamlit.app/
-[![Update data](https://github.com/bhaveshjain1612/StockProject/actions/workflows/python-app.yml/badge.svg)](https://github.com/bhaveshjain1612/StockProject/actions/workflows/python-app.yml)
+[![Dashboard status](https://github.com/bhaveshjain1612/StockProject/actions/workflows/python-app.yml/badge.svg)](Online)
 
 ## Introduction
 
