@@ -1,4 +1,6 @@
-# StockProject
+# StockProject 
+![Static Badge](https://img.shields.io/badge/Status-Online-green)
+
 https://stock-recommendation.streamlit.app/
 
 ## Introduction
