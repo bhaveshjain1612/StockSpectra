@@ -149,11 +149,98 @@ def about():
     
     st.info("Happy exploring and learning about the stock market with the Stock Insights and Analysis App!")
     
+def glossary():
+    # Define the dictionary with topics and their summaries/formulas
+    topics = ["ROE", "ROCE", "DE Ratio", "Net Income", "Debt", "ROA", "Current Ratio", "Free Cash Flow", "Net Profit Margin","ADX", "RSI", "Bollinger Bands", "EMA", "SMA", "MACD","Dividend", "Stock Split", "52 Week High", "52 Week Low", "NSE", "BSE", "Volume of Trading", "High", "Low", "Open", "Close"]
+    topics.sort()
+    # Search bar for topics
+    search_query = st.selectbox("Search topics",topics)
+    filtered_topics = [topic for topic in topics if search_query.lower() in topic.lower()]
+
+    # Displaying selected topic and summary with formula (if available)
+    if len(filtered_topics) > 0:
+        for topic in filtered_topics:
+            st.subheader(topic)
+            if topic == "ROE":
+                st.write("Return on Equity (ROE) is a financial ratio that measures a company's profitability by calculating the return generated on shareholders' equity.")
+                st.latex(r"\text{ROE} = \frac{\text{Net Income}}{\text{Shareholders' Equity}} \times 100")
+            elif topic == "ROCE":
+                st.write("Return on Capital Employed (ROCE) is a financial ratio that measures a company's profitability by calculating the return generated on the capital employed in the business.")
+                st.latex(r"\text{ROCE} = \frac{\text{EBIT}}{\text{Capital Employed}} \times 100")
+            elif topic == "DE Ratio":
+                st.write("Debt to Equity (DE) Ratio is a financial ratio that compares a company's total debt to its shareholders' equity.")
+                st.latex(r"\text{DE Ratio} = \frac{\text{Total Debt}}{\text{Shareholders' Equity}}")
+            elif topic == "Net Income":
+                st.write("Net Income represents a company's total earnings or profit after deducting all expenses and taxes.")
+                st.latex(r"\text{Net Income} = \text{Total Revenue} - \text{Total Expenses}")
+            elif topic == "Debt":
+                st.write("Debt refers to the total liabilities of a company, including long-term and short-term obligations.")
+                st.latex(r"\text{Debt} = \text{Long-term Debt} + \text{Short-term Debt}")
+            elif topic == "ROA":
+                st.write("Return on Assets (ROA) is a financial ratio that measures a company's profitability by calculating the return generated on its total assets.")
+                st.latex(r"\text{ROA} = \frac{\text{Net Income}}{\text{Total Assets}} \times 100")
+            elif topic == "Current Ratio":
+                st.write("Current Ratio is a financial ratio that measures a company's ability to pay its short-term obligations.")
+                st.latex(r"\text{Current Ratio} = \frac{\text{Current Assets}}{\text{Current Liabilities}}")
+            elif topic == "Free Cash Flow":
+                st.write("Free Cash Flow (FCF) is a measure of a company's ability to generate cash from its operations after deducting capital expenditures.")
+                st.latex(r"\text{FCF} = \text{Operating Cash Flow} - \text{Capital Expenditures}")
+            elif topic == "Net Profit Margin":
+                st.write("Net Profit Margin is a financial ratio that measures a company's profitability by calculating the percentage of profit generated from its total revenue.")
+                st.latex(r"\text{Net Profit Margin} = \frac{\text{Net Income}}{\text{Total Revenue}} \times 100")
+            elif topic == "ADX":
+                st.write("Average Directional Index (ADX) is a technical indicator used to measure the strength of a trend.")
+                st.latex(r"\text{ADX} = \frac{100}{N} \sum_{i=1}^N \frac{|(+DI_i) - (-DI_i)|}{(+DI_i) + (-DI_i)}")
+                st.write("The +DI and -DI are the positive and negative directional movement indicators, and N is the number of periods.")
+            elif topic == "RSI":
+                st.write("Relative Strength Index (RSI) is a momentum oscillator that measures the speed and change of price movements.")
+                st.latex(r"\text{RSI} = 100 - \frac{100}{1 + \frac{\text{Average Gain}}{\text{Average Loss}}}")
+                st.write("The Average Gain is the sum of gains over a specific period, and the Average Loss is the sum of losses over the same period.")
+            elif topic == "Bollinger Bands":
+                st.write("Bollinger Bands consist of a middle band (SMA) and two outer bands that are standard deviations away from the middle band.")
+                st.latex(r"\text{Middle Band (SMA)} = \frac{1}{N} \sum_{i=1}^N \text{Closing Price}_i")
+                st.latex(r"\text{Upper Band} = \text{Middle Band} + k \times \text{Standard Deviation}")
+                st.latex(r"\text{Lower Band} = \text{Middle Band} - k \times \text{Standard Deviation}")
+                st.write("N is the number of periods, and k is the number of standard deviations (typically set to 2).")
+            elif topic == "EMA":
+                st.write("Exponential Moving Average (EMA) is a type of moving average that gives more weight to recent data points.")
+                st.latex(r"\text{EMA} = (1 - \alpha) \times \text{Previous EMA} + \alpha \times \text{Current Price}")
+                st.write("The smoothing factor α determines the weight given to the current price, and it is usually calculated as 2 / (N + 1), where N is the number of periods.")
+            elif topic == "SMA":
+                st.write("Simple Moving Average (SMA) is a type of moving average that calculates the average of a specified number of periods.")
+                st.latex(r"\text{SMA} = \frac{1}{N} \sum_{i=1}^N \text{Closing Price}_i")
+                st.write("N is the number of periods.")
+            elif topic == "MACD":
+                st.write("Moving Average Convergence Divergence (MACD) is a trend-following momentum indicator that calculates the difference between two EMAs.")
+                st.latex(r"\text{MACD Line} = \text{12-period EMA} - \text{26-period EMA}")
+                st.latex(r"\text{Signal Line} = \text{9-period EMA of MACD Line}")
+                st.latex(r"\text{MACD Histogram} = \text{MACD Line} - \text{Signal Line}")
+                st.write("N is the number of periods, and k is the number of standard deviations (typically set to 2).")
+            elif topic == "Dividend":
+                st.write("Dividend is a distribution of a portion of a company's earnings to its shareholders.")
+                st.write("Dividend per Share (DPS) is calculated as follows:")
+                st.latex(r"\text{DPS} = \frac{\text{Total Dividend Paid}}{\text{Total Number of Shares}}")
+            elif topic == "Stock Split":
+                st.write("A stock split is a corporate action that increases the number of shares in a company without changing the overall market value.")
+                st.write("A 2-for-1 stock split means that each shareholder will have two shares for every share they previously owned.")
+            elif topic in ["52 Week High", "52 Week Low"]:
+                st.write(f"{topic} refers to the highest and lowest prices of a stock in the last 52 weeks.")
+            elif topic in ["NSE", "BSE"]:
+                st.write(f"{topic} refers to the National Stock Exchange and Bombay Stock Exchange, respectively.")
+            elif topic == "Volume of Trading":
+                st.write("Volume of trading represents the total number of shares traded in a specific period.")
+            elif topic in ["High", "Low", "Open", "Close"]:
+                st.write(f"{topic} represents the highest, lowest, opening, and closing prices of a stock in a given trading session.")
+        else:
+            st.write("Summary and formula for this topic are not available.")
+    else:
+        st.write(f"No topics found for your search in the {selected_topic} category.")
+    
 def main():
     st.title("How To Use the Financial Dashboard")
     st.write("This page serves as guide on what to expect and how to use this app.")
     
-    tab1, tab2, tab3 = st.tabs(["About", "Find Stocks", "In Depth"])
+    tab1, tab2, tab3, tab4 = st.tabs(["About", "Find Stocks", "In Depth Stock Analysis", "Glossary"])
     
     with tab3:
         indepth()
@@ -161,6 +248,8 @@ def main():
         home()
     with tab1:
         about()
+    with tab4:
+        glossary()
 
 
 # Check if the script is being run as the main module
