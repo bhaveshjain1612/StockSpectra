@@ -31,7 +31,7 @@ jobs:
         run: |
           git checkout main
           git pull origin main
-          git reset --hard HEAD~1
+          git reset --hard 
           git push origin main --force
 
       - name: Commit and push changes
