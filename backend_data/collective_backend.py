@@ -668,14 +668,14 @@ def check_bollinger_flag(df):
             
     return(pd.DataFrame(x,index=[df.symbol.values[0]]))
 
-database= pd.read_csv("backend_data/database.csv")
+database= pd.read_csv("database.csv")
 final = pd.DataFrame()
 for i in database.Symbol:
     try:
-        df = pd.read_csv("backend_data/historical/"+i.replace(".","_")+".csv")
+        df = pd.read_csv("historical/"+i.replace(".","_")+".csv")
         x = check_bollinger_flag(df)
         final = pd.concat([final,x],axis=0)
     except:
         continue
-final[final['Breakout']==True].to_csv("backend_data/breakout.csv")
+final[final['Breakout']==True].to_csv("breakout.csv")
 print('Breakouts updated')
