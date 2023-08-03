@@ -345,7 +345,7 @@ def collect_features(df):
 
 # Read the company list from the 'db_firmo.csv' file
 db_firmo = pd.read_csv("db_firmo.csv")
-symbol_list = db_firmo.Symbol
+symbol_list = db_firmo.head(10).Symbol
 kpi_df = pd.DataFrame()
 
 # Loop through the list of symbols, compile historical data and technical indicators, and generate features for each company
