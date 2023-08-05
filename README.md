@@ -22,11 +22,13 @@ The Stock Insights and Analysis App embodies our commitment to enhancing financi
 - **Breakout Opportunities**: Pinpoint potential breakout stocks through meticulous analysis and trend identification.
 
 ### Data Integrity and Updates
-The app sources data from NSE and BSE, ensuring that you're equipped with up-to-date stock information. Daily data updates at 7:30 PM IST guarantee access to the latest market trends, while annual financial statement updates offer a holistic view of a company's financial standing.
+The app sources data from NSE and BSE, ensuring that you're equipped with up-to-date stock information. Daily data updates at 7:30 PM IST guarantee access to the latest market trends, while annual financial statement updates offer a holistic view of a company's financial standing.\
+
+To see the detailed data flow process [click here](https://github.com/bhaveshjain1612/StockProject/edit/main/backend_data/README.md)
 
 #### App Structure:
 
-For detailed usage instructions, [click here.](https://stock-recommendation.streamlit.app/Instructions)
+For detailed usage instructions, [click here.](https://stock-recommendation.streamlit.app/Instructions)\
 Below is an overview of the app structure:
 
 #### Page 1. Stock Screening
