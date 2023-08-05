@@ -33,14 +33,19 @@ def home():
     1. **Set Filters:**
        - Filter by **Stock Name**: Enter a partial or full name of the stock you are interested in, and the dashboard will filter the relevant results accordingly.
        - Filter by **Stock Exchange**: Select the desired stock exchange (NSE or BSE) from the dropdown menu. The dashboard will display stocks from the selected exchange.
-       - Filter by **Stock Rank (Outlook)**: Choose one or more stock ranks (e.g., positive, negative, neutral) to filter stocks based on their outlook. The dashboard will update with the selected stocks.
-       - Filter by **Financial Rank**: Similar to stock rank, you can filter stocks based on their financial rank (e.g., strong, weak). Choose one or more financial ranks to apply the filter.
+       - Filter by **Stock Risk**: Choose one or more stock ranks to filter stocks based on their possible risk factor as analysed. The dashboard will update with the selected stocks.
+         - **High** : These are high risk/high reward stocks.
+         - **Low** : These are low risk/low reward stocks
+         - **Mid** : These are moderate risk/moderate reward stocks
+         - **Caution Advised** : These extremly volatile stocks hence the algorithm advises use of caution
+       - Filter by **Stock Outlook**: Choose one or more stock ranks to filter stocks based on their expected outlook. The dashboard will update with the selected stocks.
+       - Filter by **Financial Strength**: Similar to stock rank, you can filter stocks based on their financial rank. These strengths represent the analysis of latest Year on Year company financials.
 
     2. **View Options:**
        - Choose from three viewing options:
-         - **Top Picks**: Displays the top-rated stocks with strong outlook and financials.
+         - **Top Picks**: Displays the top-rated stocks with strong outlook, low - medium risk and financials.
          - **All**: Shows all stocks based on applied filters.
-         - **Potential Breakout**: Lists stocks that are potential breakout candidates .
+         - **Potential Breakout**: Lists stocks that are potential breakout candidates. Most of these are high risk companies so proceed with caution.
 
     3. **Filter by Sector and Industry:**
        - Further refine your search by selecting specific sectors and industries. Use the multiselect dropdowns to include or exclude particular sectors/industries.
