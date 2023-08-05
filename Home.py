@@ -25,7 +25,7 @@ def load_data(file_path):
 def add_links(df):
     # Function to generate the URL for in-depth stock analysis
     def add_ind_depth_url(Symbol):
-        return [f'https://stock-recommendation.streamlit.app/In_Depth_Stock_Analysis/?symbol={t.replace(".","_")}' for t in Symbol]
+        return [f'http://localhost:8501/In_Depth_Stock_Analysis/?symbol={t.replace(".","_")}' for t in Symbol]
 
     # Function to convert URL to clickable link
     def make_clickable(url, text):
@@ -50,25 +50,27 @@ def collective(df):
     # Filter by stock name
     name = col1.text_input('Enter name')
     
-    # Filter by stock exchange (NSE or BSE)
-    exchange = col2.selectbox("Exchange", ("NSE", "BSE"))
-    if exchange == "NSE":
-        Lexc = df[df['Exchange'] == 'NSE'].sort_values(by=['stkscore', 'finscore'], ascending=False)
+    risk_filter = col2.multiselect('Risk/Reward Preference', np.insert(df['Risk'].unique(), 0, "All"), ['All'])
+    if risk_filter:
+        if risk_filter == ['All']:
+            Lr = df
+        else:
+            Lr = df.query('Risk in @risk_filter') 
     else:
-        Lexc = df[df['Exchange'] == 'BSE'].sort_values(by=['stkscore', 'finscore'], ascending=False)
+        Lr = df
     
     # Filter by stock rank (outlook)
-    stkrank_filter = col3.multiselect('Select Outlook', np.insert(df['stkrank'].unique(), 0, "All"), ['All'])
+    stkrank_filter = col3.multiselect('Outlook Preference', np.insert(df['Outlook'].unique(), 0, "All"), ['All'])
     if stkrank_filter:
         if stkrank_filter == ['All']:
             L2 = df
         else:
-            L2 = df.query('stkrank in @stkrank_filter') 
+            L2 = df.query('Outlook in @stkrank_filter') 
     else:
         L2 = df
     
     # Filter by financial rank
-    finrank_filter = col4.multiselect('Select Financial', np.insert(df['finrank'].unique(), 0, "All"), ['All'])
+    finrank_filter = col4.multiselect('Company YoY financials', np.insert(df['finrank'].unique(), 0, "All"), ['All'])
     if finrank_filter:
         if finrank_filter == ['All']:
             L3 = df
@@ -76,18 +78,58 @@ def collective(df):
             L3 = df.query('finrank in @finrank_filter') 
     else:
         L3 = df
+        
+        # Filter by stock exchange (NSE or BSE)
+    exchange = col1.selectbox("Exchange", ("NSE", "BSE"))
+    if exchange == "NSE":
+        Lexc = df[df['Exchange'] == 'NSE'].sort_values(by=['stkscore', 'finscore'], ascending=False)
+    else:
+        Lexc = df[df['Exchange'] == 'BSE'].sort_values(by=['stkscore', 'finscore'], ascending=False)
+        
+    #filtering based on interval    
+    df_temp=df
+    filter_interval = col2.selectbox('Select a Time Interval for % changes', ["1 Day", "5 Days", "1 Month", "3 Months","6 Months", "1 Year"])
+    if filter_interval: 
+        if filter_interval == "1 Day":
+            df_temp = df_temp.drop(["Close_change_5d","Close_change_1m","Close_change_3m","Close_change_6m","Close_change_1y"],axis=1)
+            df_temp = df_temp.drop(["Volume_change_5d","Volume_change_1m","Volume_change_3m","Volume_change_6m","Volume_change_1y"],axis=1)
+            df_temp.rename(columns = {'Close_change_1d':'Price Change (%)','Volume_change_1d':'Volume Change (%)'}, inplace = True)
+        elif filter_interval == "5 Days":
+            df_temp = df_temp.drop(["Close_change_1d","Close_change_1m","Close_change_3m","Close_change_6m","Close_change_1y"],axis=1)
+            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_1m","Volume_change_3m","Volume_change_6m","Volume_change_1y"],axis=1)
+            df_temp.rename(columns = {'Close_change_5d':'Price Change (%)','Volume_change_5d':'Volume Change (%)'}, inplace = True)
+        elif filter_interval == "1 Month":
+            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_3m","Close_change_6m","Close_change_1y"],axis=1)
+            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_3m","Volume_change_6m","Volume_change_1y"],axis=1)
+            df_temp.rename(columns = {'Close_change_1m':'Price Change (%)','Volume_change_1m':'Volume Change (%)'}, inplace = True)
+        elif filter_interval == "3 Months":
+            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_1m","Close_change_6m","Close_change_1y"],axis=1)
+            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_1m","Volume_change_6m","Volume_change_1y"],axis=1)
+            df_temp.rename(columns = {'Close_change_3m':'Price Change (%)','Volume_change_3m':'Volume Change (%)'}, inplace = True)
+        elif filter_interval == "6 Months":
+            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_1m","Close_change_3m","Close_change_1y"],axis=1)
+            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_1m","Volume_change_3m","Volume_change_1y"],axis=1)
+            df_temp.rename(columns = {'Close_change_6m':'Price Change (%)','Volume_change_6m':'Volume Change (%)'}, inplace = True)
+        elif filter_interval == "1 Year":
+            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_1m","Close_change_3m","Close_change_6m"],axis=1)
+            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_1m","Volume_change_3m","Volume_change_6m"],axis=1)
+            df_temp.rename(columns = {'Close_change_1y':'Price Change (%)','Volume_change_1y':'Volume Change (%)'}, inplace = True)
+            
+    sort_by = col3.selectbox('Order by ', ("Name","Latest Close","Price Change (%)"))
+    
+    sort_type = col4.selectbox('Order method', ("None","Ascending","Descending"))
     
     # Split the dashboard into three columns
     col1, col2, col3 = st.columns([2, 3, 3])
     
     # Filter by view option (Top Picks, All, or Potential Breakout)
-    option = col1.selectbox("View", ("Top Picks", "All", "Potential Breakout"))
+    option = col1.selectbox("View", ("All","Top Picks", "Potential Breakout"))
     if option == "Top Picks":
         # Filtering stocks based on stock rank and financial rank
-        Ltop = df[(df['finrank'] == 'strong') & (df['stkrank'] == 'positive')].sort_values(by=['stkscore', 'finscore'], ascending=False)
+        Ltop = df[(df['Risk'].isin(['Low','Mid'])) & (df['Outlook'].isin(['positive'])) & (df['finrank'].isin(['strong']))]
     elif option == "Potential Breakout":
         # Filtering stocks based on potential breakout list from a CSV file
-        Ltop = df[df['Symbol'].isin(pd.read_csv("backend_data/breakout.csv")['Unnamed: 0'])].sort_values(by=['stkscore', 'finscore'], ascending=False)
+        Ltop = df[df['Symbol'].isin(pd.read_csv("backend_data/breakout.csv")['Unnamed: 0'])]
     else:
         Ltop = df
     
@@ -116,41 +158,10 @@ def collective(df):
         L0 = df[df['Name'].str.contains(name, case=False) | df['Symbol'].str.contains(name, case=False)]
     else:
         L0 = df
-    
-    col1, col2, col3 = st.columns([2, 3, 3])
-    df_temp=df
-    filter_interval = col1.selectbox('Select a Time Interval for % changes', ["3 Months","1 Day", "5 Days", "1 Month", "6 Months", "1 Year"])
-    if filter_interval: 
-        if filter_interval == "1 Day":
-            df_temp = df_temp.drop(["Close_change_5d","Close_change_1m","Close_change_3m","Close_change_6m","Close_change_1y"],axis=1)
-            df_temp = df_temp.drop(["Volume_change_5d","Volume_change_1m","Volume_change_3m","Volume_change_6m","Volume_change_1y"],axis=1)
-            df_temp.rename(columns = {'Close_change_1d':'Price Change (%)','Volume_change_1d':'Volume Change (%)'}, inplace = True)
-        elif filter_interval == "5 Days":
-            df_temp = df_temp.drop(["Close_change_1d","Close_change_1m","Close_change_3m","Close_change_6m","Close_change_1y"],axis=1)
-            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_1m","Volume_change_3m","Volume_change_6m","Volume_change_1y"],axis=1)
-            df_temp.rename(columns = {'Close_change_5d':'Price Change (%)','Volume_change_5d':'Volume Change (%)'}, inplace = True)
-        elif filter_interval == "1 Month":
-            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_3m","Close_change_6m","Close_change_1y"],axis=1)
-            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_3m","Volume_change_6m","Volume_change_1y"],axis=1)
-            df_temp.rename(columns = {'Close_change_1m':'Price Change (%)','Volume_change_1m':'Volume Change (%)'}, inplace = True)
-        elif filter_interval == "3 Months":
-            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_1m","Close_change_6m","Close_change_1y"],axis=1)
-            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_1m","Volume_change_6m","Volume_change_1y"],axis=1)
-            df_temp.rename(columns = {'Close_change_3m':'Price Change (%)','Volume_change_3m':'Volume Change (%)'}, inplace = True)
-        elif filter_interval == "6 Months":
-            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_1m","Close_change_3m","Close_change_1y"],axis=1)
-            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_1m","Volume_change_3m","Volume_change_1y"],axis=1)
-            df_temp.rename(columns = {'Close_change_6m':'Price Change (%)','Volume_change_6m':'Volume Change (%)'}, inplace = True)
-        elif filter_interval == "1 Year":
-            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_1m","Close_change_3m","Close_change_6m"],axis=1)
-            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_1m","Volume_change_3m","Volume_change_6m"],axis=1)
-            df_temp.rename(columns = {'Close_change_1y':'Price Change (%)','Volume_change_1y':'Volume Change (%)'}, inplace = True)
-            
-    sort_by = col2.selectbox('Order by ', ("Name","Latest Close","Price Change (%)"))    
-    sort_type = col3.selectbox('Order method', ("None","Ascending","Descending"))
 
                     
     final = df_temp[df_temp['Symbol'].isin(L0.Symbol)]
+    final = final[final['Symbol'].isin(Lr.Symbol)]
     final = final[final['Symbol'].isin(L1.Symbol)]
     final = final[final['Symbol'].isin(L2.Symbol)]
     final = final[final['Symbol'].isin(L3.Symbol)]
@@ -158,7 +169,7 @@ def collective(df):
     final = final[final['Symbol'].isin(Lexc.Symbol)]
     
     # Display the final DataFrame with links
-    final = final[['Name', 'Symbol', 'Sector', 'Industry', 'Latest Close','Price Change (%)', 'stkrank', 'finrank']].rename(columns={'finrank': 'Company Financials', 'stkrank': 'Outlook'})
+    final = final[['Name', 'Symbol', 'Sector', 'Industry', 'Latest Close','Price Change (%)', 'Outlook','Risk', 'finrank']].rename(columns={'finrank': 'Company Financials', 'stkrank': 'Outlook','Price Change (%)': 'Change (%)'})
     final = final.drop_duplicates(subset='Name').set_index('Name')
     
     if sort_type != "None":
@@ -173,10 +184,8 @@ def collective(df):
 def main():
     # Load data from the CSV file and preprocess
     df = load_data("backend_data/database.csv")
-    df['finscore'] = df.apply(financial_scores, axis=1)
-    df = finrank(df)
-    df['stkscore'] = df.apply(stock_scores, axis=1)
-    df = stkrank(df)
+
+    df = allot_tags(df)
     
     # Set up the Streamlit dashboard
     st.header("Screening Page")

@@ -90,8 +90,8 @@ def generate_stock(data):
         for m in list(stksummary.items()):
             col2.write(m[1]['Display'])
     
-    col1.header(data.stkrank.values[0].upper())
-    col1.write("Outlook Based on recent technicals")
+    col1.header(data.Outlook.values[0].upper())
+    col1.subheader(data.Risk.values[0]+" Risk / "+data.Risk.values[0]+" Reward")
     
     st.divider()
     
@@ -267,8 +267,7 @@ def load_insights(data,input_symbol):
 
 def main():
     data = load_data("backend_data/database.csv")
-    data['stkscore'] = data.apply(stock_scores, axis=1)
-    data = stkrank(data)
+    data = allot_tags(data)
     
     input_symbol = st.sidebar.text_input("Enter stock Ticker")       
     
