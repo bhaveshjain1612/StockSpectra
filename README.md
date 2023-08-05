@@ -65,7 +65,7 @@ Tabs for Comprehensive Analysis
 
 #### Page 3. Instructions
 
-The "About" section provides an overview of the Financial Dashboard app and its key features:
+The "Instructions" section provides an overview of the Financial Dashboard app and its key features:
 
 - **Key Features**: Discover how the app helps you with technical trend identification, in-depth stock analysis, access to financial statements, and short-term trading opportunities.
 - **Data Sources and Updates**: Learn about the data sources from the National Stock Exchange (NSE) and Bombay Stock Exchange (BSE) and the scheduled daily data update at 7:30 PM IST.
