@@ -29,6 +29,7 @@ To see the detailed data flow process [click here](https://github.com/bhaveshjai
 #### App Structure:
 
 For detailed usage instructions, [click here.](https://stock-recommendation.streamlit.app/Instructions)\
+The data is stored in the *backend_data* folder and the fucntions for all pages are in the *utils.py* file\
 Below is an overview of the app structure:
 
 #### Page 1. Stock Screening
