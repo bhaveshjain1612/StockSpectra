@@ -24,12 +24,14 @@ The Stock Insights and Analysis App embodies our commitment to enhancing financi
 ### Data Integrity and Updates
 The app sources data from NSE and BSE, ensuring that you're equipped with up-to-date stock information. Daily data updates at 7:30 PM IST guarantee access to the latest market trends, while annual financial statement updates offer a holistic view of a company's financial standing.
 
+#### App Structure:
+
+For detailed usage instructions, [click here.](https://stock-recommendation.streamlit.app/Instructions)
 Below is an overview of the app structure:
-(For detailed usage instructions, [click here.](https://stock-recommendation.streamlit.app/Instructions)
 
-### 1. Stock Screening
+#### Page 1. Stock Screening
 
-The "Stock Screening" section allows you to filter and view stocks based on various criteria, making it easy to find stocks that meet your specific preferences.
+The "Stock Screening" section allows you to filter and view stocks based on various criteria, making it easy to find stocks that meet your specific preferences. This is the home page of the app.
 
 - **Filter by Stock Name**: Enter a partial or full name of the stock you are interested in, and the dashboard will filter the relevant results accordingly.
 - **Filter by Stock Exchange**: Select the desired stock exchange (NSE or BSE) from the dropdown menu. The dashboard will display stocks from the selected exchange.
@@ -46,20 +48,20 @@ The "Stock Screening" section allows you to filter and view stocks based on vari
 - **Filter by Sector and Industry**: Further refine your search by selecting specific sectors and industries. Use the multiselect dropdowns to include or exclude particular sectors/industries.
 - **Display Companies**: Adjust the number of companies you want to display using the slider. You can view a maximum of 10 companies at once.
 
-### 2. In-Depth Stock Analysis
+#### Page 2. In-Depth Stock Analysis
 
 The "In-Depth Stock Analysis" section allows you to explore detailed insights for individual stocks.
 
 - **Enter Stock Ticker**: Input the stock ticker in the sidebar using the text input box, and press Enter. The app will display insights for the specified company.
 - **Share Insights via URL**: The app supports loading insights based on the stock ticker passed through the URL query parameters. Share specific company insights with others by providing the stock ticker in the URL.
 
-#### Tabs for Comprehensive Analysis
+Tabs for Comprehensive Analysis
 
 - **Firmo Tab**: Displays firmographic data about the company, including its sector, industry, and a brief description. A holding chart provides graphical representation related to the company's holdings.
 - **Stock Tab**: Provides key performance indicators (KPIs) such as close price, volume, high, low, normal dividend, stock split, 52-week high, and 52-week low. Interactive charts allow customization options like different Simple Moving Averages (SMAs) and Exponential Moving Averages (EMAs), Bollinger Bands, time intervals, and additional indicators.
 - **Financial Tab**: Provides financial metrics such as Net Income, Debt, Free Cash Flow, Basic EPS, Net Profit Margin, ROA, ROE, ROCE, Current Ratio, and DE Ratio. Desirable and non-desirable indicators are listed, and detailed financial data is accessible for the company.
 
-### 3. About
+#### Page 3. Instructions
 
 The "About" section provides an overview of the Financial Dashboard app and its key features:
 
