@@ -7,8 +7,6 @@ The project is organized into the following folder structure:
 ```
 project_root/
 ├── pages
-│   ├── In-Depth Analysis.py
-│   ├── Instructions.py
 ├── **backend_data**
 |   ├── collective_backend.py
 │   ├── historical
@@ -22,6 +20,8 @@ project_root/
 │   ├── financials_mapping.csv
 │   ├── breakout.csv
 │   ├── database.csv
+├── requirements.txt
+├── utils.py
 └── Home.py
 ```
 ### About some key files:
