@@ -358,7 +358,7 @@ def generate_charts(historical_sample, selected_ma, bollinger_filter, holiday_li
         
     for i in historical_sample[historical_sample['Dividends']>0].reset_index().index:
         pos_x = historical_sample[historical_sample['Dividends']>0].reset_index().date_only.values[i]
-        fig.add_vline( x=pos_x, line_width=1,  line_color="black",row=1,col=1)
+        fig.add_vline( x=pos_x, line_width=1,  line_color="black")
         
         
     fig.update_yaxes(showgrid=True, minor=dict(showgrid=False),showline=True, linewidth=2)
