@@ -2,11 +2,11 @@ name: Update data
 
 on:
   schedule:
-      - cron: "0 13 * * 1"
-      - cron: "0 13 * * 2"
-      - cron: "0 13 * * 3"
-      - cron: "0 13 * * 4"
-      - cron: "0 13 * * 5"
+      - cron: "30 12 * * 1"
+      - cron: "30 12 * * 2"
+      - cron: "30 12 * * 3"
+      - cron: "30 12 * * 4"
+      - cron: "30 12 * * 5"
   #push:
     #branches:
       #- main
