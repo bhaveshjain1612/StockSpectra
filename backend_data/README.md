@@ -64,6 +64,6 @@ project_root/
  - Merge the calculated financial KPIs and firmographics data with the historical and technical indicators data to create a comprehensive dataset.
  - Calculate stocks that are potential breakouts and save them as **breakout.csv**
 
-## Autoamtion
+## Automation
 
 A GitHub workflow is set to run automatically on weekdays at 6 PM IST (12 30 UTC). This updates and pushes the updated files to the repository ensuring latest data is fed always
