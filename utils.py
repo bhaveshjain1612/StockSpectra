@@ -413,7 +413,7 @@ def generate_charts(historical_sample, selected_ma, bollinger_filter, holiday_li
     # Plot OHLC on 1st row
     fig.add_trace(candlesticks,row=1, col=1)
     
-    for div in historical_sample[historical_sample['Dividends']>0].reset_index().index:
+    for div in historical_sample[historical_sample['Dividends']>0].index:
         pos_x = historical_sample[historical_sample['Dividends']>0].date_only.values[div]
         pos_y = historical_sample[historical_sample['Dividends']>0].Close.values[div]
         #fig.add_vline( x=pos_x, line_width=10,  line_color="cyan")
