@@ -46,132 +46,96 @@ def add_links(df):
 def collective(df):
     # Split the dashboard into four columns
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+    db=df
     
+    #_________________ALL COLUMN 1 FILTERS_____________________________
+    #Create Filter by investment strategy
+    strategy =  col1.selectbox("Strategy", ("None","1-2 Months", "3-6 Months", "> 1 Year","Potential Breakout"))
+
     # Filter by stock name
     name = col1.text_input('Enter name')
-    
-    risk_filter = col2.multiselect('Risk/Reward Preference', np.insert(df['Risk'].unique(), 0, "All"), ['All'])
-    if risk_filter:
-        if risk_filter == ['All']:
-            Lr = df
-        else:
-            Lr = df.query('Risk in @risk_filter') 
-    else:
-        Lr = df
-    
-    # Filter by stock rank (outlook)
-    stkrank_filter = col3.multiselect('Outlook Preference', np.insert(df['Outlook'].unique(), 0, "All"), ['All'])
-    if stkrank_filter:
-        if stkrank_filter == ['All']:
-            L2 = df
-        else:
-            L2 = df.query('Outlook in @stkrank_filter') 
-    else:
-        L2 = df
-    
-    # Filter by financial rank
-    finrank_filter = col4.multiselect('Company YoY financials', np.insert(df['finrank'].unique(), 0, "All"), ['All'])
-    if finrank_filter:
-        if finrank_filter == ['All']:
-            L3 = df
-        else:
-            L3 = df.query('finrank in @finrank_filter') 
-    else:
-        L3 = df
         
-        # Filter by stock exchange (NSE or BSE)
-    exchange = col1.selectbox("Exchange", ("NSE", "BSE"))
-    if exchange == "NSE":
-        Lexc = df[df['Exchange'] == 'NSE'].sort_values(by=['stkscore', 'finscore'], ascending=False)
+    # Filter by view option (Top Picks, All, or Potential Breakout)
+    dividend = col1.selectbox("Dividend", strategy_allotting(strategy)[3])
+        
+    #_________________ALL COLUMN 2 FILTERS_____________________________    
+    #Filter based on Risk
+    risk_filter = col2.multiselect('Risk/Reward Preference',np.insert(df['Risk'].unique(), 0, "All"), strategy_allotting(strategy)[0])
+    if 'All' in risk_filter or risk_filter ==[]:
+        risk_filter = df['Risk'].unique()    
+        
+    # Filter by stock exchange (NSE or BSE)
+    exchange = col2.selectbox("Exchange", ("All","NSE", "BSE"))
+    if exchange == 'All' :
+        exchange = df['Exchange'].unique()
     else:
-        Lexc = df[df['Exchange'] == 'BSE'].sort_values(by=['stkscore', 'finscore'], ascending=False)
+        exchange = [exchange]
         
     #filtering based on interval    
-    df_temp=df
     filter_interval = col2.selectbox('Select a Time Interval for % changes', ["1 Day", "5 Days", "1 Month", "3 Months","6 Months", "1 Year"])
-    if filter_interval: 
-        if filter_interval == "1 Day":
-            df_temp = df_temp.drop(["Close_change_5d","Close_change_1m","Close_change_3m","Close_change_6m","Close_change_1y"],axis=1)
-            df_temp = df_temp.drop(["Volume_change_5d","Volume_change_1m","Volume_change_3m","Volume_change_6m","Volume_change_1y"],axis=1)
-            df_temp.rename(columns = {'Close_change_1d':'Price Change (%)','Volume_change_1d':'Volume Change (%)'}, inplace = True)
-        elif filter_interval == "5 Days":
-            df_temp = df_temp.drop(["Close_change_1d","Close_change_1m","Close_change_3m","Close_change_6m","Close_change_1y"],axis=1)
-            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_1m","Volume_change_3m","Volume_change_6m","Volume_change_1y"],axis=1)
-            df_temp.rename(columns = {'Close_change_5d':'Price Change (%)','Volume_change_5d':'Volume Change (%)'}, inplace = True)
-        elif filter_interval == "1 Month":
-            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_3m","Close_change_6m","Close_change_1y"],axis=1)
-            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_3m","Volume_change_6m","Volume_change_1y"],axis=1)
-            df_temp.rename(columns = {'Close_change_1m':'Price Change (%)','Volume_change_1m':'Volume Change (%)'}, inplace = True)
-        elif filter_interval == "3 Months":
-            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_1m","Close_change_6m","Close_change_1y"],axis=1)
-            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_1m","Volume_change_6m","Volume_change_1y"],axis=1)
-            df_temp.rename(columns = {'Close_change_3m':'Price Change (%)','Volume_change_3m':'Volume Change (%)'}, inplace = True)
-        elif filter_interval == "6 Months":
-            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_1m","Close_change_3m","Close_change_1y"],axis=1)
-            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_1m","Volume_change_3m","Volume_change_1y"],axis=1)
-            df_temp.rename(columns = {'Close_change_6m':'Price Change (%)','Volume_change_6m':'Volume Change (%)'}, inplace = True)
-        elif filter_interval == "1 Year":
-            df_temp = df_temp.drop(["Close_change_1d","Close_change_5d","Close_change_1m","Close_change_3m","Close_change_6m"],axis=1)
-            df_temp = df_temp.drop(["Volume_change_1d","Volume_change_5d","Volume_change_1m","Volume_change_3m","Volume_change_6m"],axis=1)
-            df_temp.rename(columns = {'Close_change_1y':'Price Change (%)','Volume_change_1y':'Volume Change (%)'}, inplace = True)
-            
-    sort_by = col3.selectbox('Order by ', ("Name","Latest Close","Price Change (%)"))
     
+    #_________________ALL COLUMN 3 FILTERS_____________________________    
+    # Filter by stock rank (outlook)
+    stkrank_filter = col3.multiselect('Outlook Preference',np.insert(df['Outlook'].unique(), 0, "All"), strategy_allotting(strategy)[1])
+    if 'All' in stkrank_filter or stkrank_filter ==[]:
+        stkrank_filter = df['Outlook'].unique()    
+        
+    #Filter by sector
+    sector_filter = col3.multiselect('Select Sector', np.insert(df['Sector'].unique(), 0, "All"), ['All'])
+    if 'All' in sector_filter or sector_filter ==[]:
+        sector_filter = df['Sector'].unique()
+        
+    #Select column to sort by
+    sort_by = col3.selectbox('Order by ', ("Name","Latest Close","Dividend Yield","Change (%)"))
+    
+    #_________________ALL COLUMN 4 FILTERS_____________________________    
+    # Filter by financial rank
+    finrank_filter = col4.multiselect('Company YoY financials', np.insert(df['finrank'].unique(), 0, "All"), strategy_allotting(strategy)[2])     
+    if 'All' in finrank_filter or finrank_filter ==[]:
+        finrank_filter = df['finrank'].unique()
+        
+    # Filter by industry
+    industry_filter = col4.multiselect('Select Industry', np.insert(df[df['Sector'].isin(sector_filter)]['Industry'].unique(), 0, "All"), ['All'])
+    if 'All' in industry_filter or industry_filter ==[]:
+        industry_filter = df[df['Sector'].isin(sector_filter)]['Industry'].unique()     
+        
+    # Sorting Method 
     sort_type = col4.selectbox('Order method', ("None","Ascending","Descending"))
     
-    # Split the dashboard into three columns
-    col1, col2, col3 = st.columns([2, 3, 3])
+    #_________________Executing Filters and showing df_____________________________ 
     
-    # Filter by view option (Top Picks, All, or Potential Breakout)
-    option = col1.selectbox("View", ("All","Top Picks", "Potential Breakout"))
-    if option == "Top Picks":
-        # Filtering stocks based on stock rank and financial rank
-        Ltop = df[(df['Risk'].isin(['Low','Mid'])) & (df['Outlook'].isin(['positive'])) & (df['finrank'].isin(['strong']))]
-    elif option == "Potential Breakout":
-        # Filtering stocks based on potential breakout list from a CSV file
-        Ltop = df[df['Symbol'].isin(pd.read_csv("backend_data/breakout.csv")['Unnamed: 0'])]
+    #filtering based on possible breakout
+    if strategy == 'Potential Breakout':
+        final=df[df['Symbol'].isin(load_data("backend_data/breakout.csv")['Unnamed: 0'])]
     else:
-        Ltop = df
-    
-    # Filter by sector
-    sector_filter = col2.multiselect('Select Sector', np.insert(df['Sector'].unique(), 0, "All"), ['All'])
-    if sector_filter:
-        if sector_filter == ['All']:
-            df_filter_sector = df
-        else:
-            df_filter_sector = df.query('Sector in @sector_filter')
-    else:
-        df_filter_sector = df
-    
-    # Filter by industry
-    industry_filter = col3.multiselect('Select Industry', np.insert(df_filter_sector['Industry'].unique(), 0, "All"), ['All'])
-    if industry_filter:
-        if industry_filter == ['All']:
-            L1 = df_filter_sector
-        else:
-            L1 = df_filter_sector.query('Industry in @industry_filter') 
-    else:
-        L1 = df_filter_sector
-        
-    # Apply filters and obtain the final DataFrame
+        final=df
+    #filtering based on name
     if name:
-        L0 = df[df['Name'].str.contains(name, case=False) | df['Symbol'].str.contains(name, case=False)]
-    else:
-        L0 = df
+        final = final[final['Name'].str.contains(name, case=False) | df['Symbol'].str.contains(name, case=False)]
+        
+    #dividend filter:
+    final = final.loc[lambda x: (x['Dividend Yield'] > 0) if dividend == "Yes" else ((x['Dividend Yield'] == 0) if dividend == "No" else x['Dividend Yield']!='Not Found')]
+        
+    # Applying exchange_filters
+    final=final[final['Exchange'].isin(exchange)]
+    # Applying sector_filters
+    final=final[final['Sector'].isin(sector_filter)]
+    # Applying industry_filters
+    final=final[final['Industry'].isin(industry_filter)]
+    # Applying risk_filters
+    final=final[final['Risk'].isin(risk_filter)]
+    # Applying outlook_filters
+    final=final[final['Outlook'].isin(stkrank_filter)]
+    # Applying financials_filters
+    final=final[final['finrank'].isin(finrank_filter)]
+    #applying time interval filter
+    final.rename(columns = {"Close_change_"+filter_interval[:3].lower().replace(" ",""):'Change (%)'}, inplace = True)
 
-                    
-    final = df_temp[df_temp['Symbol'].isin(L0.Symbol)]
-    final = final[final['Symbol'].isin(Lr.Symbol)]
-    final = final[final['Symbol'].isin(L1.Symbol)]
-    final = final[final['Symbol'].isin(L2.Symbol)]
-    final = final[final['Symbol'].isin(L3.Symbol)]
-    final = final[final['Symbol'].isin(Ltop.Symbol)]
-    final = final[final['Symbol'].isin(Lexc.Symbol)]
-    
     # Display the final DataFrame with links
-    final = final[['Name', 'Symbol', 'Sector', 'Industry', 'Latest Close','Price Change (%)', 'Outlook','Risk', 'finrank']].rename(columns={'finrank': 'Company Financials', 'stkrank': 'Outlook','Price Change (%)': 'Change (%)'})
+    final = final[['Name', 'Symbol','Exchange', 'Sector', 'Industry', 'Latest Close','Change (%)','Outlook','Risk', 'finrank','Dividend Yield']].rename(columns={'finrank': 'Company Financials', 'stkrank': 'Outlook'})
     final = final.drop_duplicates(subset='Name').set_index('Name')
     
+    #Sorting Functions
     if sort_type != "None":
         final = final.sort_values(by=sort_by,ascending=(sort_type=="Ascending"))
     
@@ -180,15 +144,17 @@ def collective(df):
  
     with st.container():
         add_links(final)
-
+    
 def main():
     # Load data from the CSV file and preprocess
     df = load_data("backend_data/database.csv")
 
     df = allot_tags(df)
+    df['Annual Dividend'] = df['Dividend Rate'].replace('Not Found', '0').astype(float)
+    df['Dividend Yield'] = df['Annual Dividend']*100/df['Latest Close']
     
     # Set up the Streamlit dashboard
-    st.header("Screening Page")
+    st.header("Find Stocks")
     st.write("Updated On: " + df['Latest date_only'].values[0])
     
     # Display the filtered data using the collective function

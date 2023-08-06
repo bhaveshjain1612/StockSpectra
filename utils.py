@@ -223,6 +223,16 @@ def allot_tags(df):
     df=allot_outlook(df)
     return df
 
+#allot strategy based on selected filter
+def strategy_allotting(argument):
+    switcher = {
+        "> 1 Year": [['Low'],['positive','neutral'],['strong','mid'],("Yes","All","No")],
+        "3-6 Months": [['Low','Mid'],['positive','neutral'],['strong'],("All","Yes","No")],
+        "1-2 Months": [['Mid','High'],['positive'],['All'],("All","Yes","No")],
+    }
+
+    return switcher.get(argument, [['All'],['All'],['All'],("All","Yes","No")])
+
 ######################################################################################################################################
 # In Depth Functions
 ######################################################################################################################################
