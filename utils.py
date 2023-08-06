@@ -413,12 +413,12 @@ def generate_charts(historical_sample, selected_ma, bollinger_filter, holiday_li
     # Plot OHLC on 1st row
     fig.add_trace(candlesticks,row=1, col=1)
     
-    for div in historical_sample[historical_sample['Dividends']>0].reset_index().index:
-        pos_x = historical_sample[historical_sample['Dividends']>0].reset_index().date_only.values[div]
-        pos_y = historical_sample[historical_sample['Dividends']>0].reset_index().Close.values[div]
+    #for div in historical_sample[historical_sample['Dividends']>0].reset_index().index:
+        #pos_x = historical_sample[historical_sample['Dividends']>0].reset_index().date_only.values[div]
+        #pos_y = historical_sample[historical_sample['Dividends']>0].reset_index().Close.values[div]
         #fig.add_vline( x=pos_x, line_width=10,  line_color="cyan")
         #fig.add_annotation(x=pos_x,text="Dividend",textangle=270, row=1, col=1)
-        fig['layout'].update(annotations=[dict(x=pos_x, y=pos_y, xref='x1', yref='y1',text='Dividend')])
+        #fig['layout'].update(annotations=[dict(x=pos_x, y=pos_y, xref='x1', yref='y1',text='Dividend')])
     
     fig.update_yaxes(title_text="Price", row=1, col=1)
     
