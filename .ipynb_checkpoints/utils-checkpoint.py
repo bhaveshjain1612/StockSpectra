@@ -416,7 +416,7 @@ def generate_charts(historical_sample, selected_ma, bollinger_filter, holiday_li
     for j in historical_sample[historical_sample['Dividends']>0].reset_index().index:
         pos_x = historical_sample[historical_sample['Dividends']>0].date_only.values[j]
         fig.add_vline( x=pos_x, line_width=10,  line_color="cyan")
-       fig.add_annotation(x=pos_x,text="Dividend",textangle=270)
+        fig.add_annotation(x=pos_x,text="Dividend",textangle=270)
     
     fig.update_yaxes(title_text="Price", row=1, col=1)
     
