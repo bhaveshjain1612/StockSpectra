@@ -36,20 +36,28 @@ Below is an overview of the app structure:
 
 The "Stock Screening" section allows you to filter and view stocks based on various criteria, making it easy to find stocks that meet your specific preferences. This is the home page of the app.
 
-- **Filter by Stock Name**: Enter a partial or full name of the stock you are interested in, and the dashboard will filter the relevant results accordingly.
-- **Filter by Stock Exchange**: Select the desired stock exchange (NSE or BSE) from the dropdown menu. The dashboard will display stocks from the selected exchange.
-- **Filter by Stock Rank (Outlook)**: Choose one or more stock ranks (e.g., positive, negative, neutral) to filter stocks based on their outlook. The dashboard will update with the selected stocks.
-- **Filter by Financial Rank**: Similar to stock rank, you can filter stocks based on their financial rank (e.g., strong, weak). Choose one or more financial ranks to apply the filter.
-- Filter by **Stock Risk**: Choose one or more stock ranks to filter stocks based on their possible risk factor as analysed. The dashboard will update with the selected stocks.
-    - **High** : These are high risk/high reward stocks.
-    - **Low** : These are low risk/low reward stocks
-    - **Mid** : These are moderate risk/moderate reward stocks
-- Choose from three viewing options:
-    - **Top Picks**: Displays the top-rated stocks with strong outlook, low - medium risk and financials.
-    - **All**: Shows all stocks based on applied filters.
-    - **Potential Breakout**: Lists stocks that are potential breakout candidates. Most of these are high risk companies so proceed with caution.
-- **Filter by Sector and Industry**: Further refine your search by selecting specific sectors and industries. Use the multiselect dropdowns to include or exclude particular sectors/industries.
-- **Display Companies**: Adjust the number of companies you want to display using the slider. You can view a maximum of 10 companies at once.
+**Set Filters:**
+- **Strategy**: Allows you to shuffle between 4 key strategies - > 1 year, 3 - 6 months, 1-2 months and potential breakouts. Only one can be selected in a go.
+All other parameters are varied basis the strategy selected. If left to *None*, all parameters will stay default.
+- **Risk/ Reward** : Is to select the risk factor associated with the company.Selecting All allows you to view all 3. More than one can be selected.
+    - *High* : Companies in this group tend tend to have high variation between returns. They may give very high, or negative returns
+    - *Mid* : Companies in this group tend tend to have not very high or very low variation between returns.
+    - *Low* : Companies in this group tend tend to have low variation between returns, i.e. while returns may be less, so is the risk compared to High rtanked companies. 
+- **Outlook Filter** : Select cpomapines based on the technical analysis outllok of stock data.Selecting All allows you to view all 3. More than one can be selected.
+    - *Positive* : Companies in this group tend are more likley to have positive returns in the future compared to mrket movement.
+    - *Neutral* : Companies in this group tend are more likley to have at par returns in the future compared to market.
+    - *Negative* : Companies in this group tend are more likley to have sub par returns in the future. 
+- **Financial Strength**: Similar to stock rank, you can filter stocks based on their financial rank. These strengths represent the analysis of latest Year on Year company financials.
+Selecting All allows you to view all 3. More than one can be selected.
+    - *Strong* : Good YoY Financials compared to others 
+    - *Mid* : Near median FInancial strength of YoY parameters
+    - *Weak* : Sub par recent YoY financials compared to other stocks
+**Sort the companies:**
+- Use the two dropdowns in 3rd row to sort them by Name, Price, Dividend Yield or Change for the selected interval.
+
+**Display Companies:**
+- Adjust the number of companies you want to display using the slider.
+- The displayed table includes a column labeled "Analysis" with clickable links. Clicking on "See in Depth" will take you to a detailed analysis page for the respective stock.
 
 #### Page 2. In-Depth Stock Analysis
 
@@ -60,7 +68,7 @@ The "In-Depth Stock Analysis" section allows you to explore detailed insights fo
 
 Tabs for Comprehensive Analysis
 
-- **Firmo Tab**: Displays firmographic data about the company, including its sector, industry, and a brief description. A holding chart provides graphical representation related to the company's holdings.
+- **Company Details Tab**: Displays firmographic data about the company, including its sector, industry, and a brief description. A holding chart provides graphical representation related to the company's holdings.
 - **Stock Tab**: Provides key performance indicators (KPIs) such as close price, volume, high, low, normal dividend, stock split, 52-week high, and 52-week low. Interactive charts allow customization options like different Simple Moving Averages (SMAs) and Exponential Moving Averages (EMAs), Bollinger Bands, time intervals, and additional indicators.
 - **Financial Tab**: Provides financial metrics such as Net Income, Debt, Free Cash Flow, Basic EPS, Net Profit Margin, ROA, ROE, ROCE, Current Ratio, and DE Ratio. Desirable and non-desirable indicators are listed, and detailed financial data is accessible for the company.
 

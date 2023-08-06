@@ -28,7 +28,7 @@ def generate_firmo(data):
     
     col1, col2 = st.columns([4,2])
     col1.write(data.Description.values[0])
-    col2.plotly_chart(holding_chart(data),use_container_width=True,height=200)
+    col2.plotly_chart(holding_chart(data).replace("Insider", "Promoter"),use_container_width=True,height=200)
 
 #Generate Stock Based Insights
 def generate_stock(data):
@@ -255,7 +255,7 @@ def load_insights(data,input_symbol):
         
     st.subheader(data.Exchange.values[0]+" : " +data.Symbol.values[0][:-3])   
         
-    tab1, tab2, tab3 = st.tabs(["Firmo", "Stock", "Financial"])
+    tab1, tab2, tab3 = st.tabs(["Company Details", "Stock", "Financial"])
     
     with tab1:
         generate_firmo(data)

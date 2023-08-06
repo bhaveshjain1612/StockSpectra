@@ -31,30 +31,29 @@ def home():
     how_to_use_text = '''
 
     1. **Set Filters:**
-       - Filter by **Stock Name**: Enter a partial or full name of the stock you are interested in, and the dashboard will filter the relevant results accordingly.
-       - Filter by **Stock Exchange**: Select the desired stock exchange (NSE or BSE) from the dropdown menu. The dashboard will display stocks from the selected exchange.
-       - Filter by **Stock Risk**: Choose one or more stock ranks to filter stocks based on their possible risk factor as analysed. The dashboard will update with the selected stocks.
-         - **High** : These are high risk/high reward stocks.
-         - **Low** : These are low risk/low reward stocks
-         - **Mid** : These are moderate risk/moderate reward stocks
-         - **Caution Advised** : These extremly volatile stocks hence the algorithm advises use of caution
-       - Filter by **Stock Outlook**: Choose one or more stock ranks to filter stocks based on their expected outlook. The dashboard will update with the selected stocks.
-       - Filter by **Financial Strength**: Similar to stock rank, you can filter stocks based on their financial rank. These strengths represent the analysis of latest Year on Year company financials.
-
-    2. **View Options:**
-       - Choose from three viewing options:
-         - **Top Picks**: Displays the top-rated stocks with strong outlook, low - medium risk and financials.
-         - **All**: Shows all stocks based on applied filters.
-         - **Potential Breakout**: Lists stocks that are potential breakout candidates. Most of these are high risk companies so proceed with caution.
-
-    3. **Filter by Sector and Industry:**
-       - Further refine your search by selecting specific sectors and industries. Use the multiselect dropdowns to include or exclude particular sectors/industries.
-       
-    4. **Select tiome period for change :**
-       - Select the Time period for which you want to see price change for.
+        - **Strategy**: Allows you to shuffle between 4 key strategies - > 1 year, 3 - 6 months, 1-2 months and potential breakouts. Only one can be selected in a go.
+        All other parameters are varied basis the strategy selected. If left to *None*, all parameters will stay default.
+        - **Risk/ Reward** : Is to select the risk factor associated with the company.Selecting All allows you to view all 3. More than one can be selected.
+            - *High* : Companies in this group tend tend to have high variation between returns. They may give very high, or negative returns
+            - *Mid* : Companies in this group tend tend to have not very high or very low variation between returns.
+            - *Low* : Companies in this group tend tend to have low variation between returns, i.e. while returns may be less, so is the risk compared to High rtanked companies. 
+        - **Outlook Filter** : Select cpomapines based on the technical analysis outllok of stock data.Selecting All allows you to view all 3. More than one can be selected.
+            - *Positive* : Companies in this group tend are more likley to have positive returns in the future compared to mrket movement.
+            - *Neutral* : Companies in this group tend are more likley to have at par returns in the future compared to market.
+            - *Negative* : Companies in this group tend are more likley to have sub par returns in the future. 
+        - **Financial Strength**: Similar to stock rank, you can filter stocks based on their financial rank. These strengths represent the analysis of latest Year on Year company financials.
+        Selecting All allows you to view all 3. More than one can be selected.
+            - *Strong* : Good YoY Financials compared to others 
+            - *Mid* : Near median FInancial strength of YoY parameters
+            - *Weak* : Sub par recent YoY financials compared to other stocks
+        - **Stock Name**: Enter a partial or full name of the stock you are interested in, and the dashboard will filter the relevant results accordingly.
+        - **Stock Exchange**: Select the desired stock exchange (NSE or BSE) from the dropdown menu. The dashboard will display stocks from the selected exchange. Selecting all displays both NSE and BSE stocks post duplicate removal.
+        - **Sector and Industry**: Further refine your search by selecting specific sectors and industries. Use the multiselect dropdowns to include or exclude particular sectors/industries.
+        - **Dividend**: Select or include companies based on whetrher they provide dividend or not.
+        - **Select time period for change**: Select the Time period for which you want to see price change for
        
     5. **Sort the companies:**
-       - Use the two dropdowns in 3rd row to sort them by Name, Price or Change for the selected interval.
+       - Use the two dropdowns in 3rd row to sort them by Name, Price, Dividend Yield or Change for the selected interval.
 
     6. **Display Companies:**
        - Adjust the number of companies you want to display using the slider.
@@ -79,7 +78,7 @@ def indepth():
     st.markdown("After entering the stock ticker and pressing Enter, the app will display the insights for the specified company.")
     st.markdown("The app also supports loading insights based on the stock ticker passed through the URL query parameters. This allows you to share specific company insights with others by providing the stock ticker in the URL.")
 
-    with st.expander("Firmo Tab",expanded=True):
+    with st.expander("Company Details Tab",expanded=True):
         st.markdown(
             """
             - The "Firmo" tab displays firmographic data about the company.
