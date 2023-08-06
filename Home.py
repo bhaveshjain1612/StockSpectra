@@ -134,6 +134,10 @@ def collective(df):
     # Display the final DataFrame with links
     final = final[['Name', 'Symbol','Exchange', 'Sector', 'Industry', 'Latest Close','Change (%)','Outlook','Risk', 'finrank','Dividend Yield']].rename(columns={'finrank': 'Company Financials', 'stkrank': 'Outlook'})
     final = final.drop_duplicates(subset='Name').set_index('Name')
+    # Beautifying some columns
+    final = final.round(2)
+    final['Company Financials'] = final['Company Financials'].str.title()
+    final['Outlook'] = final['Outlook'].str.title()
     
     #Sorting Functions
     if sort_type != "None":

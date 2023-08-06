@@ -25,7 +25,7 @@ def load_data(file_path):
 def add_links(df):
     # Function to generate the URL for in-depth stock analysis
     def add_ind_depth_url(Symbol):
-        return [f'http://localhost:8501/In_Depth_Stock_Analysis/?symbol={t.replace(".","_")}' for t in Symbol]
+        return [f'https://stock-recommendation.streamlit.app/In_Depth_Stock_Analysis/?symbol={t.replace(".","_")}' for t in Symbol]
 
     # Function to convert URL to clickable link
     def make_clickable(url, text):
@@ -134,6 +134,10 @@ def collective(df):
     # Display the final DataFrame with links
     final = final[['Name', 'Symbol','Exchange', 'Sector', 'Industry', 'Latest Close','Change (%)','Outlook','Risk', 'finrank','Dividend Yield']].rename(columns={'finrank': 'Company Financials', 'stkrank': 'Outlook'})
     final = final.drop_duplicates(subset='Name').set_index('Name')
+    # Beautifying some columns
+    final = final.round(2)
+    final['Company Financials'] = final['Company Financials'].str.title()
+    final['Outlook'] = final['Outlook'].str.title()
     
     #Sorting Functions
     if sort_type != "None":
