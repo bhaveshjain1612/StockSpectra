@@ -244,7 +244,7 @@ def holding_chart(df):
     public = 100-insider-institutions
     
 
-    labels = ["Public", "Insider", "Institutions"]
+    labels = ["Public", "Promoter", "Institutions"]
     values = [public,insider,institutions]
 
     fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.5)])
