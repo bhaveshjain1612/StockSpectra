@@ -414,9 +414,9 @@ def generate_charts(historical_sample, selected_ma, bollinger_filter, holiday_li
     fig.add_trace(candlesticks,row=1, col=1)
     
     for j in historical_sample[historical_sample['Dividends']>0].reset_index().index:
-        pos_x = historical_sample[historical_sample['Dividends']>0].reset_index().date_only.values[j]
-        fig.add_vline( x=pos_x, line_width=1,  line_color="cyan")
-    #    fig.add_annotation(x=pos_x,text="Dividend",textangle=270)
+        pos_x = historical_sample[historical_sample['Dividends']>0].date_only.values[j]
+        fig.add_vline( x=pos_x, line_width=10,  line_color="cyan")
+       fig.add_annotation(x=pos_x,text="Dividend",textangle=270)
     
     fig.update_yaxes(title_text="Price", row=1, col=1)
     
@@ -456,9 +456,6 @@ def generate_charts(historical_sample, selected_ma, bollinger_filter, holiday_li
         fig.add_trace(macd_line, row=2, col=1)
         fig.add_trace(macd_signal_line, row=2, col=1)
         fig.update_yaxes(title_text="MACD", row=2, col=1)
-    
-    
-        
         
     fig.update_yaxes(showgrid=True, minor=dict(showgrid=False),showline=True, linewidth=2)
     fig.update_xaxes(
