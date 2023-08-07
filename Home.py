@@ -30,6 +30,7 @@ def add_links(df):
     # Function to convert URL to clickable link
     def make_clickable(url, text):
         return f'<a target="_self" href="{url}">{text}</a>'
+        #return url
 
     # Add 'Analysis' column with clickable links to DataFrame
     df['Analysis'] = add_ind_depth_url(df.Symbol)
@@ -41,6 +42,7 @@ def add_links(df):
     else:
         st.write(str(df.shape[0]) + " Companies found")
         st.write(df.to_html(escape=False), unsafe_allow_html=True)
+        #st.dataframe(df)
 
 # Function for collective filtering and displaying of data
 def collective(df):
@@ -50,19 +52,26 @@ def collective(df):
     
     #_________________ALL COLUMN 1 FILTERS_____________________________
     #Create Filter by investment strategy
-    strategy =  col1.selectbox("Strategy", ("None","1-2 Months", "3-6 Months", "> 1 Year","Potential Breakout"))
+    strategy_selected =  col1.selectbox("Investment Duration", ("1-2 Months", "5-6 Months", "> 1 Year","Potential Breakout"))
+    #filtering based on possible breakout
+    strategy=strategy_selected
+    if strategy == 'Potential Breakout':
+        final=df[df['Symbol'].isin(load_data("backend_data/breakout.csv")['Unnamed: 0'])]
+        strategy = "1-2 Months"
+    else:
+        final=df
 
     # Filter by stock name
     name = col1.text_input('Enter name')
         
-    # Filter by view option (Top Picks, All, or Potential Breakout)
+    # Filter by Dividend
     dividend = col1.selectbox("Dividend", strategy_allotting(strategy)[3])
         
     #_________________ALL COLUMN 2 FILTERS_____________________________    
     #Filter based on Risk
-    risk_filter = col2.multiselect('Risk/Reward Preference',np.insert(df['Risk'].unique(), 0, "All"), strategy_allotting(strategy)[0])
+    risk_filter = col2.multiselect('Risk/Reward Preference',np.insert(df["Risk "+strategy.replace(" ","")].unique(), 0, "All"), strategy_allotting(strategy)[0])
     if 'All' in risk_filter or risk_filter ==[]:
-        risk_filter = df['Risk'].unique()    
+        risk_filter = df["Risk "+strategy.replace(" ","")].unique()    
         
     # Filter by stock exchange (NSE or BSE)
     exchange = col2.selectbox("Exchange", ("All","NSE", "BSE"))
@@ -76,9 +85,9 @@ def collective(df):
     
     #_________________ALL COLUMN 3 FILTERS_____________________________    
     # Filter by stock rank (outlook)
-    stkrank_filter = col3.multiselect('Outlook Preference',np.insert(df['Outlook'].unique(), 0, "All"), strategy_allotting(strategy)[1])
+    stkrank_filter = col3.multiselect('Outlook Preference',np.insert(df["Outlook "+strategy.replace(" ","")].unique(), 0, "All"), strategy_allotting(strategy)[1])
     if 'All' in stkrank_filter or stkrank_filter ==[]:
-        stkrank_filter = df['Outlook'].unique()    
+        stkrank_filter = df["Outlook "+strategy.replace(" ","")].unique()    
         
     #Filter by sector
     sector_filter = col3.multiselect('Select Sector', np.insert(df['Sector'].unique(), 0, "All"), ['All'])
@@ -104,14 +113,9 @@ def collective(df):
     
     #_________________Executing Filters and showing df_____________________________ 
     
-    #filtering based on possible breakout
-    if strategy == 'Potential Breakout':
-        final=df[df['Symbol'].isin(load_data("backend_data/breakout.csv")['Unnamed: 0'])]
-    else:
-        final=df
     #filtering based on name
     if name:
-        final = final[final['Name'].str.contains(name, case=False) | df['Symbol'].str.contains(name, case=False)]
+        final = final[final['Name'].str.contains(name, case=False) | final['Symbol'].str.contains(name, case=False)]
         
     #dividend filter:
     final = final.loc[lambda x: (x['Dividend Yield'] > 0) if dividend == "Yes" else ((x['Dividend Yield'] == 0) if dividend == "No" else x['Dividend Yield']!='Not Found')]
@@ -123,22 +127,23 @@ def collective(df):
     # Applying industry_filters
     final=final[final['Industry'].isin(industry_filter)]
     # Applying risk_filters
-    final=final[final['Risk'].isin(risk_filter)]
+    final=final[final["Risk "+strategy.replace(" ","")].isin(risk_filter)]
     # Applying outlook_filters
-    final=final[final['Outlook'].isin(stkrank_filter)]
+    final=final[final["Outlook "+strategy.replace(" ","")].isin(stkrank_filter)]
     # Applying financials_filters
     final=final[final['finrank'].isin(finrank_filter)]
     #applying time interval filter
-    final.rename(columns = {"Close_change_"+filter_interval[:3].lower().replace(" ",""):'Change (%)'}, inplace = True)
+    final.rename(columns = {"Close_change_"+filter_interval[:3].lower().replace(" ",""):'Change (%)',
+                           "Risk "+strategy.replace(" ",""): "Risk",
+                           "Outlook "+strategy.replace(" ",""): "Outlook"}, inplace = True)
 
     # Display the final DataFrame with links
-    final = final[['Name', 'Symbol','Exchange', 'Sector', 'Industry', 'Latest Close','Change (%)','Outlook','Risk', 'finrank','Dividend Yield']].rename(columns={'finrank': 'Company Financials', 'stkrank': 'Outlook'})
+    final = final[['Name', 'Symbol','Exchange', 'Sector', 'Industry', 'Latest Close','Change (%)','Outlook','Risk', 'finrank','Dividend Yield']].rename(columns={'finrank': 'Company Financials'})
     final = final.drop_duplicates(subset='Name').set_index('Name')
     # Beautifying some columns
     final = final.round(2)
     final['Company Financials'] = final['Company Financials'].str.title()
     final['Outlook'] = final['Outlook'].str.title()
-    
     #Sorting Functions
     if sort_type != "None":
         final = final.sort_values(by=sort_by,ascending=(sort_type=="Ascending"))

@@ -20,6 +20,8 @@ from plotly.subplots import make_subplots
 # Home Page Fuctions
 ######################################################################################################################################
 
+#collective code to allot financial scores, outlooks and all other scores in one go
+
 #finaical score:
 def financial_scores(row):
     def fin_test(df,param,score,type):
@@ -99,53 +101,44 @@ def base_score(row):
 
     return score
 
-#advanced score
-def stock_score(row):
-    index=0
-    rsi = (70 - row['Latest rsi'] )/10
-    adx = (row['Latest ADX']  - 25)/10
-    maP = (row['Latest Close']  - row['Latest Close_ema_5'] )*10/row['Latest Close_ema_5'] 
-    ma2 = (row['Latest Close_ema_5']  - row['Latest Close_ema_20'])*10/row['Latest Close_ema_20'] 
-    bb2 = (row['Latest Close']  - row['Latest UpperBand2'] )*10/(2*row['Latest RollingStd'] )
-    bb1 = (row['Latest Close']  - row['Latest UpperBand1'] )*10/row['Latest RollingStd'] 
-    fin = row['finscore'] 
-    c1d = row['Close_change_1d']/10 
-    c1w = row['Close_change_5d'] /10    
-    c2w = row['Close_change_10d']/10 
-    c1m = row['Close_change_1m']/10 
-    old = row['stkscore'] 
+def stock_score(row, weights):
+    index = 0
+    rsi = (70 - row['Latest rsi']) / 10
+    adx = (row['Latest ADX'] - 25) / 10
+    maP = (row['Latest Close'] - row['Latest Close_ema_5']) * 10 / row['Latest Close_ema_5']
+    ma2 = (row['Latest Close_ema_5'] - row['Latest Close_ema_20']) * 10 / row['Latest Close_ema_20']
+    bb2 = (row['Latest Close'] - row['Latest UpperBand2']) * 10 / (2 * row['Latest RollingStd'])
+    bb1 = (row['Latest Close'] - row['Latest UpperBand1']) * 10 / row['Latest RollingStd']
+    fin = row['finscore']
+    c1d = row['Close_change_1d'] / 10
+    c1w = row['Close_change_5d'] / 10
+    c2w = row['Close_change_10d'] / 10
+    c1m = row['Close_change_1m'] / 10
+    old = row['stkscore']
 
-    weights = {'rsi':3,
-                'adx':2,
-                'maP':2,
-                'ma2':1,
-                'bb2':3,
-                'bb1':0,
-                'fin':1,
-                'c1d':2,
-                'c1w':2,
-                'c2w':0,
-                'c1m':0,
-                'old':4}
-
-    score = weights['rsi']*rsi
-    score += weights['adx']*adx
-    score += weights['maP']*maP    
-    score += weights['ma2']*ma2    
-    score += weights['bb2']*bb2    
-    score += weights['bb1']*bb1    
-    score += weights['c1d']*c1d    
-    score += weights['c1w']*c1w    
-    score += weights['c2w']*c2w
-    score += weights['c1m']*c1m  
-    score += weights['fin']*fin
-    score += weights['old']*old      
+    score = weights['rsi'] * rsi
+    score += weights['adx'] * adx
+    score += weights['maP'] * maP
+    score += weights['ma2'] * ma2
+    score += weights['bb2'] * bb2
+    score += weights['bb1'] * bb1
+    score += weights['c1d'] * c1d
+    score += weights['c1w'] * c1w
+    score += weights['c2w'] * c2w
+    score += weights['c1m'] * c1m
+    score += weights['fin'] * fin
+    score += weights['old'] * old
 
     return score
 
-#allot risk
-def allot_risk(df):  
-    percentiles = df['overall_score'].quantile([0.5,0.9,0.99])
+# Define weights for each time term
+weights_long = {'rsi': 1, 'adx': 1, 'maP': 1, 'ma2': 1, 'bb2': 0, 'bb1': 0, 'fin': 5, 'c1d': 0, 'c1w': 0, 'c2w': 0, 'c1m': 1, 'old': 1}
+weights_short = {'rsi': 2, 'adx': 2, 'maP': 1, 'ma2': 1, 'bb2': 1, 'bb1': 1, 'fin': 1, 'c1d': 1, 'c1w': 1, 'c2w': 0, 'c1m': 0, 'old': 2}
+weights_mid = {'rsi': 1, 'adx': 1, 'maP': 2, 'ma2': 1, 'bb2': 2, 'bb1': 0, 'fin': 4, 'c1d': 0, 'c1w': 0, 'c2w': 1, 'c1m': 2, 'old': 1}
+
+#allot risk long term
+def allot_risk_long(df):  
+    percentiles = df['overall_score_long'].quantile([0.5,0.9,0.99])
     # Function to assign tier based on percentile value
     def assign_tier(score):
         if score >= percentiles[0.99]:
@@ -158,19 +151,19 @@ def allot_risk(df):
             return 'Caution Advised'
 
     # Apply the function to create the 'Tier' column
-    df['Risk'] = df['overall_score'].apply(assign_tier)
+    df['Risk >1Year'] = df['overall_score_long'].apply(assign_tier)
     return df
 
-#allot outlook
-def allot_outlook(df):
-    u=0.75
-    l=0.25
+#allot outlook long term
+def allot_outlook_long(df):
+    u=0.8
+    l=0.2
     m=0.5
     out_df =pd.DataFrame()
     for req in ['High','Low','Mid','Caution Advised']:
-        x = df[df['Risk']==req]
+        x = df[df['Risk >1Year'] ==req]
 
-        percentiles = x['overall_score'].quantile([u,m,l])
+        percentiles = x['overall_score_long'].quantile([u,m,l])
 
         def assign_tier(score):
             if score >= percentiles[u] :
@@ -180,16 +173,125 @@ def allot_outlook(df):
             else:
                 return 'C'
 
-        x['Outlook'] = df['overall_score'].apply(assign_tier)
+        x['Outlook'] = df['overall_score_long'].apply(assign_tier)
         
         if req=='High':
-            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'C': 'neutral', 'B': 'negative'})
+            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
         elif req=='Mid':
-            x['Outlook'] = x['Outlook'].replace({'B': 'positive', 'C': 'neutral', 'A': 'negative'})
+            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
         elif req=='Low':
-            x['Outlook'] = x['Outlook'].replace({'C': 'positive', 'A': 'neutral', 'B': 'negative'})
+            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
+        else:
+            x['Outlook'] = x['Outlook'].replace({'C': 'positive', 'B': 'neutral', 'A': 'negative'})
+            
+        x= x.rename(columns={'Outlook':'Outlook >1Year'})
+        
+        out_df = pd.concat([out_df,x],axis=0)
+    return out_df
+
+
+#allot risk short term
+def allot_risk_short(df):  
+    percentiles = df['overall_score_short'].quantile([0.5,0.9,0.99])
+    # Function to assign tier based on percentile value
+    def assign_tier(score):
+        if score >= percentiles[0.99]:
+            return 'Low'
+        elif score >= percentiles[0.9]:
+            return 'Mid'
+        elif score >= percentiles[0.5]:
+            return 'High'
+        else:
+            return 'Caution Advised'
+
+    # Apply the function to create the 'Tier' column
+    df['Risk 1-2Months'] = df['overall_score_short'].apply(assign_tier)
+    return df
+
+#allot outlook short term
+def allot_outlook_short(df):
+    u=0.75
+    l=0.25
+    m=0.5
+    out_df =pd.DataFrame()
+    for req in ['High','Low','Mid','Caution Advised']:
+        x = df[df['Risk 1-2Months']==req]
+
+        percentiles = x['overall_score_short'].quantile([u,m,l])
+
+        def assign_tier(score):
+            if score >= percentiles[u] :
+                return 'A'
+            elif score >= percentiles[l] :
+                return 'B'
+            else:
+                return 'C'
+
+        x['Outlook'] = df['overall_score_short'].apply(assign_tier)
+        
+        if req=='High':
+            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
+        elif req=='Mid':
+            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
+        elif req=='Low':
+            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
         else:
             x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
+            
+        x= x.rename(columns={'Outlook':'Outlook 1-2Months'})
+        
+        out_df = pd.concat([out_df,x],axis=0)
+    return out_df
+
+#Risk alloting mid
+def allot_risk_mid(df):  
+    percentiles = df['overall_score_mid'].quantile([0.5,0.9,0.99])
+    # Function to assign tier based on percentile value
+    def assign_tier(score):
+        if score >= percentiles[0.99]:
+            return 'Low'
+        elif score >= percentiles[0.9]:
+            return 'Mid'
+        elif score >= percentiles[0.5]:
+            return 'High'
+        else:
+            return 'Caution Advised'
+
+    # Apply the function to create the 'Tier' column
+    df['Risk 5-6Months'] = df['overall_score_mid'].apply(assign_tier)
+    return df
+
+#Allot outlook mid term
+def allot_outlook_mid(df):
+    u=0.8
+    l=0.2
+    m=0.5
+    out_df =pd.DataFrame()
+    for req in ['High','Low','Mid','Caution Advised']:
+        x = df[df['Risk 5-6Months']==req]
+
+        percentiles = x['overall_score_mid'].quantile([u,m,l])
+
+        def assign_tier(score):
+            if score >= percentiles[u] :
+                return 'A'
+            elif score >= percentiles[l] :
+                return 'B'
+            else:
+                return 'C'
+
+        x['Outlook'] = df['overall_score_mid'].apply(assign_tier)
+        
+        if req=='High':
+            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
+        elif req=='Mid':
+            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
+        elif req=='Low':
+            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
+        else:
+            x['Outlook'] = x['Outlook'].replace({'C': 'positive', 'B': 'neutral', 'A': 'negative'})
+        
+        x= x.rename(columns={'Outlook':'Outlook 5-6Months'})
         
         out_df = pd.concat([out_df,x],axis=0)
     return out_df
@@ -217,17 +319,29 @@ def allot_tags(df):
     #allotting scores
     df['finscore'] = df.apply(financial_scores,axis=1)
     df['stkscore'] = df.apply(base_score,axis=1)
-    df['overall_score'] = df.apply(stock_score,axis=1)
     df = finrank(df)
-    df=allot_risk(df)
-    df=allot_outlook(df)
+    #allotting long range scores
+    #df['overall_score_long'] = df.apply(stock_score_long,axis=1)
+    df['overall_score_long'] = df.apply(stock_score, args=(weights_long,), axis=1)
+    df=allot_risk_long(df)
+    df=allot_outlook_long(df)
+    #allotting short term scores
+    #df['overall_score_short'] = df.apply(stock_score_short,axis=1)
+    df['overall_score_short'] = df.apply(stock_score, args=(weights_short,), axis=1)
+    df=allot_risk_short(df)
+    df=allot_outlook_short(df)
+    #allotting mid term scores
+    #df['overall_score_mid'] = df.apply(stock_score_mid,axis=1)
+    df['overall_score_mid'] = df.apply(stock_score, args=(weights_mid,), axis=1)
+    df=allot_risk_mid(df)
+    df=allot_outlook_mid(df)
     return df
 
 #allot strategy based on selected filter
 def strategy_allotting(argument):
     switcher = {
         "> 1 Year": [['Low'],['positive','neutral'],['strong','mid'],("Yes","All","No")],
-        "3-6 Months": [['Low','Mid'],['positive','neutral'],['strong'],("All","Yes","No")],
+        "5-6 Months": [['Low','Mid'],['positive','neutral'],['strong'],("All","Yes","No")],
         "1-2 Months": [['Mid','High'],['positive'],['All'],("All","Yes","No")],
     }
 
@@ -244,7 +358,7 @@ def holding_chart(df):
     public = 100-insider-institutions
     
 
-    labels = ["Public", "Promoter", "Institutions"]
+    labels = ["Public", "Insider", "Institutions"]
     values = [public,insider,institutions]
 
     fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.5)])
@@ -413,12 +527,10 @@ def generate_charts(historical_sample, selected_ma, bollinger_filter, holiday_li
     # Plot OHLC on 1st row
     fig.add_trace(candlesticks,row=1, col=1)
     
-    #for div in historical_sample[historical_sample['Dividends']>0].reset_index().index:
-        #pos_x = historical_sample[historical_sample['Dividends']>0].reset_index().date_only.values[div]
-        #pos_y = historical_sample[historical_sample['Dividends']>0].reset_index().Close.values[div]
-        #fig.add_vline( x=pos_x, line_width=10,  line_color="cyan")
-        #fig.add_annotation(x=pos_x,text="Dividend",textangle=270, row=1, col=1)
-        #fig['layout'].update(annotations=[dict(x=pos_x, y=pos_y, xref='x1', yref='y1',text='Dividend')])
+    for j in historical_sample[historical_sample['Dividends']>0].reset_index().index:
+        pos_x = historical_sample[historical_sample['Dividends']>0].reset_index().date_only.values[j]
+        fig.add_vline( x=pos_x, line_width=1,  line_color="cyan")
+    #    fig.add_annotation(x=pos_x,text="Dividend",textangle=270)
     
     fig.update_yaxes(title_text="Price", row=1, col=1)
     
@@ -436,7 +548,6 @@ def generate_charts(historical_sample, selected_ma, bollinger_filter, holiday_li
         fig.add_trace(bollinger_u_2,row=1, col=1)
         fig.add_trace(bollinger_l_2,row=1, col=1)
         fig.add_trace(rolling_mean,row=1, col=1)
-    
 
     for i in selected_ma:    
         fig.add_trace(ma_traces[i],row=1, col=1)
@@ -458,6 +569,9 @@ def generate_charts(historical_sample, selected_ma, bollinger_filter, holiday_li
         fig.add_trace(macd_line, row=2, col=1)
         fig.add_trace(macd_signal_line, row=2, col=1)
         fig.update_yaxes(title_text="MACD", row=2, col=1)
+    
+    
+        
         
     fig.update_yaxes(showgrid=True, minor=dict(showgrid=False),showline=True, linewidth=2)
     fig.update_xaxes(

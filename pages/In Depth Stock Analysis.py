@@ -14,6 +14,28 @@ st.set_page_config(page_title="Detailed Analysis", layout = "wide")
 def load_data(file_path):
     return pd.read_csv(file_path)
 
+# Function to add clickable links to the DataFrame
+def add_links(df):
+    # Function to generate the URL for in-depth stock analysis
+    def add_ind_depth_url(Symbol):
+        return [f'https://stock-recommendation.streamlit.app/In_Depth_Stock_Analysis/?symbol={t.replace(".","_")}' for t in Symbol]
+
+    # Function to convert URL to clickable link
+    def make_clickable(url, text):
+        return f'<a target="_self" href="{url}">{text}</a>'
+        #return url
+
+    # Add 'Analysis' column with clickable links to DataFrame
+    df['Analysis'] = add_ind_depth_url(df.Symbol)
+    df['Analysis'] = df['Analysis'].apply(make_clickable, text='See in Depth')
+        
+    if df.empty:
+        st.error("No companies found for the selection")
+        st.empty()
+    else:
+        st.write(str(df.shape[0]) + " Companies found")
+        st.write(df.to_html(escape=False), unsafe_allow_html=True)
+
 #Generate FirmoGraphic Data
 def generate_firmo(data):
     col1, col2 = st.columns([4,2])
@@ -72,7 +94,6 @@ def generate_stock(data):
     if len(stksummary)>1:
         col1, col2, col3 = st.columns(3)
         
-        
         if len(stksummary)%2 ==1:
             for m in list(stksummary.items())[:(len(stksummary)//2)+1]:
                 col2.write(m[1]['Display'])
@@ -90,8 +111,11 @@ def generate_stock(data):
         for m in list(stksummary.items()):
             col2.write(m[1]['Display'])
     
-    col1.header(data.Outlook.values[0].upper())
-    col1.subheader(data.Risk.values[0]+" Risk / "+data.Risk.values[0]+" Reward")
+    #col1.header(data.Outlook.values[0].upper())
+    #col1.subheader(data.Risk.values[0]+" Risk / "+data.Risk.values[0]+" Reward")
+    strategy =  col1.selectbox("Investment Duration", ("1-2 Months", "5-6 Months", "> 1 Year"))
+    outllok_risk_df = data[['Outlook '+strategy.replace(" ",""),'Risk '+strategy.replace(" ","")]].rename(columns={'Outlook '+strategy.replace(" ",""):"Outlook",'Risk '+strategy.replace(" ",""):'Risk'})
+    col1.subheader(outllok_risk_df.Outlook.values[0].title()+" Outlook - "+outllok_risk_df.Risk.values[0]+" Risk")
     
     st.divider()
     
@@ -227,7 +251,6 @@ def generate_financials(data):
             con.append(s[i]['To display'][0])
             col2.write(s[i]['To display'][0])
 
-    
     #display
     with st.expander("Income Statement"):
         st.dataframe(fin[fin['sheet']=='i'].drop(['Unnamed: 0','sheet'],axis=1))
@@ -255,7 +278,7 @@ def load_insights(data,input_symbol):
         
     st.subheader(data.Exchange.values[0]+" : " +data.Symbol.values[0][:-3])   
         
-    tab1, tab2, tab3 = st.tabs(["Company Details", "Stock", "Financial"])
+    tab1, tab2, tab3 = st.tabs(["Firmo", "Stock", "Financial"])
     
     with tab1:
         generate_firmo(data)
@@ -269,13 +292,19 @@ def main():
     data = load_data("backend_data/database.csv")
     data = allot_tags(data)
     
-    input_symbol = st.sidebar.text_input("Enter stock Ticker")       
+    input_symbol = st.sidebar.text_input("Enter stock ticker/name")       
     
     if input_symbol:
         st.experimental_set_query_params()
-        data = data[(data['Symbol'] == input_symbol.upper()+".NS") | (data['Symbol'] == input_symbol.upper()+".BO")].reset_index().drop('index',axis=1)        
-        load_insights(data,input_symbol)
-        
+        data_company = data[(data['Symbol'] == input_symbol.upper()+".NS") | (data['Symbol'] == input_symbol.upper()+".BO")].reset_index().drop('index',axis=1)    
+        #load_insights(data,input_symbol)
+        if data_company.shape[0] == 0:
+            found = data[data['Name'].str.contains(input_symbol, case=False) | data['Symbol'].str.contains(input_symbol, case=False)][['Name','Symbol','Exchange','Sector','Industry','Latest Close']].set_index('Name')
+            st.subheader("Results of search:")
+            add_links(found)
+        else:
+            load_insights(data_company,input_symbol)
+  
     elif st.experimental_get_query_params() != {}:
         in_s = st.experimental_get_query_params()['symbol'][0][:-3]
         data = data[(data['Symbol']==in_s.upper()+".NS")|(data['Symbol']==in_s.upper()+".BO")].reset_index().drop('index',axis=1)
