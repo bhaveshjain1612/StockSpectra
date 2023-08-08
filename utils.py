@@ -247,7 +247,7 @@ def holding_chart(df):
     public = 100-insider-institutions
     
 
-    labels = ["Public", "Insider", "Institutions"]
+    labels = ["Public", "Promoter", "Institutions"]
     values = [public,insider,institutions]
 
     fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.5)])
@@ -458,10 +458,7 @@ def generate_charts(historical_sample, selected_ma, bollinger_filter, holiday_li
         fig.add_trace(macd_line, row=2, col=1)
         fig.add_trace(macd_signal_line, row=2, col=1)
         fig.update_yaxes(title_text="MACD", row=2, col=1)
-    
-    
-        
-        
+
     fig.update_yaxes(showgrid=True, minor=dict(showgrid=False),showline=True, linewidth=2)
     fig.update_xaxes(
             rangeslider_visible=False,showgrid=True,showline=True, linewidth=2,
