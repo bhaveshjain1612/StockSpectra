@@ -278,7 +278,7 @@ def load_insights(data,input_symbol):
         
     st.subheader(data.Exchange.values[0]+" : " +data.Symbol.values[0][:-3])   
         
-    tab1, tab2, tab3 = st.tabs(["Firmo", "Stock", "Financial"])
+    tab1, tab2, tab3 = st.tabs(["Company Details", "Stock", "Financial"])
     
     with tab1:
         generate_firmo(data)
