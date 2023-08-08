@@ -50,253 +50,130 @@ def financial_scores(row):
     
     return score
 
-#base score
-def base_score(row):
-    score = 0
+#allotting a score based on stock performance
+def allot_outlook(df):
 
-    #indicator 1 - macd > signal and macd moving upwards
-    try:
-        if row['Latest macd'] > row['Latest macd_ema_9'] and row['macd_change_5d']>0:
-            score+=1
+    # Weights for each parameter
+    short_term_weights = {
+        'rsi': 3,
+        'macd': 2,
+        'adx': 1,
+        'bollinger': 3,
+        'pe_ratio': 1,
+        'moving_averages': 2,
+        'financials_yoy': 1
+    }
+
+    mid_term_weights = {
+        'rsi': 2,
+        'macd': 3,
+        'adx': 3,
+        'bollinger': 2,
+        'pe_ratio': 2,
+        'moving_averages': 3,
+        'financials_yoy': 2
+    }
+
+    long_term_weights = {
+        'rsi': 1,
+        'macd': 2,
+        'adx': 2,
+        'bollinger': 1,
+        'pe_ratio': 3,
+        'moving_averages': 3,
+        'financials_yoy': 3
+    }
+
+    for index, row in df.iterrows():
+        
+        short_term_score = 0
+        mid_term_score = 0
+        long_term_score = 0
+
+        # RSI logic
+        if row['Latest rsi'] < 30:
+            short_term_score += short_term_weights['rsi']
+        elif row['Latest rsi'] > 70:
+            short_term_score -= short_term_weights['rsi']
+
+        # ADX logic
+        if row['Latest ADX'] > 25:
+            mid_term_score += mid_term_weights['adx']
         else:
-            score-=1
-    except:
-        score+=0
+            mid_term_score -= mid_term_weights['adx']
 
-    #indicator 2 - rsi should be below 70, shouuld not be increasing if more than 60, should not be decreasing if less than 30
-    try:
-        if row['Latest rsi']>70 or (row['Latest rsi']>60 and row['rsi_change_5d']>0) or (row['Latest rsi']<30 and row['rsi_change_5d']<0):
-            score-=2
+        # MACD logic
+        if row['Latest macd'] > 0:
+            short_term_score += short_term_weights['macd']
+            mid_term_score += mid_term_weights['macd']
+
+        # Bollinger Bands logic
+        price_position = (row['Latest Close'] - row['Latest RollingMean']) / (row['Latest UpperBand2'] - row['Latest LowerBand2'])
+        if price_position < -0.5:
+            short_term_score += short_term_weights['bollinger']
+        elif price_position > 0.5:
+            short_term_score -= short_term_weights['bollinger']
+
+        # Price change logic
+        if row['Close_change_1d'] > 0:
+            short_term_score += 1
+        if row['Close_change_1m'] > 0:
+            mid_term_score += 1
+            long_term_score += 1
+        '''
+        
+        # P/E Ratio logic
+        if row['P/E ratio'] < row['Industry Median P/E Ratio']:
+            long_term_score += long_term_weights['pe_ratio']
         else:
-            score+=2
-    except:
-        score+=0
-
-    #indicator 3 - increasing price along with strong trend(ADX)
-    try:
-        if row['Latest ADX']>25 and row['Close_change_5d']>0 and row['ADX_change_5d']>0:
-            score+=1
+            long_term_score -= long_term_weights['pe_ratio']
+        
+        # Moving Averages logic
+        if row['sma50'] > row['sma200']:
+            mid_term_score += mid_term_weights['moving_averages']
+            long_term_score += long_term_weights['moving_averages']
         else:
-            score-=1
-    except:
-        score+=0  
+            mid_term_score -= mid_term_weights['moving_averages']
+        '''
+        # Financials YoY score logic
+        short_term_score += row['finscore'] * short_term_weights['financials_yoy']
+        mid_term_score += row['finscore'] * mid_term_weights['financials_yoy']
+        long_term_score += row['finscore'] * long_term_weights['financials_yoy']
 
-    #indicator 4 - price above ema and ema anove sma
-    try:
-        if row['Latest Close']>row['Latest ema_5d'] and row['Latest sma_20d']<row['Latest ema_5d']:
-            score+=1
-        else:
-            score-=1
-    except:
-        score+=0  
+        # Translating the scores into outlooks
+        df.at[index, 'short_term_score'] = short_term_score 
+        df.at[index, 'mid_term_score'] = mid_term_score 
+        df.at[index, 'long_term_score'] = long_term_score 
+        
+        def allot_risk(df,col,outname):
+            u = 0.75
+            l = 0.25
+            #out_df =pd.DataFrame()
 
-    #indicator 5 - bollinger bands
-    try:
-        if row['Latest Close']>row['Latest UpperBand1'] and  row['Latest Close']<row['Latest UpperBand2']:
-            score+=1
-        else:
-            score-=1
-    except:
-        score+=0  
+            percentiles = df[col].quantile([u,l])
 
-    return score
+            def assign_tier(score):
+                #if score >= percentiles[u2] :
+                #    return 'Very High'
+                if score >= percentiles[u] :
+                    return 'positive'
+                if score >= percentiles[l] :
+                    return 'neutral'
+                #if score >= percentiles[l] :
+                #    return 'Low'
+                else:
+                    return 'negative'
 
-def stock_score(row, weights):
-    index = 0
-    rsi = (70 - row['Latest rsi']) / 10
-    adx = (row['Latest ADX'] - 25) / 10
-    maP = (row['Latest Close'] - row['Latest Close_ema_5']) * 10 / row['Latest Close_ema_5']
-    ma2 = (row['Latest Close_ema_5'] - row['Latest Close_ema_20']) * 10 / row['Latest Close_ema_20']
-    bb2 = (row['Latest Close'] - row['Latest UpperBand2']) * 10 / (2 * row['Latest RollingStd'])
-    bb1 = (row['Latest Close'] - row['Latest UpperBand1']) * 10 / row['Latest RollingStd']
-    fin = row['finscore']
-    c1d = row['Close_change_1d'] / 10
-    c1w = row['Close_change_5d'] / 10
-    c2w = row['Close_change_10d'] / 10
-    c1m = row['Close_change_1m'] / 10
-    old = row['stkscore']
+            df[outname] = df[col].apply(assign_tier)
 
-    score = weights['rsi'] * rsi
-    score += weights['adx'] * adx
-    score += weights['maP'] * maP
-    score += weights['ma2'] * ma2
-    score += weights['bb2'] * bb2
-    score += weights['bb1'] * bb1
-    score += weights['c1d'] * c1d
-    score += weights['c1w'] * c1w
-    score += weights['c2w'] * c2w
-    score += weights['c1m'] * c1m
-    score += weights['fin'] * fin
-    score += weights['old'] * old
+            return df
 
-    return score
-
-# Define weights for each time term
-weights_long = {'rsi': 1, 'adx': 1, 'maP': 1, 'ma2': 1, 'bb2': 0, 'bb1': 0, 'fin': 5, 'c1d': 0, 'c1w': 0, 'c2w': 0, 'c1m': 1, 'old': 1}
-weights_short = {'rsi': 2, 'adx': 2, 'maP': 1, 'ma2': 1, 'bb2': 1, 'bb1': 1, 'fin': 1, 'c1d': 1, 'c1w': 1, 'c2w': 0, 'c1m': 0, 'old': 2}
-weights_mid = {'rsi': 1, 'adx': 1, 'maP': 2, 'ma2': 1, 'bb2': 2, 'bb1': 0, 'fin': 4, 'c1d': 0, 'c1w': 0, 'c2w': 1, 'c1m': 2, 'old': 1}
-
-#allot risk long term
-def allot_risk_long(df):  
-    percentiles = df['overall_score_long'].quantile([0.5,0.9,0.99])
-    # Function to assign tier based on percentile value
-    def assign_tier(score):
-        if score >= percentiles[0.99]:
-            return 'Low'
-        elif score >= percentiles[0.9]:
-            return 'Mid'
-        elif score >= percentiles[0.5]:
-            return 'High'
-        else:
-            return 'Caution Advised'
-
-    # Apply the function to create the 'Tier' column
-    df['Risk >1Year'] = df['overall_score_long'].apply(assign_tier)
+    df = allot_risk(df,'short_term_score','Outlook 1-2Months')
+    df = allot_risk(df,'mid_term_score','Outlook 5-6Months')
+    df = allot_risk(df,'long_term_score','Outlook >1Year')
     return df
 
-#allot outlook long term
-def allot_outlook_long(df):
-    u=0.8
-    l=0.2
-    m=0.5
-    out_df =pd.DataFrame()
-    for req in ['High','Low','Mid','Caution Advised']:
-        x = df[df['Risk >1Year'] ==req]
-
-        percentiles = x['overall_score_long'].quantile([u,m,l])
-
-        def assign_tier(score):
-            if score >= percentiles[u] :
-                return 'A'
-            elif score >= percentiles[l] :
-                return 'B'
-            else:
-                return 'C'
-
-        x['Outlook'] = df['overall_score_long'].apply(assign_tier)
-        
-        if req=='High':
-            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
-        elif req=='Mid':
-            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
-        elif req=='Low':
-            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
-        else:
-            x['Outlook'] = x['Outlook'].replace({'C': 'positive', 'B': 'neutral', 'A': 'negative'})
-            
-        x= x.rename(columns={'Outlook':'Outlook >1Year'})
-        
-        out_df = pd.concat([out_df,x],axis=0)
-    return out_df
-
-
-#allot risk short term
-def allot_risk_short(df):  
-    percentiles = df['overall_score_short'].quantile([0.5,0.9,0.99])
-    # Function to assign tier based on percentile value
-    def assign_tier(score):
-        if score >= percentiles[0.99]:
-            return 'Low'
-        elif score >= percentiles[0.9]:
-            return 'Mid'
-        elif score >= percentiles[0.5]:
-            return 'High'
-        else:
-            return 'Caution Advised'
-
-    # Apply the function to create the 'Tier' column
-    df['Risk 1-2Months'] = df['overall_score_short'].apply(assign_tier)
-    return df
-
-#allot outlook short term
-def allot_outlook_short(df):
-    u=0.75
-    l=0.25
-    m=0.5
-    out_df =pd.DataFrame()
-    for req in ['High','Low','Mid','Caution Advised']:
-        x = df[df['Risk 1-2Months']==req]
-
-        percentiles = x['overall_score_short'].quantile([u,m,l])
-
-        def assign_tier(score):
-            if score >= percentiles[u] :
-                return 'A'
-            elif score >= percentiles[l] :
-                return 'B'
-            else:
-                return 'C'
-
-        x['Outlook'] = df['overall_score_short'].apply(assign_tier)
-        
-        if req=='High':
-            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
-        elif req=='Mid':
-            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
-        elif req=='Low':
-            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
-        else:
-            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
-            
-        x= x.rename(columns={'Outlook':'Outlook 1-2Months'})
-        
-        out_df = pd.concat([out_df,x],axis=0)
-    return out_df
-
-#Risk alloting mid
-def allot_risk_mid(df):  
-    percentiles = df['overall_score_mid'].quantile([0.5,0.9,0.99])
-    # Function to assign tier based on percentile value
-    def assign_tier(score):
-        if score >= percentiles[0.99]:
-            return 'Low'
-        elif score >= percentiles[0.9]:
-            return 'Mid'
-        elif score >= percentiles[0.5]:
-            return 'High'
-        else:
-            return 'Caution Advised'
-
-    # Apply the function to create the 'Tier' column
-    df['Risk 5-6Months'] = df['overall_score_mid'].apply(assign_tier)
-    return df
-
-#Allot outlook mid term
-def allot_outlook_mid(df):
-    u=0.8
-    l=0.2
-    m=0.5
-    out_df =pd.DataFrame()
-    for req in ['High','Low','Mid','Caution Advised']:
-        x = df[df['Risk 5-6Months']==req]
-
-        percentiles = x['overall_score_mid'].quantile([u,m,l])
-
-        def assign_tier(score):
-            if score >= percentiles[u] :
-                return 'A'
-            elif score >= percentiles[l] :
-                return 'B'
-            else:
-                return 'C'
-
-        x['Outlook'] = df['overall_score_mid'].apply(assign_tier)
-        
-        if req=='High':
-            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
-        elif req=='Mid':
-            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
-        elif req=='Low':
-            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
-        else:
-            x['Outlook'] = x['Outlook'].replace({'C': 'positive', 'B': 'neutral', 'A': 'negative'})
-        
-        x= x.rename(columns={'Outlook':'Outlook 5-6Months'})
-        
-        out_df = pd.concat([out_df,x],axis=0)
-    return out_df
-
-#Allotting financial Tag
+#finanical strength ranking
 def finrank(df):
     u = df.finscore.describe()['75%']
     l = df.finscore.describe()['25%']
@@ -314,28 +191,40 @@ def finrank(df):
     
     return df
 
+#allcoate risk based on standard deviation
+def allot_risk(df,col,outname):
+    u = 0.6
+    l = 0.4
+    #out_df =pd.DataFrame()
 
-def allot_tags(df):
-    #allotting scores
-    df['finscore'] = df.apply(financial_scores,axis=1)
-    df['stkscore'] = df.apply(base_score,axis=1)
-    df = finrank(df)
-    #allotting long range scores
-    #df['overall_score_long'] = df.apply(stock_score_long,axis=1)
-    df['overall_score_long'] = df.apply(stock_score, args=(weights_long,), axis=1)
-    df=allot_risk_long(df)
-    df=allot_outlook_long(df)
-    #allotting short term scores
-    #df['overall_score_short'] = df.apply(stock_score_short,axis=1)
-    df['overall_score_short'] = df.apply(stock_score, args=(weights_short,), axis=1)
-    df=allot_risk_short(df)
-    df=allot_outlook_short(df)
-    #allotting mid term scores
-    #df['overall_score_mid'] = df.apply(stock_score_mid,axis=1)
-    df['overall_score_mid'] = df.apply(stock_score, args=(weights_mid,), axis=1)
-    df=allot_risk_mid(df)
-    df=allot_outlook_mid(df)
+    percentiles = df[col].quantile([u,l])
+    
+    def assign_tier(score):
+        #if score >= percentiles[u2] :
+        #    return 'Very High'
+        if score >= percentiles[u] :
+            return 'High'
+        if score >= percentiles[l] :
+            return 'Mid'
+        #if score >= percentiles[l] :
+        #    return 'Low'
+        else:
+            return 'Low'
+
+    df[outname] = df[col].apply(assign_tier)
+       
     return df
+
+#funaction to allot all tags
+def allot_tags(df):
+    df['finscore'] = df.apply(financial_scores,axis=1)
+    df = allot_risk(df,'volatility_1M','Risk 1-2Months')
+    df = allot_risk(df,'volatility_6M','Risk 5-6Months')
+    df = allot_risk(df,'volatility_1Y','Risk >1Year')
+    df = finrank(df)
+    df = allot_outlook(df)
+    return df
+
 
 #allot strategy based on selected filter
 def strategy_allotting(argument):

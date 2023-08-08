@@ -157,7 +157,7 @@ def collective(df):
 def main():
     # Load data from the CSV file and preprocess
     df = load_data("backend_data/database.csv")
-
+    
     df = allot_tags(df)
     df['Annual Dividend'] = df['Dividend Rate'].replace('Not Found', '0').astype(float)
     df['Dividend Yield'] = df['Annual Dividend']*100/df['Latest Close']

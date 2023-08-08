@@ -306,6 +306,17 @@ def calc_change(data, series, duration, changetype):
         return round(((value_end - value_start) / value_start) * 100, 2)
     else:
         return (value_end - value_start)
+    
+# Function to calculate 3 month, 1 uyear, 1month standard deviation
+def stds(data):
+    volatility = pd.DataFrame()
+    # If duration is not in days (e.g., 1 month is (1, 'M')), calculate the starting and ending values accordingly
+    for duration in [(1,"M"),(3,"M"),(6,"M"),(1,"Y")]:
+        end = data['date_only'][0]
+        start = end - np.timedelta64(duration[0], duration[1])
+        volatility['std_'+str(duration[0])+ duration[1]] = [data[data['date_only'] >= start]['Close'].std()]
+    #print(volatility)
+    return volatility
 
 # Function to calculate the most recent values for given columns
 def calc_most_recent(data, column_list):
@@ -338,6 +349,7 @@ def collect_features(df):
     
     temp = pd.concat([temp, pd.DataFrame(temp_latest, index=[0])], axis=1)
     temp = pd.concat([temp, changes], axis=1)
+    temp = pd.concat([temp, stds(df)], axis=1)
     
     temp['symbol'] = df['symbol'].values[0]
         
@@ -345,7 +357,7 @@ def collect_features(df):
 
 # Read the company list from the 'db_firmo.csv' file
 db_firmo = pd.read_csv("db_firmo.csv")
-symbol_list = db_firmo.Symbol
+symbol_list = db_firmo.Symbol#.head(10)
 kpi_df = pd.DataFrame()
 
 # Loop through the list of symbols, compile historical data and technical indicators, and generate features for each company
@@ -633,16 +645,22 @@ database['EPS (trailing)'] = database['EPS (trailing)'].astype('float')
 database['P/E ratio']=database['Latest Close']/database['EPS (trailing)']
 database = add_sector_industry_pe_median(database)
 
+#calculating volatility
+database['volatility_1M'] = database['std_1M']/database['Latest Close']
+database['volatility_3M'] = database['std_3M']/database['Latest Close']
+database['volatility_6M'] = database['std_6M']/database['Latest Close']
+database['volatility_1Y'] = database['std_1Y']/database['Latest Close']
+
 #exporting the final db
 database["Latest created_on"] = datetime.now()
 database.to_csv('database.csv', index=False,mode='w')
 print("Data Updated")
 
-
 ####################################################################################################################################################
 #Breakouts
 ####################################################################################################################################################
 #calculate bollinger breaouts
+
 def check_bollinger_flag(df):
     bollinger_band = df.UpperBand2
     closing_prices = df.Close
