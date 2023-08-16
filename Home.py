@@ -153,7 +153,46 @@ def collective(df):
  
     with st.container():
         add_links(final)
+        
+#function for top picks
+def top_picks(df):
+
+    #selecting companies with high short volatility, mid to low in mid ter and low in long term
+    tp = df[df['finrank']=='strong']
+    tp = tp[tp['Outlook 1-2Months']=='positive']
+    tp = tp[tp['Outlook 5-6Months']=='positive']
+    tp = tp[tp['Outlook >1Year']=='positive']
+    tp = tp[(tp['Risk 1-2Months']=='Mid') | (tp['Risk 1-2Months']=='High')]
+    tp = tp[(tp['Risk 5-6Months']=='Low') | (tp['Risk 5-6Months']=='Mid')]
+    tp = tp[tp['Risk >1Year']=='Low']
+    tp = tp[tp['Dividend Yield']>0]
+
+    tp = tp[['Name','Symbol','Sector','Industry','Latest Close','Close_change_1d','Dividend Yield']].rename(columns={'Close_change_1d':'% Change'}).drop_duplicates(subset=['Name']).set_index('Name').round(2)
     
+    if tp.shape[0] > 10:
+        tp = tp.head(st.slider('Companies to Display', 0, tp.shape[0], 10))
+ 
+    with st.container():
+        add_links(tp)
+        
+#function for top gainers
+def top_price_changes(df):
+    
+    # Filter by stock exchange (NSE or BSE)
+    col1,col2 = st.columns(2)
+    
+    chng_type = col1.selectbox("Price change type", ("Top Gainers", "Top Losers"))
+    
+    exchange_g = col2.selectbox("Exchange", ("NSE", "BSE"))
+    tg = df[df['Exchange']==exchange_g]
+    
+    tg = tg[['Name','Symbol','Sector','Industry','Latest Close','Close_change_1d','Volume_change_1d']]
+    tg = tg.rename(columns={'Close_change_1d':'Close Change(%)','Volume_change_1d':'Volume Change(%)'}).drop_duplicates(subset=['Name']).set_index('Name')
+    tg = tg.sort_values(by = 'Close Change(%)', ascending = (chng_type=="Top Losers")).head(10).round(2)
+    
+    add_links(tg)
+    
+
 def main():
     # Load data from the CSV file and preprocess
     df = load_data("backend_data/database.csv")
@@ -167,7 +206,17 @@ def main():
     st.write("Updated On: " + df['Latest date_only'].values[0])
     
     # Display the filtered data using the collective function
-    collective(df)
+    tab1, tab2, tab3 = st.tabs(["Top Picks", "Top Price Changes","Screener"])
+
+    with tab3:
+        collective(df)
+        
+    with tab1:
+        top_picks(df)
+        
+    with tab2:
+        top_price_changes(df)
+
 
 # Check if the script is being run as the main module
 if __name__ == "__main__":
