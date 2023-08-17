@@ -280,9 +280,10 @@ def generate_news(name):
             col1, col2, col3 = st.columns([1,1,5])
             col1.write(news.source[i])
             col2.write(news.date[i])
-            link  = "https//:"+news.link[i]  
-            st.write(news.summary[i])
-            st.write("[Read More....]("+link+")")
+            url  = "https://"+news.link[i]  
+            #st.write(news.summary[i])
+            st.write("[Read More.... ](%s)" % url)
+            #st.write("[Read More....]("+link+")")
             st.divider()
     except:
         st.write("no News articles about the company in past 14 days")
