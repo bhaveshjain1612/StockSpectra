@@ -7,5 +7,4 @@ streamlit-autorefresh==1.0.1
 plotly==5.15.0
 requests==2.25.1
 beautifulsoup4==4.9.3
-pandas==1.2.4
 newspaper3k==0.2.8
