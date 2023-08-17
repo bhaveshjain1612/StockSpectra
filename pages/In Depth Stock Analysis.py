@@ -281,7 +281,7 @@ def generate_news(name):
             col1.write(news.source[i])
             col2.write(news.date[i])
             url  = "https://"+news.link[i]  
-            link='check out this [link]('+url')'
+            link='check out this [link]('+url+')'
             st.markdown(link,unsafe_allow_html=True)
             st.divider()
     except:
