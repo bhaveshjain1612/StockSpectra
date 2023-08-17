@@ -52,14 +52,10 @@ def collective(df):
     
     #_________________ALL COLUMN 1 FILTERS_____________________________
     #Create Filter by investment strategy
-    strategy_selected =  col1.selectbox("Investment Duration", ("1-2 Months", "5-6 Months", "> 1 Year","Potential Breakout"))
+    strategy_selected =  col1.selectbox("Investment Duration", ("1-2 Months", "5-6 Months", "> 1 Year"))
     #filtering based on possible breakout
     strategy=strategy_selected
-    if strategy == 'Potential Breakout':
-        final=df[df['Symbol'].isin(load_data("backend_data/breakout.csv")['Unnamed: 0'])]
-        strategy = "1-2 Months"
-    else:
-        final=df
+    final=df
 
     # Filter by stock name
     name = col1.text_input('Enter name')
@@ -156,9 +152,20 @@ def collective(df):
         
 #function for top picks
 def top_picks(df):
+    
+    #creating sols in dahsboard
+    col1, col2, col3 = st.columns(3)
+    
+    exchange_p = col1.selectbox("Exchange", ("NSE", "BSE"), key = 'tp_exchange')
+    tp = df[df['Exchange']==exchange_p]
+    
+    #Select column to sort by
+    sort_by = col2.selectbox('Order by' , ("Name","Latest Close","Dividend Yield","Change (%)"),key='tp_sortby')
+    # Sorting Method 
+    sort_type = col3.selectbox('Order method', ("None","Ascending","Descending") ,key='tp_sorttype')
 
     #selecting companies with high short volatility, mid to low in mid ter and low in long term
-    tp = df[df['finrank']=='strong']
+    tp = tp[tp['finrank']=='strong']
     tp = tp[tp['Outlook 1-2Months']=='positive']
     tp = tp[tp['Outlook 5-6Months']=='positive']
     tp = tp[tp['Outlook >1Year']=='positive']
@@ -167,7 +174,10 @@ def top_picks(df):
     tp = tp[tp['Risk >1Year']=='Low']
     tp = tp[tp['Dividend Yield']>0]
 
-    tp = tp[['Name','Symbol','Sector','Industry','Latest Close','Close_change_1d','Dividend Yield']].rename(columns={'Close_change_1d':'% Change'}).drop_duplicates(subset=['Name']).set_index('Name').round(2)
+    tp = tp[['Name','Symbol','Sector','Industry','Latest Close','Close_change_1d','Dividend Yield']].rename(columns={'Close_change_1d':'Change (%)'}).drop_duplicates(subset=['Name']).set_index('Name').round(2)
+    
+    if sort_type != "None":
+        tp = tp.sort_values(by=sort_by,ascending=(sort_type=="Ascending"))
     
     if tp.shape[0] > 10:
         tp = tp.head(st.slider('Companies to Display', 0, tp.shape[0], 10))
@@ -183,16 +193,48 @@ def top_price_changes(df):
     
     chng_type = col1.selectbox("Price change type", ("Top Gainers", "Top Losers"))
     
-    exchange_g = col2.selectbox("Exchange", ("NSE", "BSE"))
+    exchange_g = col2.selectbox("Exchange", ("NSE", "BSE"), key = 'tpc_exchange')
     tg = df[df['Exchange']==exchange_g]
     
-    tg = tg[['Name','Symbol','Sector','Industry','Latest Close','Close_change_1d','Volume_change_1d']]
-    tg = tg.rename(columns={'Close_change_1d':'Close Change(%)','Volume_change_1d':'Volume Change(%)'}).drop_duplicates(subset=['Name']).set_index('Name')
-    tg = tg.sort_values(by = 'Close Change(%)', ascending = (chng_type=="Top Losers")).head(10).round(2)
+    tg = tg[['Name','Symbol','Sector','Industry','Latest Close','Close_change_1d','Dividend Yield']].rename(columns={'Close_change_1d':'Change (%)'}).drop_duplicates(subset=['Name']).set_index('Name').round(2)
     
-    add_links(tg)
+    tg = tg.sort_values(by='Change (%)',ascending=(chng_type=="Top Losers")).head(10)
+ 
+    with st.container():
+        add_links(tg)
     
 
+#function for top gainers
+def potential_breakout(df):
+    
+    #st.write("These are some stocks that have the possibility of shifting from a bearish trend to a strong bullish trend. However, This change is always uncertain. Please proceed with caution"
+    
+    #creating sols in dahsboard
+    col1, col2, col3 = st.columns(3)
+    
+    exchange_p = col1.selectbox("Exchange", ("NSE", "BSE"), key = 'pb_exchange')
+    
+    pb = df[df['Exchange']==exchange_p]
+    
+    pb=pb[pb['Symbol'].isin(load_data("backend_data/breakout.csv")['Unnamed: 0'])]
+
+    #Select column to sort by
+    sort_by = col2.selectbox('Order by' , ("Name","Latest Close","Dividend Yield","Change (%)"),key='pb_sortby')
+    # Sorting Method 
+    sort_type = col3.selectbox('Order method', ("None","Ascending","Descending") ,key='pb_sorttype')
+    
+    pb = pb[['Name','Symbol','Sector','Industry','Latest Close','Close_change_1d','Dividend Yield']].rename(columns={'Close_change_1d':'Change (%)'}).drop_duplicates(subset=['Name']).set_index('Name').round(2)
+    
+    if sort_type != "None":
+        pb = pb.sort_values(by=sort_by,ascending=(sort_type=="Ascending"))
+    
+    if pb.shape[0] > 10:
+        pb = pb.head(st.slider('Companies to Display', 0, pb.shape[0], 10))
+ 
+    with st.container():
+        add_links(pb)
+
+    
 def main():
     # Load data from the CSV file and preprocess
     df = load_data("backend_data/database.csv")
@@ -208,7 +250,7 @@ def main():
     # Display the filtered data using the collective function
     tab1, tab2, tab3 = st.tabs(["Top Picks", "Top Price Changes","Screener"])
 
-    with tab3:
+    with tab4:
         collective(df)
         
     with tab1:
@@ -216,6 +258,9 @@ def main():
         
     with tab2:
         top_price_changes(df)
+        
+    #with tab3:
+    #    potential_breakout(df)
 
 
 # Check if the script is being run as the main module

@@ -120,14 +120,13 @@ def allot_outlook(df):
         if row['Close_change_1m'] > 0:
             mid_term_score += 1
             long_term_score += 1
-        '''
         
         # P/E Ratio logic
         if row['P/E ratio'] < row['Industry Median P/E Ratio']:
             long_term_score += long_term_weights['pe_ratio']
         else:
             long_term_score -= long_term_weights['pe_ratio']
-        
+        '''
         # Moving Averages logic
         if row['sma50'] > row['sma200']:
             mid_term_score += mid_term_weights['moving_averages']
@@ -460,9 +459,6 @@ def generate_charts(historical_sample, selected_ma, bollinger_filter, holiday_li
         fig.add_trace(macd_signal_line, row=2, col=1)
         fig.update_yaxes(title_text="MACD", row=2, col=1)
     
-    
-        
-        
     fig.update_yaxes(showgrid=True, minor=dict(showgrid=False),showline=True, linewidth=2)
     fig.update_xaxes(
             rangeslider_visible=False,showgrid=True,showline=True, linewidth=2,
@@ -482,15 +478,15 @@ def calc_KPIs(financials,mode):
     kpis['ROE'] = {'desc' : 'Efficiency of Equity utilisation'}
     try:
         if financials['Stockholders Equity'][0] and financials['Net Income'][0]:
-            kpis['ROE']['current'] = financials['Stockholders Equity'][0]/financials['Net Income'][0]
+            kpis['ROE']['current'] = round(financials['Stockholders Equity'][0]/financials['Net Income'][0],2)
         else:
             kpis['ROE']['current'] = None
         if financials['Stockholders Equity'][1] and financials['Net Income'][1]:
-            kpis['ROE']['previous'] = financials['Stockholders Equity'][1]/financials['Net Income'][1]
+            kpis['ROE']['previous'] = round(financials['Stockholders Equity'][1]/financials['Net Income'][1],2)
         else:
             kpis['ROE']['previous'] = None
         if kpis['ROE']['previous'] and kpis['ROE']['current']:
-            kpis['ROE']['delta'] = kpis['ROE']['current'] - kpis['ROE']['previous']
+            kpis['ROE']['delta'] = round(kpis['ROE']['current'] - kpis['ROE']['previous'],2)
         else:
             kpis['ROE']['delta'] = None
     except:
@@ -500,62 +496,77 @@ def calc_KPIs(financials,mode):
         
     #ROA
     kpis['ROA'] = {'desc' : 'Efficiency of Assets utilisation'}
-    if financials['Total Assets'][0] and financials['Net Income'][0]:
-        kpis['ROA']['current'] = financials['Net Income'][0]/financials['Total Assets'][0]
-    else:
-        kpis['ROA']['current'] = None
-    if financials['Total Assets'][1] and financials['Net Income'][1]:
-        kpis['ROA']['previous'] = financials['Net Income'][1]/financials['Total Assets'][1]
-    else:
-        kpis['ROA']['previous'] = None
-    if kpis['ROA']['previous'] and kpis['ROA']['current']:
-        kpis['ROA']['delta'] = kpis['ROA']['current'] - kpis['ROA']['previous']
-    else:
+    try:
+        if financials['Total Assets'][0] and financials['Net Income'][0]:
+            kpis['ROA']['current'] = round(financials['Net Income'][0]/financials['Total Assets'][0],2)
+        else:
+            kpis['ROA']['current'] = None
+        if financials['Total Assets'][1] and financials['Net Income'][1]:
+            kpis['ROA']['previous'] = round(financials['Net Income'][1]/financials['Total Assets'][1],2)
+        else:
+            kpis['ROA']['previous'] = None
+        if kpis['ROA']['previous'] and kpis['ROA']['current']:
+            kpis['ROA']['delta'] = round(kpis['ROA']['current'] - kpis['ROA']['previous'],2)
+        else:
+            kpis['ROA']['delta'] = None
+    except:
         kpis['ROA']['delta'] = None
+        kpis['ROA']['current'] = None
+        kpis['ROA']['previous'] = None
         
      #Current Ratio
     kpis['Current Ratio'] = {'desc' : 'Ability to pay short term liabilities'}
-    if financials['Current Assets'][0] and financials['Current Liabilities'][0]:
-        kpis['Current Ratio']['current'] = financials['Current Assets'][0]/financials['Current Liabilities'][0]
-    else:
-        kpis['Current Ratio']['current'] = None
-    if financials['Current Assets'][1] and financials['Current Liabilities'][1]:
-        kpis['Current Ratio']['previous'] = financials['Current Assets'][1]/financials['Current Liabilities'][1]
-    else:
-        kpis['Current Ratio']['previous'] = None
-    if kpis['Current Ratio']['previous'] and kpis['Current Ratio']['current']:
-        kpis['Current Ratio']['delta'] = kpis['Current Ratio']['current'] - kpis['Current Ratio']['previous']
-    else:
+    try:
+        if financials['Current Assets'][0] and financials['Current Liabilities'][0]:
+            kpis['Current Ratio']['current'] = round(financials['Current Assets'][0]/financials['Current Liabilities'][0],2)
+        else:
+            kpis['Current Ratio']['current'] = None
+        if financials['Current Assets'][1] and financials['Current Liabilities'][1]:
+            kpis['Current Ratio']['previous'] = round(financials['Current Assets'][1]/financials['Current Liabilities'][1],2)
+        else:
+            kpis['Current Ratio']['previous'] = None
+        if kpis['Current Ratio']['previous'] and kpis['Current Ratio']['current']:
+            kpis['Current Ratio']['delta'] = round(kpis['Current Ratio']['current'] - kpis['Current Ratio']['previous'],2)
+        else:
+            kpis['Current Ratio']['delta'] = None
+    except:
         kpis['Current Ratio']['delta'] = None
+        kpis['Current Ratio']['current'] = None
+        kpis['Current Ratio']['previous'] = None
         
     #Gross Margin
     kpis['Net Profit Margin'] = {'desc' : 'Profitability of a company'}
-    if financials['Total Revenue'][0] and financials['Net Income'][0]:
-        kpis['Net Profit Margin']['current'] = financials['Net Income'][0]/financials['Total Revenue'][0]
-    else:
-        kpis['Net Profit Margin']['current'] = None
-    if financials['Total Revenue'][1] and financials['Net Income'][1]:
-        kpis['Net Profit Margin']['previous'] = financials['Net Income'][1]/financials['Total Revenue'][1]
-    else:
-        kpis['Net Profit Margin']['previous'] = None
-    if kpis['Net Profit Margin']['previous'] and kpis['Net Profit Margin']['current']:
-        kpis['Net Profit Margin']['delta'] = kpis['Net Profit Margin']['current'] - kpis['Net Profit Margin']['previous']
-    else:
+    try:
+        if financials['Total Revenue'][0] and financials['Net Income'][0]:
+            kpis['Net Profit Margin']['current'] = round(financials['Net Income'][0]/financials['Total Revenue'][0],2)
+        else:
+            kpis['Net Profit Margin']['current'] = None
+        if financials['Total Revenue'][1] and financials['Net Income'][1]:
+            kpis['Net Profit Margin']['previous'] = round(financials['Net Income'][1]/financials['Total Revenue'][1],2)
+        else:
+            kpis['Net Profit Margin']['previous'] = None
+        if kpis['Net Profit Margin']['previous'] and kpis['Net Profit Margin']['current']:
+            kpis['Net Profit Margin']['delta'] = round(kpis['Net Profit Margin']['current'] - kpis['Net Profit Margin']['previous'],2)
+        else:
+            kpis['Net Profit Margin']['delta'] = None
+    except:
         kpis['Net Profit Margin']['delta'] = None
+        kpis['Net Profit Margin']['current'] = None
+        kpis['Net Profit Margin']['previous'] = None
         
     #Debt to equity ratio
     kpis['DE Ratio'] = {'desc' : 'Total debt comapred to equity'}
     try:
         if financials['Stockholders Equity'][0] and financials['Total Debt'][0]:
-            kpis['DE Ratio']['current'] = financials['Total Debt'][0]/financials['Stockholders Equity'][0]
+            kpis['DE Ratio']['current'] = round(financials['Total Debt'][0]/financials['Stockholders Equity'][0],2)
         else:
             kpis['DE Ratio']['current'] = None
         if financials['Stockholders Equity'][1] and financials['Total Debt'][1]:
-            kpis['DE Ratio']['previous'] = financials['Total Debt'][1]/financials['Stockholders Equity'][1]
+            kpis['DE Ratio']['previous'] = round(financials['Total Debt'][1]/financials['Stockholders Equity'][1],2)
         else:
             kpis['DE Ratio']['previous'] = None
         if kpis['DE Ratio']['previous'] and kpis['DE Ratio']['current']:
-            kpis['DE Ratio']['delta'] = kpis['DE Ratio']['current'] - kpis['DE Ratio']['previous']
+            kpis['DE Ratio']['delta'] = round(kpis['DE Ratio']['current'] - kpis['DE Ratio']['previous'],2)
         else:
             kpis['DE Ratio']['delta'] = None
     except:
@@ -574,7 +585,7 @@ def calc_KPIs(financials,mode):
     else:
         kpis['Net Income']['previous'] = None
     if kpis['Net Income']['previous'] and kpis['Net Income']['current']:
-        kpis['Net Income']['delta'] = kpis['Net Income']['current'] - kpis['Net Income']['previous']
+        kpis['Net Income']['delta'] = round(kpis['Net Income']['current'] - kpis['Net Income']['previous'],2)
     else:
         kpis['Net Income']['delta'] = None
         
@@ -589,7 +600,7 @@ def calc_KPIs(financials,mode):
     else:
         kpis['Free Cash Flow']['previous'] = None
     if kpis['Free Cash Flow']['previous'] and kpis['Free Cash Flow']['current']:
-        kpis['Free Cash Flow']['delta'] = kpis['Free Cash Flow']['current'] - kpis['Free Cash Flow']['previous']
+        kpis['Free Cash Flow']['delta'] = round(kpis['Free Cash Flow']['current'] - kpis['Free Cash Flow']['previous'],2)
     else:
         kpis['Free Cash Flow']['delta'] = None
         
@@ -603,8 +614,8 @@ def calc_KPIs(financials,mode):
         kpis['Debt']['previous'] = financials['Total Debt'][1]
     else:
         kpis['Debt']['previous'] = None
-    if kpis['Debt']['previous'] and kpis['ROE']['current']:
-        kpis['Debt']['delta'] = kpis['Debt']['current'] - kpis['Debt']['previous']
+    if kpis['Debt']['previous'] and kpis['Debt']['current']:
+        kpis['Debt']['delta'] = round(kpis['Debt']['current'] - kpis['Debt']['previous'],2)
     else:
         kpis['Debt']['delta'] = None
         
@@ -619,24 +630,29 @@ def calc_KPIs(financials,mode):
     else:
         kpis['Basic EPS']['previous'] = None
     if kpis['Basic EPS']['previous'] and kpis['Basic EPS']['current']:
-        kpis['Basic EPS']['delta'] = kpis['Basic EPS']['current'] - kpis['Basic EPS']['previous']
+        kpis['Basic EPS']['delta'] = round(kpis['Basic EPS']['current'] - kpis['Basic EPS']['previous'],2)
     else:
         kpis['Basic EPS']['delta'] = None
         
     #ROCE
     kpis['ROCE'] = {'desc':"Utilization of capital employed"}
-    if financials['EBIT'][0] and financials['Total Assets'][0] and financials['Current Liabilities'][0]:
-        kpis['ROCE']['current'] = financials['EBIT'][0] / (financials['Total Assets'][0]-financials['Current Liabilities'][0])
-    else:
-        kpis['ROCE']['current'] = None
-    if financials['EBIT'][1] and financials['Total Assets'][1] and financials['Current Liabilities'][1]:
-        kpis['ROCE']['previous'] = financials['EBIT'][1] / (financials['Total Assets'][1]-financials['Current Liabilities'][1])
-    else:
-        kpis['ROCE']['previous'] = None
-    if kpis['ROCE']['previous'] and kpis['ROCE']['current']:
-        kpis['ROCE']['delta'] = kpis['ROCE']['current'] - kpis['ROCE']['previous']
-    else:
+    try:
+        if financials['EBIT'][0] and financials['Total Assets'][0] and financials['Current Liabilities'][0]:
+            kpis['ROCE']['current'] = round(financials['EBIT'][0] / (financials['Total Assets'][0]-financials['Current Liabilities'][0]),2)
+        else:
+            kpis['ROCE']['current'] = None
+        if financials['EBIT'][1] and financials['Total Assets'][1] and financials['Current Liabilities'][1]:
+            kpis['ROCE']['previous'] = round(financials['EBIT'][1] / (financials['Total Assets'][1]-financials['Current Liabilities'][1]),2)
+        else:
+            kpis['ROCE']['previous'] = None
+        if kpis['ROCE']['previous'] and kpis['ROCE']['current']:
+            kpis['ROCE']['delta'] = round(kpis['ROCE']['current'] - kpis['ROCE']['previous'],2)
+        else:
+            kpis['ROCE']['delta'] = None
+    except:
         kpis['ROCE']['delta'] = None
+        kpis['ROCE']['current'] = None
+        kpis['ROCE']['previous'] = None
         
     if mode == "delta":
         return pd.DataFrame(kpis).loc['delta'].reset_index().set_index('index').T
@@ -801,13 +817,16 @@ def indicator_summary(x):
 
     # Tag desirable or non-desirable change for each indicator
     for indicator in summary:
-        if summary[indicator]['Change']*summary[indicator]['type'] > 0:
-            summary[indicator]['Tag'] = 'Desirable'
-            summary[indicator]['To display'] = summary[indicator]['Positive Change']
-        elif summary[indicator]['Change']*summary[indicator]['type'] < 0:
-            summary[indicator]['Tag'] = 'Non-Desirable'
-            summary[indicator]['To display'] = summary[indicator]['Negative Change']
-        else:
+        try:
+            if summary[indicator]['Change']*summary[indicator]['type'] > 0:
+                summary[indicator]['Tag'] = 'Desirable'
+                summary[indicator]['To display'] = summary[indicator]['Positive Change']
+            elif summary[indicator]['Change']*summary[indicator]['type'] < 0:
+                summary[indicator]['Tag'] = 'Non-Desirable'
+                summary[indicator]['To display'] = summary[indicator]['Negative Change']
+            else:
+                summary[indicator]['Tag'] = 'NA'
+        except:
             summary[indicator]['Tag'] = 'NA'
 
     return summary
@@ -840,7 +859,7 @@ def stock_summary(stock_data,historical,week_52,dividend_split):
     #52 week proximity   
     summary['52 Week Proximity'] = {}
     if stock_data['Latest Close'].values[0] - week_52['52 Week Low'] > -1*(stock_data['Latest Close'].values[0] - week_52['52 Week High']):
-        summary['52 Week Proximity']['Display'] = "CLoser to 52 Week High"
+        summary['52 Week Proximity']['Display'] = "Closer to 52 Week High"
         summary['52 Week Proximity']['Type'] = 1
     elif stock_data['Latest Close'].values[0] - week_52['52 Week Low'] < -1*(stock_data['Latest Close'].values[0] - week_52['52 Week High']):
         summary['52 Week Proximity']['Display'] = "Closer to 52 Week Low"
@@ -853,7 +872,7 @@ def stock_summary(stock_data,historical,week_52,dividend_split):
     if stock_data['Latest rsi'].values[0] < 30:
         summary['RSI']['Display'] = "Stock appears oversold and may rise soon"
         summary['RSI']['Type'] = 1
-    elif stock_data['Latest rsi'].values[0] > 70:
+    elif stock_data['Latest rsi'].values[0] > 75:
         summary['RSI']['Display'] = "Stock appears overbought and may fall soon"
         summary['RSI']['Type'] = -1
     else:
@@ -861,13 +880,13 @@ def stock_summary(stock_data,historical,week_52,dividend_split):
 
     #ADX
     summary['ADX'] = {}
-    if stock_data['Latest ADX'].values[0] > 27 and stock_data['Close_change_10d'].values[0] > 0:
+    if stock_data['Latest ADX'].values[0] > 25 and stock_data['Close_change_10d'].values[0] > 0:
         summary['ADX']['Display'] = "Stock having strong uptrend"
         summary['ADX']['Type'] = 1
-    elif stock_data['Latest ADX'].values[0] > 27 and stock_data['Close_change_10d'].values[0] < 0:
+    elif stock_data['Latest ADX'].values[0] > 25 and stock_data['Close_change_10d'].values[0] < 0:
         summary['ADX']['Display'] = "Stock having strong downtrend"
         summary['ADX']['Type'] = -1
-    elif stock_data['Latest ADX'].values[0] <= 27:
+    elif stock_data['Latest ADX'].values[0] <= 25:
         summary['ADX']['Display'] = "Stock having weak trend"
         summary['ADX']['Type'] = -1
     else:
@@ -898,7 +917,7 @@ def stock_summary(stock_data,historical,week_52,dividend_split):
     #Momentum
     summary['Momentum'] = {}
     if stock_data['Latest Close'].values[0] > historical['sma_5'].values[0] and historical['sma_5'].values[0] > historical['sma_25'].values[0]:
-        summary['Momentum']['Display'] = "Bullish Moemntum"
+        summary['Momentum']['Display'] = "Bullish Momentum"
         summary['Momentum']['Type'] = 1
     elif stock_data['Latest Close'].values[0] < historical['sma_5'].values[0] and historical['sma_5'].values[0] < historical['sma_25'].values[0]:
         summary['Momentum']['Display'] = "Bearish Momentum"

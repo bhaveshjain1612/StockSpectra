@@ -201,16 +201,19 @@ def generate_stock(data):
     st.plotly_chart(fig,theme="streamlit", use_container_height=True, use_container_width=True, height=1000)
     
 def generate_financials(data):
-    def simplify(x):    
-        if x >1000000000 or x <-1000000000:
-            y = str(round(x/10000000))+" Cr"    
-        elif x > 10000000 or x < -10000000:
-            y = str(round(x/10000000,2))+" Cr"
-        elif x > 100000 or x <-100000:
-            y = str(round(x/100000,2))+" L"
-        else:
-            y = x
-        return y
+    def simplify(x):
+        try:
+            if x >1000000000 or x <-1000000000:
+                y = str(round(x/10000000))+" Cr"    
+            elif x > 10000000 or x < -10000000:
+                y = str(round(x/10000000,2))+" Cr"
+            elif x > 100000 or x <-100000:
+                y = str(round(x/100000,2))+" L"
+            else:
+                y = x
+            return y
+        except:
+            return None
     
     fin_file = "backend_data/company_financials/"+data.Symbol.values[0].replace(".","_")+".csv"
     fin = load_data(fin_file)
@@ -224,14 +227,14 @@ def generate_financials(data):
     col1.metric("Net Income",simplify(kpis['Net Income']['current']), simplify(kpis['Net Income']['delta']))
     col2.metric("Debt",simplify(kpis['Debt']['current']), simplify(kpis['Debt']['delta']))
     col3.metric("Free Cash Flow",simplify(kpis['Free Cash Flow']['current']), simplify(kpis['Free Cash Flow']['delta']))
-    col4.metric("Basic EPS",round(kpis['Basic EPS']['current'],2), round(kpis['Basic EPS']['delta'],2))
-    col5.metric("Net Profit Margin",round(kpis['Net Profit Margin']['current'],2), round(kpis['Net Profit Margin']['delta'],2))
+    col4.metric("Basic EPS",kpis['Basic EPS']['current'], kpis['Basic EPS']['delta'])
+    col5.metric("Net Profit Margin",kpis['Net Profit Margin']['current'], kpis['Net Profit Margin']['delta'])
     st.divider()
-    col1.metric("ROA",round(kpis['ROA']['current'],2), round(kpis['ROA']['delta'],2))
-    col2.metric("ROE",round(kpis['ROE']['current'],2), round(kpis['ROE']['delta'],2))
-    col3.metric("ROCE",round(kpis['ROCE']['current'],2), round(kpis['ROCE']['delta'],2))
-    col4.metric("Current Ratio",round(kpis['Current Ratio']['current'],2), round(kpis['Current Ratio']['delta'],2))
-    col5.metric("DE Ratio",round(kpis['DE Ratio']['current'],2), round(kpis['DE Ratio']['delta'],2))
+    col1.metric("ROA",kpis['ROA']['current'], kpis['ROA']['delta'])
+    col2.metric("ROE",kpis['ROE']['current'], kpis['ROE']['delta'])
+    col3.metric("ROCE",kpis['ROCE']['current'], kpis['ROCE']['delta'])
+    col4.metric("Current Ratio",kpis['Current Ratio']['current'], kpis['Current Ratio']['delta'])
+    col5.metric("DE Ratio",kpis['DE Ratio']['current'], kpis['DE Ratio']['delta'])
     
     mapping = load_data("backend_data/financials_mapping.csv")
     #st.dataframe(fin)
@@ -260,6 +263,29 @@ def generate_financials(data):
         
     with st.expander("Cash Flow"):
         st.dataframe(fin[fin['sheet']=='c'].drop(['Unnamed: 0','sheet'],axis=1)) 
+        
+#get ne2ws for stocks        
+def generate_news(name):
+    try:
+        news = pd.read_csv("backend_data/news_articles/"+name.replace(" ","_")+".csv")
+
+        if news.empty:
+            st.write("no News articles about the company in past 14 days")
+        else:
+            st.header("Most Recent news articles (Last 14 Days)")
+
+        #st.dataframe(news)  
+        for i in news.index:
+            st.subheader(news.title[i])
+            col1, col2, col3 = st.columns([1,1,5])
+            col1.write(news.source[i])
+            col2.write(news.date[i])
+            link  = "https//:"+news.link[i]  
+            st.write(news.summary[i])
+            st.write("[Read More....]("+link+")")
+            st.divider()
+    except:
+        st.write("no News articles about the company in past 14 days")
     
 #Load all insights
 def load_insights(data,input_symbol):
@@ -278,7 +304,7 @@ def load_insights(data,input_symbol):
         
     st.subheader(data.Exchange.values[0]+" : " +data.Symbol.values[0][:-3])   
         
-    tab1, tab2, tab3 = st.tabs(["Company Details", "Stock", "Financial"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Firmo", "Stock", "Financial", "News"])
     
     with tab1:
         generate_firmo(data)
@@ -286,6 +312,8 @@ def load_insights(data,input_symbol):
         generate_stock(data)
     with tab3:
         generate_financials(data)
+    with tab4:
+        generate_news(data.Name.values[0])
     #st.dataframe(data)
 
 def main():
