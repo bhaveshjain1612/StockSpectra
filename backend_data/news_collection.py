@@ -84,5 +84,5 @@ names = pd.read_csv("db_firmo.csv").Name.unique()
 for n in tqdm(names):
     #print(n.replace(" ","_"))
     links = (get_news(n+" Company India"))
-    news = get_details(links)
-    news.to_csv("news_articles/"+n.replace(" ","_")+".csv")
+    #news = get_details(links)
+    links.to_csv("news_articles/"+n.replace(" ","_")+".csv")
