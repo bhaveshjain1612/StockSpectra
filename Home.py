@@ -250,7 +250,7 @@ def main():
     # Display the filtered data using the collective function
     tab1, tab2, tab3 = st.tabs(["Top Picks", "Top Price Changes","Screener"])
 
-    with tab4:
+    with tab3:
         collective(df)
         
     with tab1:
