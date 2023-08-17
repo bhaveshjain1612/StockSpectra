@@ -85,4 +85,4 @@ for n in tqdm(names):
     #print(n.replace(" ","_"))
     links = (get_news(n+" Company India"))
     news = get_details(links)
-    news.to_csv("backend_data/news_articles/"+n.replace(" ","_")+".csv")
+    news.to_csv("news_articles/"+n.replace(" ","_")+".csv")
