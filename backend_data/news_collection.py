@@ -76,7 +76,7 @@ def get_details(df):
 
     df['summary'] = summaries
     df['text'] = text
-    df['title'] = title
+    df['title_retrieved'] = title
 
     return df
 
