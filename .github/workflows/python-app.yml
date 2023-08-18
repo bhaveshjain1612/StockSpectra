@@ -38,7 +38,7 @@ jobs:
           git config --global user.email "bhavesh.161201@gmail.com"
           git config --global user.name "Bhavesh Jain"
           
-          git pull origin main # Pull the latest changes first
+          git pull --rebase origin main # Use rebase to apply local changes on top of remote changes
           git add .
           git commit -m "Data updated on `date +'%d-%m-%Y'`"
           git push origin main
