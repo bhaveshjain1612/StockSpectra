@@ -30,13 +30,13 @@ jobs:
         run: |
           python collective_backend.py  # Replace this with the actual command to run your script
 
-      - name: Commit and push changes to a new branch
+      - name: Merge remote changes and push
         run: |
           git config --global user.email "bhavesh.161201@gmail.com"
           git config --global user.name "Bhavesh Jain"
           
-          BRANCH_NAME="update-$(date +'%Y%m%d%H%M%S')"
-          git checkout -b $BRANCH_NAME
+          git fetch origin main
+          git merge origin/main
           git add .
           git commit -m "Data updated on `date +'%d-%m-%Y'`"
-          git push origin $BRANCH_NAME
+          git push origin main
