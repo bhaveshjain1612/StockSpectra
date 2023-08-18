@@ -356,7 +356,7 @@ def collect_features(df):
     return temp
 
 # Read the company list from the 'db_firmo.csv' file
-db_firmo = pd.read_csv("db_firmo.csv")
+db_firmo = pd.read_csv("db_firmo.csv").head(10)
 symbol_list = db_firmo.Symbol#.head(10)
 kpi_df = pd.DataFrame()
 
