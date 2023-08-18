@@ -7,9 +7,6 @@ on:
       - cron: "30 12 * * 3"
       - cron: "30 12 * * 4"
       - cron: "30 12 * * 5"
-  #push:
-    #branches:
-      #- main
 
 jobs:
   run_and_push:
@@ -33,12 +30,13 @@ jobs:
         run: |
           python collective_backend.py  # Replace this with the actual command to run your script
 
-      - name: Commit and push changes
+      - name: Commit and push changes to a new branch
         run: |
           git config --global user.email "bhavesh.161201@gmail.com"
           git config --global user.name "Bhavesh Jain"
           
-          git pull --rebase origin main # Use rebase to apply local changes on top of remote changes
+          BRANCH_NAME="update-$(date +'%Y%m%d%H%M%S')"
+          git checkout -b $BRANCH_NAME
           git add .
           git commit -m "Data updated on `date +'%d-%m-%Y'`"
-          git push origin main
+          git push origin $BRANCH_NAME
