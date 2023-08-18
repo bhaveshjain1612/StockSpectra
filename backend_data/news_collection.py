@@ -80,7 +80,7 @@ def get_details(df):
 
     return df
 
-names = pd.read_csv("db_firmo.csv").Name.unique()
+names = pd.read_csv("db_firmo.csv").head(3).Name.unique()
 for n in tqdm(names):
     #print(n.replace(" ","_"))
     links = (get_news(n+" Company India"))
