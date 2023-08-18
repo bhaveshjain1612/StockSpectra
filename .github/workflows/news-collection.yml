@@ -36,4 +36,5 @@ jobs:
           
           git add .
           git commit -m "News updated on `date +'%d-%m-%Y'`"
+          git pull origin main
           git push origin main
