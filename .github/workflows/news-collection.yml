@@ -3,7 +3,7 @@ name: Update News
 on:
   schedule:
       - cron: "0 16 * * *"
-      #- cron: "30 6 * * *"
+      - cron: "30 6 * * *"
   #push:
   #  branches:
    #   - main
