@@ -842,7 +842,4 @@ for i in database.Symbol:
         continue
 final[final['Breakout']==True].to_csv("breakout.csv")
 print('Breakouts updated')
-<<<<<<< Updated upstream
-=======
 '''
->>>>>>> Stashed changes
