@@ -136,67 +136,20 @@ def generate_stock(data):
     "2023-10-24",#	Dussehra
     "2023-11-14",#	Diwali-Balipratipada
     "2023-11-27",#	Gurunanak Jayanti
-    "2023-12-25",#	Christmas
     ]
-    
     #ma duratiosn for plotting
-    ma_durations = [5,10,15,20,25,30,40,50,75,100,150,200]
-    col1, col2, col3, col4, col5 = st.columns([2,2,2,2,2])
-         
-    sma_filter = col3.multiselect('Select SMAs to show',ma_durations)
-    ema_filter = col4.multiselect('Select EMAs to show',ma_durations)  
-    bollinger_filter = col5.multiselect('Select Bollinger Bands to show',["1 Standard Deviation","2 Standard Deviations"])
+    col1, col2 = st.columns([2,8])
+    
+    ma_names = []
+    for i in [5,10,15,20,25,30,40,50,75,100,150,200]:
+        ma_names.append('SMA ('+str(i)+')')
+        ma_names.append('EMA ('+str(i)+')') 
+    ta_list = ma_names+["Volume","ADX (14)", "RSI (14)", "CCI (10)", "CCI (40)","OBV", "VPT", "CMF", 'Williamson%R (14)', 'MACD', 'VWAP', 'MFI (14)',"Bollinger (1 STD)", "Bollinger (2 STD)"]
+
     filter_interval = col1.selectbox('Select a Time Interval', ["6 Months","1 Day", "5 Days", "1 Month","3 Months",  "1 Year", "2 Years"])
-    plot_filter = col2.selectbox('Select Bottom Plot',['Volume','MACD','ADX','RSI'])
+    plot_filter = col2.multiselect('Select Technical Indicators',ta_list, "Volume")
     
-    #selecting right MA
-    if filter_interval: 
-        if filter_interval == "1 Day":
-            if historical_with_ma.date_only.values[-1] <= historical_with_ma.date_only.values[0] - np.timedelta64(1, "D"):
-                historical_sample = historical_with_ma[historical_with_ma['date_only'] >historical_with_ma['date_only'][0]-np.timedelta64(1, "D")]
-            else:
-                historical_sample = historical_with_ma
-        elif filter_interval == "5 Days":
-            if historical_with_ma.date_only.values[-1] <= historical_with_ma.date_only.values[0] - np.timedelta64(5, "D"):
-                historical_sample = historical_with_ma[historical_with_ma['date_only'] >historical_with_ma['date_only'][0]-np.timedelta64(5, "D")]
-            else:
-                historical_sample = historical_with_ma
-        elif filter_interval == "1 Month":
-            if historical_with_ma.date_only.values[-1] <= historical_with_ma.date_only.values[0] - np.timedelta64(31, "D"):
-                historical_sample = historical_with_ma[historical_with_ma['date_only'] >historical_with_ma['date_only'][0]-np.timedelta64(1, "M")]
-            else:
-                historical_sample = historical_with_ma
-        elif filter_interval == "3 Months":
-            if historical_with_ma.date_only.values[-1] <= historical_with_ma.date_only.values[0] - np.timedelta64(93, "D"):
-                historical_sample = historical_with_ma[historical_with_ma['date_only'] >historical_with_ma['date_only'][0]-np.timedelta64(3, "M")]
-            else:
-                historical_sample = historical_with_ma
-        elif filter_interval == "6 Months":
-            if historical_with_ma.date_only.values[-1] <= historical_with_ma.date_only.values[0] - np.timedelta64(183, "D"):
-                historical_sample = historical_with_ma[historical_with_ma['date_only'] >historical_with_ma['date_only'][0]-np.timedelta64(6, "M")]
-            else:
-                historical_sample = historical_with_ma
-        elif filter_interval == "1 Year":
-            if historical_with_ma.date_only.values[-1] <= historical_with_ma.date_only.values[0] - np.timedelta64(366, "D"):
-                historical_sample = historical_with_ma[historical_with_ma['date_only'] >historical_with_ma['date_only'][0]-np.timedelta64(1, "Y")]
-            else:
-                historical_sample = historical_with_ma
-        elif filter_interval == "2 Years":
-            if historical_with_ma.date_only.values[-1] <= historical_with_ma.date_only.values[0] - np.timedelta64(736, "D"):
-                historical_sample = historical_with_ma[historical_with_ma['date_only'] >historical_with_ma['date_only'][0]-np.timedelta64(2, "Y")]
-            else:
-                historical_sample = historical_with_ma
-            
-    selected_mas = []
-    #creating filtering names for sma
-    for i in sma_filter:
-        selected_mas.append("sma_"+str(i)+"_trace")
-            
-    #creating filtering names for ema   :                         
-    for i in ema_filter:
-        selected_mas.append("ema_"+str(i)+"_trace")
-    
-    fig = generate_charts(historical_sample,selected_mas,bollinger_filter,holiday_list, plot_filter)
+    fig = generate_charts(historical_with_ma,filter_interval,plot_filter, holiday_list)
         
     st.plotly_chart(fig,theme="streamlit", use_container_height=True, use_container_width=True, height=1000)
     
@@ -304,7 +257,7 @@ def load_insights(data,input_symbol):
         
     st.subheader(data.Exchange.values[0]+" : " +data.Symbol.values[0][:-3])   
         
-    tab1, tab2, tab3, tab4 = st.tabs(["Firmo", "Stock", "Financial", "News"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Company Details", "Technical Analysis", "Financials", "News"])
     
     with tab1:
         generate_firmo(data)
