@@ -431,15 +431,23 @@ def compile_single(symbol):
     
     return data
 
-def calc_change(data, series, duration, changetype):
-    end = data['date_only'][0]
-    start = end - np.timedelta64(duration[0], duration[1])
-    
-    value_start = data[data['date_only'] >= start][series].values[-1]
-    value_end = data[data['date_only'] = end][series].values[0]
-    
-    change = value_end - value_start
-    return round((change / value_start) * 100, 2) if changetype == "%" else change
+#calculate % change b/w two ends of user defined interval and qty
+def calc_change(data,series,duration, changetype):
+    #duartion is atuple i.e 1 month is (1, 'M'), 1 week is (1, 'W') etc.
+    if duration[1]!="D":
+        end = data['date_only'][0]
+        start = end-np.timedelta64(duration[0], duration[1])
+        value_start = data[data['date_only']>=start][series].values[-1]
+        value_end = data[data['date_only']>=end][series].values[-1]
+    else:
+        value_end = data[data["Trading Day"]==1][series].values[0]
+        value_start = data[data["Trading Day"]==1+duration[0]][series].values[0]
+   
+    #return (value_start,value_end)
+    if changetype == "%":
+        return round(((value_end - value_start) / value_start) * 100,2)
+    else:
+        return (value_end - value_start)
 
 def stds(data):
     durations = [(1, "M"), (3, "M"), (6, "M"), (1, "Y")]
