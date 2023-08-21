@@ -436,7 +436,7 @@ def calc_change(data, series, duration, changetype):
     start = end - np.timedelta64(duration[0], duration[1])
     
     value_start = data[data['date_only'] >= start][series].values[-1]
-    value_end = data[data['date_only'] >= end][series].values[-1]
+    value_end = data[data['date_only'] = end][series].values[0]
     
     change = value_end - value_start
     return round((change / value_start) * 100, 2) if changetype == "%" else change
