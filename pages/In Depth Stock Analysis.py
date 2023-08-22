@@ -89,15 +89,17 @@ def generate_stock(data):
     col4.metric(label ="52 Week Low",value=round(week52_data['52 Week Low'],2), delta='') 
     
     st.divider()
-    st.subheader("Key Takeaways")
+    col1,col2,col3 = st.columns([1,1,2])
+    col1.subheader("Key Takeaways")
+    outdur = col2.selectbox("Outlook Duration",("1-2 Months",">1 Year"))
+    
     stksummary = stock_summary(data,historical_with_ma,week52_data,dividend_split_data)
     if len(stksummary)>1:
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3 = st.columns([2,2,2])
         
         if len(stksummary)%2 ==1:
             for m in list(stksummary.items())[:(len(stksummary)//2)+1]:
                 col2.write(m[1]['Display'])
-            #col3.subheader("_")
             for m in list(stksummary.items())[(len(stksummary)//2)+1:]:
                 col3.write(m[1]['Display'])
         else:
@@ -107,20 +109,103 @@ def generate_stock(data):
                 col3.write(m[1]['Display'])
     else:
         col1, col2 = st.columns(2)
-        col2.subheader("Key Takeaways")
         for m in list(stksummary.items()):
             col2.write(m[1]['Display'])
+            
+    col1.header(data['Outlook '+outdur.replace(" ","")].values[0].title()+" - "+data['Risk '+outdur.replace(" ","")].values[0].title()+" Risk")
     
-    #col1.header(data.Outlook.values[0].upper())
-    #col1.subheader(data.Risk.values[0]+" Risk / "+data.Risk.values[0]+" Reward")
-    strategy =  col1.selectbox("Investment Duration", ("1-2 Months", "5-6 Months", "> 1 Year"))
-    outllok_risk_df = data[['Outlook '+strategy.replace(" ",""),'Risk '+strategy.replace(" ","")]].rename(columns={'Outlook '+strategy.replace(" ",""):"Outlook",'Risk '+strategy.replace(" ",""):'Risk'})
-    col1.subheader(outllok_risk_df.Outlook.values[0].title()+" Outlook - "+outllok_risk_df.Risk.values[0]+" Risk")
+    #Technical Inidcators Latest Values
+    with st.expander("Technical Indicators (Latest Values)"):
+        col1, col2, col3, col4 = st.columns(4)
+
+        col1.write("**Average Directional Index (14)**")
+        col1.write(str(round(data['Latest ADX'].values[0],2))+" - "+indicator_tags(data, historical_with_ma)['adx'])
+        
+        col2.write("**Relative Strength Index (14)**")
+        col2.write(str(round(data['Latest rsi'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['rsi'])
+        
+        col3.write("**Commodity Channel Index (10)**")
+        col3.write(str(round(data['Latest CCI_10'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['cci_10'])
+        
+        col4.write("**Commodity Channel Index (40)**")
+        col4.write(str(round(data['Latest CCI_40'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['cci_40'])
+        
+        col2.write("**Money Flow Index (14)**")
+        col2.write(str(round(data['Latest MFI_14'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['mfi_14'])
+        
+        col1.write("**Moving Average Convergence Divergence**")
+        col1.write(str(round(data['Latest macd'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['macd'])
+        
+        col3.write("**Volume Price Trend**")
+        col3.write(str(round(data['Latest VPT'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['VPT'])
+        
+        col4.write("**Williamson%R (14)**")
+        col4.write(str(round(data['Latest %R'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['%R'])
+     
+        #Moving Averages
+        st.divider()
+        matype = st.selectbox('Moving Average Type',('SMA','EMA'))
+        col1,col2 = st.columns([5,3])
+        col1.write('Values')
+        col2.write('Crossovers')
+        c1,c2,c3,c4,c5 = col1.columns(5)
+        
+        c1.write('**5 Days**')
+        c1.write(str(round(historical_with_ma[matype.lower()+"_5"].values[0],2)))
+        c1.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_5"])
+                 
+        c2.write('**10 Days**')
+        c2.write(str(round(historical_with_ma[matype.lower()+"_10"].values[0],2)))
+        c2.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_10"])
+                 
+        c3.write('**20 Days**')
+        c3.write(str(round(historical_with_ma[matype.lower()+"_20"].values[0],2)))
+        c3.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_20"])
+                 
+        c4.write('**50 Days**')
+        c4.write(str(round(historical_with_ma[matype.lower()+"_50"].values[0],2)))
+        c4.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_50"])
+                 
+        c5.write('**100 Days**')
+        c5.write(str(round(historical_with_ma[matype.lower()+"_100"].values[0],2)))
+        c5.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_100"])
+                 
+        c1,c2,c3 = col2.columns(3)
+        c1.write('**Short**')
+        c1.write('5 & 20 Days')
+        c1.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_shortcross"])
+        
+        c2.write('**Median**')
+        c2.write('20 & 50 Days')
+        c2.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_midcross"])
+        
+        c3.write('**Long**')
+        c3.write('50 & 100 Days')
+        c3.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_longcross"])
+
+        #Pivot levels
+        st.divider()   
+        st.write("Expected pivot points for next day:")
+        col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
+        col1.write("R3")
+        col1.write(str(round(data['Latest R3'].values[0],2)))
+        col2.write("R2")
+        col2.write(str(round(data['Latest R2'].values[0],2)))
+        col3.write("R1")
+        col3.write(str(round(data['Latest R1'].values[0],2)))
+        col4.write("PP")
+        col4.write(str(round(data['Latest PP'].values[0],2)))
+        col5.write("S1")
+        col5.write(str(round(data['Latest S1'].values[0],2)))
+        col6.write("S2")
+        col6.write(str(round(data['Latest S2'].values[0],2)))
+        col7.write("S3")
+        col7.write(str(round(data['Latest S3'].values[0],2)))
     
-    st.divider()
-    
-    st.subheader("Stock Price and technical charts")
     ##Charts
+    st.divider()
+    st.subheader("Stock Price and technical charts")
+
     holiday_list = [
     "2023-01-26",#	Republic Day
     "2023-03-07",#	Holi
@@ -153,6 +238,10 @@ def generate_stock(data):
         
     st.plotly_chart(fig,theme="streamlit", use_container_height=True, use_container_width=True, height=1000)
     
+    #technical inidcator values 
+    
+    
+# Generate financial details    
 def generate_financials(data):
     def simplify(x):
         try:
@@ -233,9 +322,9 @@ def generate_news(name):
             col1, col2, col3 = st.columns([1,1,5])
             col1.write(news.source[i])
             col2.write(news.date[i])
-            url  = "https://"+news.link[i]  
-            link='[Read more......]('+url+')'
-            col3.markdown(link,unsafe_allow_html=True)
+            link  = "https//:"+news.link[i]  
+            st.write(news.summary[i])
+            st.write("[Read More....]("+link+")")
             st.divider()
     except:
         st.write("no News articles about the company in past 14 days")

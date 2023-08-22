@@ -69,58 +69,28 @@ def allot_outlook(df):
         'mfi_14': 3
     }
 
-    mid_term_weights = {
-        'rsi': 2,
-        'macd': 3,
-        'adx': 3,
-        'bollinger': 2,
-        'pe_ratio': 2,
-        'moving_averages': 3,
-        'financials_yoy': 2,
-        'cci_10': 2,
-        'cci_40': 3,
-        'vpt': 3,
-        'vwap': 2,
-        'mfi_14': 3
-    }
-
-    long_term_weights = {
-        'rsi': 1,
-        'macd': 2,
-        'adx': 2,
-        'bollinger': 1,
-        'pe_ratio': 3,
-        'moving_averages': 3,
-        'financials_yoy': 3,
-        'cci_10': 1,
-        'cci_40': 2,
-        'vpt': 2,
-        'vwap': 1,
-        'mfi_14': 2
-    }
 
     for index, row in df.iterrows():
         
         short_term_score = 0
-        mid_term_score = 0
         long_term_score = 0
-
+        
+        #Short term logic
         # RSI logic
-        if row['Latest rsi'] < 30:
+        if row['Latest rsi'] > 70 and row['Latest rsi'] < 90: # bullish
             short_term_score += short_term_weights['rsi']
-        elif row['Latest rsi'] > 70:
+        elif row['Latest rsi'] < 30 or row['Latest rsi'] > 90: # overbought
             short_term_score -= short_term_weights['rsi']
 
         # ADX logic
-        if row['Latest ADX'] > 25:
-            mid_term_score += mid_term_weights['adx']
+        if row['Latest ADX'] > 30:
+            short_term_score += short_term_weights['adx'] # strong trend
         else:
-            mid_term_score -= mid_term_weights['adx']
+            short_term_score -= short_term_weights['adx'] # weak trend
 
         # MACD logic
         if row['Latest macd'] > 0:
             short_term_score += short_term_weights['macd']
-            mid_term_score += mid_term_weights['macd']
 
         # Bollinger Bands logic
         price_position = (row['Latest Close'] - row['Latest RollingMean']) / (row['Latest UpperBand2'] - row['Latest LowerBand2'])
@@ -132,87 +102,112 @@ def allot_outlook(df):
         # Price change logic
         if row['Close_change_1d'] > 0:
             short_term_score += 1
-        if row['Close_change_1m'] > 0:
-            mid_term_score += 1
+            
+        if row['Close_change_1m'] > 1:
+            long_term_score += 1
+        else:
+            long_term_score -= 1
+            
+        if row['Close_change_6m'] > 5:
+            long_term_score += 1
+        else:
+            long_term_score -= 1
+            
+        if row['Close_change_1y'] > 10:
+            long_term_score += 1
+        else:
+            long_term_score -= 1
+            
+            
+        # if DIvidend
+        if row['Dividend Rate'] != 'Not Found':
+            long_term_score -= 1
+        else:
             long_term_score += 1
         
         # P/E Ratio logic
         if row['P/E ratio'] < row['Industry Median P/E Ratio']:
-            long_term_score += long_term_weights['pe_ratio']
+            long_term_score -= 1
         else:
-            long_term_score -= long_term_weights['pe_ratio']
+            long_term_score += 1
         
         # Moving Averages logic
         if row['Latest sma_50'] > row['Latest sma_100']:
-            mid_term_score += mid_term_weights['moving_averages']
-            long_term_score += long_term_weights['moving_averages']
+            long_term_score += 1
         else:
-            mid_term_score -= mid_term_weights['moving_averages']
-        '''
+            long_term_score -= 1
+        
         # CCI logic for short term
-        if row['CCI_10'] > 100:
-            short_term_score -= short_term_weights['cci_10']
-            short_term_score -= short_term_weights['cci_10']
-        elif row['CCI_10'] < -100:
+        if row['Latest CCI_10'] > 100:
             short_term_score += short_term_weights['cci_10']
+        elif row['Latest CCI_10'] < -100:
             short_term_score -= short_term_weights['cci_10']
             
          # CCI logic for long term
-        if row['CCI_40'] > 100:
-            short_term_score -= short_term_weights['cci_10']
-            short_term_score -= short_term_weights['cci_10']
-        elif row['CCI_40'] < -100:
-            short_term_score += short_term_weights['cci_10']
-            short_term_score -= short_term_weights['cci_10']
+        if row['Latest CCI_40'] > 100:
+            short_term_score += short_term_weights['cci_40']
+        elif row['Latest CCI_40'] < -100:
+            short_term_score -= short_term_weights['cci_40']
         
         # VPT logic for short term
         if row['Latest VPT'] -  row['Latest VPT_signal'] > 0:
             short_term_score += short_term_weights['vpt']
         else:
             short_term_score -= short_term_weights['vpt']
-        
+            
         # MFI logic for short term
-        if row['Latest MFI_14'] > 80:
+        if row['Latest MFI_14'] > 80 and row['Latest MFI_14'] < 20: # overbought
             short_term_score -= short_term_weights['mfi_14']
-        elif row['Latest MFI_14'] < 20:
+        elif row['Latest MFI_14'] > 65 and row['Latest MFI_14'] < 80: # bullish
             short_term_score += short_term_weights['mfi_14']
-        '''
+        
         # Financials YoY score logic
-        short_term_score += row['finscore'] * short_term_weights['financials_yoy']
-        mid_term_score += row['finscore'] * mid_term_weights['financials_yoy']
-        long_term_score += row['finscore'] * long_term_weights['financials_yoy']
-
+        short_term_score += row['finscore']*0.5 
+        long_term_score += row['finscore'] 
+        
         # Translating the scores into outlooks
         df.at[index, 'short_term_score'] = short_term_score 
-        df.at[index, 'mid_term_score'] = mid_term_score 
         df.at[index, 'long_term_score'] = long_term_score 
         
-        def allot_risk(df,col,outname):
-            u = 0.75
-            l = 0.25
-            #out_df =pd.DataFrame()
-
-            percentiles = df[col].quantile([u,l])
+        def outlook_category(df,col,outname):
+            
+            scr = df[col]
 
             def assign_tier(score):
-                #if score >= percentiles[u2] :
-                #    return 'Very High'
-                if score >= percentiles[u] :
+                if score > scr.max()/2:
+                    return 'very positive'
+                elif score > scr.max()/4:
                     return 'positive'
-                if score >= percentiles[l] :
+                elif score > 0:
                     return 'neutral'
-                #if score >= percentiles[l] :
-                #    return 'Low'
-                else:
+                else :
                     return 'negative'
-
+                
             df[outname] = df[col].apply(assign_tier)
 
             return df
 
-    df = allot_risk(df,'short_term_score','Outlook 1-2Months')
-    df = allot_risk(df,'mid_term_score','Outlook 5-6Months')
-    df = allot_risk(df,'long_term_score','Outlook >1Year')
+    df = outlook_category(df,'short_term_score','Outlook 1-2Months')
+    df = outlook_category(df,'long_term_score','Outlook >1Year')
+    return df
+
+def allot_risk(df,col,outname):
+    u = 0.6
+    l = 0.4
+    #out_df =pd.DataFrame()
+
+    percentiles = df[col].quantile([u,l])
+    
+    def assign_tier(score):
+        if score >= percentiles[u] :
+            return 'High'
+        if score >= percentiles[l] :
+            return 'Mid'
+        else:
+            return 'Low'
+
+    df[outname] = df[col].apply(assign_tier)
+       
     return df
 
 #finanical strength ranking
@@ -242,14 +237,10 @@ def allot_risk(df,col,outname):
     percentiles = df[col].quantile([u,l])
     
     def assign_tier(score):
-        #if score >= percentiles[u2] :
-        #    return 'Very High'
         if score >= percentiles[u] :
             return 'High'
         if score >= percentiles[l] :
             return 'Mid'
-        #if score >= percentiles[l] :
-        #    return 'Low'
         else:
             return 'Low'
 
@@ -468,6 +459,15 @@ def generate_charts(df, interval, items, holiday_list):
         fig.add_trace(go.Scatter(x=df['Date'], y=df['UpperBand2'], name='Upper Band (2STD)', mode='lines', line=dict(dash='dot', color= 'yellow')), row=1, col=1)
         fig.add_trace(go.Scatter(x=df['Date'], y=df['LowerBand2'], name='Lower Band (2STD)', mode='lines', line=dict(dash='dot', color= 'yellow')), row=1, col=1)
         
+        #Dividend TRaces
+    div = df[df['Dividends']!=0][['Date','Close']].reset_index()
+    rng = (df.Close.max() - df.Close.min())/10
+    for i in div.index:
+        fig.add_shape(
+        go.layout.Shape( type="line", x0=div['Date'].values[i], x1=div['Date'].values[i], y0=div['Close'].values[i]-rng,  y1=div['Close'].values[i]+rng, line=dict(dash='dot'),
+                ),row=1, col=1)
+        fig.add_annotation(x=div['Date'].values[i] ,y=div['Close'].values[i]+rng, text="Dividend")
+        
     # moving averages
     for i in upper_plots:
         if 'SMA (' in i or 'EMA (' in i:
@@ -486,6 +486,106 @@ def generate_charts(df, interval, items, holiday_list):
     fig.update_layout(autosize=False,width=1200,height=800,template="plotly_dark")
     
     return fig
+
+
+#Generate technical indicator tags
+def indicator_tags(data, hist):
+    tags = {}
+    #RSi
+    if data['Latest rsi'].values[0] < 30:
+        tags['rsi'] = 'Oversold'
+    elif data['Latest rsi'].values[0] < 50:
+        tags['rsi'] = 'Bearish'
+    elif data['Latest rsi'].values[0] < 60:
+        tags['rsi'] = 'Neutral'
+    elif data['Latest rsi'].values[0] < 80:
+        tags['rsi'] = 'Bullish'
+    else:
+        tags['rsi'] = 'Overbought'
+    #ADX
+    if data['Latest ADX'].values[0] > 30:
+        tags['adx'] = 'Strong Trend'
+    else:
+        tags['adx'] = 'Weak Trend'
+    #cci 10
+    if data['Latest CCI_10'].values[0] < -150:
+        tags['cci_10'] = 'Oversold'
+    elif data['Latest CCI_10'].values[0] < -50:
+        tags['cci_10'] = 'Bearish'
+    elif data['Latest CCI_10'].values[0] < 50:
+        tags['cci_10'] = 'Neutral'
+    elif data['Latest CCI_10'].values[0] < 150:
+        tags['cci_10'] = 'Bullish'
+    else:
+        tags['cci_10'] = 'Overbought'
+    #cci 40
+    if data['Latest CCI_40'].values[0] < -150:
+        tags['cci_40'] = 'Oversold'
+    elif data['Latest CCI_40'].values[0] < -50:
+        tags['cci_40'] = 'Bearish'
+    elif data['Latest CCI_40'].values[0] < 50:
+        tags['cci_40'] = 'Neutral'
+    elif data['Latest CCI_40'].values[0] < 150:
+        tags['cci_40'] = 'Bullish'
+    else:
+        tags['cci_40'] = 'Overbought'
+    #MFI
+    if data['Latest MFI_14'].values[0] < 20:
+        tags['mfi_14'] = 'Oversold'
+    elif data['Latest MFI_14'].values[0] < 80:
+        tags['mfi_14'] = 'Neutral'
+    else:
+        tags['mfi_14'] = 'Overbought'
+    #MACD
+    if data['Latest macd'].values[0] >0 and data['Latest macd'].values[0] > data['Latest macd_signal'].values[0]:
+        tags['macd'] = 'Bullish'
+    elif data['Latest macd'].values[0] < 0 and  data['Latest macd_signal'].values[0] > data['Latest macd'].values[0]:
+        tags['macd'] = 'Bearish'
+    else:
+        tags['macd'] = 'Neutral'
+    #MACD
+    if data['Latest VPT'].values[0] > data['Latest VPT_signal'].values[0]:
+        tags['VPT'] = 'Bullish'
+    elif data['Latest VPT_signal'].values[0] > data['Latest VPT'].values[0]:
+        tags['VPT'] = 'Bearish'
+    else:
+        tags['VPT'] = 'Neutral'
+    #Willamson %R
+    if data['Latest %R'].values[0] < -80:
+        tags['%R'] = 'Oversold'
+    elif data['Latest %R'].values[0] < -60:
+        tags['%R'] = 'Bearish'
+    elif data['Latest %R'].values[0] < -40:
+        tags['%R'] = 'Neutral'
+    elif data['Latest %R'].values[0] < -20:
+        tags['%R'] = 'Bullish'
+    else:
+        tags['%R'] = 'Overbought'
+
+    #Moving averages
+    for i in ['sma_','ema_']:
+        for j in [5,10,20,50,100]:
+            if hist.Close.values[0] > hist[i+str(j)].values[0]:
+                tags[i+str(j)] = 'Bullish'
+            else:
+                tags[i+str(j)] = 'Bearish'
+                
+    #crossovers
+    for i in ['ema_','sma_']:
+        if hist[i+'5'].values[0] > hist[i+'20'].values[0]:
+            tags[i+'shortcross'] = 'Bullish'
+        else:
+            tags[i+'shortcross'] = 'Bearish'
+        if hist[i+'20'].values[0] > hist[i+'50'].values[0]:
+            tags[i+'midcross'] = 'Bullish'
+        else:
+            tags[i+'midcross'] = 'Bearish'
+        if hist[i+'50'].values[0] > hist[i+'100'].values[0]:
+            tags[i+'longcross'] = 'Bullish'
+        else:
+            tags[i+'longcross'] = 'Bearish'
+            
+    return tags
 
 #Calculate Financial KPIs
 def calc_KPIs(financials,mode):
@@ -909,7 +1009,7 @@ def stock_summary(stock_data,historical,week_52,dividend_split):
     if stock_data['Latest rsi'].values[0] < 30:
         summary['RSI']['Display'] = "Stock appears oversold and may rise soon"
         summary['RSI']['Type'] = 1
-    elif stock_data['Latest rsi'].values[0] > 75:
+    elif stock_data['Latest rsi'].values[0] > 80:
         summary['RSI']['Display'] = "Stock appears overbought and may fall soon"
         summary['RSI']['Type'] = -1
     else:

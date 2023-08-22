@@ -19,7 +19,7 @@ st.set_page_config(
 
 # Function to load data from a CSV file
 def load_data(file_path):
-    return pd.read_csv(file_path, sep=",", on_bad_lines='skip')
+    return pd.read_csv(file_path)
 
 # Function to add clickable links to the DataFrame
 def add_links(df):
@@ -52,7 +52,7 @@ def collective(df):
     
     #_________________ALL COLUMN 1 FILTERS_____________________________
     #Create Filter by investment strategy
-    strategy_selected =  col1.selectbox("Investment Duration", ("1-2 Months", "5-6 Months", "> 1 Year"))
+    strategy_selected =  col1.selectbox("Investment Duration", ("1-2 Months","> 1 Year"))
     #filtering based on possible breakout
     strategy=strategy_selected
     final=df
@@ -166,11 +166,9 @@ def top_picks(df):
 
     #selecting companies with high short volatility, mid to low in mid ter and low in long term
     tp = tp[tp['finrank']=='strong']
-    tp = tp[tp['Outlook 1-2Months']=='positive']
-    tp = tp[tp['Outlook 5-6Months']=='positive']
-    tp = tp[tp['Outlook >1Year']=='positive']
+    tp = tp[(tp['Outlook 1-2Months']=='positive')]
+    tp = tp[(tp['Outlook >1Year']=='positive') | (tp['Outlook >1Year']=='very positive')]
     tp = tp[(tp['Risk 1-2Months']=='Mid') | (tp['Risk 1-2Months']=='High')]
-    tp = tp[(tp['Risk 5-6Months']=='Low') | (tp['Risk 5-6Months']=='Mid')]
     tp = tp[tp['Risk >1Year']=='Low']
     tp = tp[tp['Dividend Yield']>0]
 
