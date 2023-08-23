@@ -812,42 +812,38 @@ print("Data Updated")
 ####################################################################################################################################################
 #Breakouts
 ####################################################################################################################################################
-#calculate bollinger breaouts
-'''
-def check_bollinger_flag(df):
-    bollinger_band = df.UpperBand2
-    closing_prices = df.Close
-    x = {}
-    i=0
-        # Check the conditions for the past 3 sessions
-    if (closing_prices[i] > bollinger_band[i]) and (closing_prices[i] >= df.Open.values[i]) and (closing_prices[i+1] > bollinger_band[i+1]) and (closing_prices[i+2] < bollinger_band[i+2]) and df.rsi.values[0]<70 and closing_prices[i+1]<closing_prices[i]:
-        flag=True
-    else:
-        flag=False
-    
-    m=0
-    for i in range(1,20):
-        if (closing_prices[i] > bollinger_band[i]) and (closing_prices[i] >= df.Open.values[i]) and (closing_prices[i+1] > bollinger_band[i+1]) and (closing_prices[i+2] < bollinger_band[i+2]) and df.rsi.values[0]<70 and closing_prices[i+1]<closing_prices[i]:
-            m+=1
-        else:
-            m+=0
-            
-    if flag  and m==0:
-        x['Breakout']=True,
-    else:
-        x['Breakout']=False
-            
-    return(pd.DataFrame(x,index=[df.symbol.values[0]]))
+#calculate breakouts
+def find_breakouts():
+    def breakout_conditions(data):
+            return (
+                (data['Close'] >= data['UpperBand1']) & 
+                (data['Close'].shift(-1) >= data['Open'].shift(-1)) &
+                (data['Close'] >= data['Close'].shift(-1)) & 
+                (data['Close'].shift(-1) >= data['UpperBand1'].shift(-1)) &
+                (data['Close'] >= data['Open']) &  
+                (data['rsi'] <= 70) &
+                ((data['CCI_10'] - data['CCI_40']> 80) | ((data['CCI_40'] - data['CCI_10'] > 0) & (data['CCI_40'] - data['CCI_10'] < 50))) & #(data['CCI_10'] < 200) &
+                (data['CCI_40'] > 100) & (data['CCI_10'] > 100) &
+                (data['MFI_14'] < 85) & (data['MFI_14'] > 40)  
+                & (data['VPT'] >= data['VPT'].shift(-1))
+            )
 
-database= pd.read_csv("database.csv")
-final = pd.DataFrame()
-for i in database.Symbol:
-    try:
-        df = pd.read_csv("historical/"+i.replace(".","_")+".csv")
-        x = check_bollinger_flag(df)
-        final = pd.concat([final,x],axis=0)
-    except:
-        continue
-final[final['Breakout']==True].to_csv("breakout.csv")
+    sym,brk = [],[]
+    for i in pd.read_csv("database.csv").Symbol:
+        x = pd.read_csv('historical/'+i.replace(".","_")+".csv")
+        try:
+            b = breakout_conditions(x)[0]
+            sym.append(i)
+            brk.append(b)
+        except:
+            continue
+
+    df1 = pd.DataFrame()
+    df1['Symbol'] =  sym
+    df1['Breakout'] =  brk    
+    df1 = df1[df1['Breakout']==True]
+    
+    return df1
+
+find_breakouts().to_csv('breakout.csv')
 print('Breakouts updated')
-'''

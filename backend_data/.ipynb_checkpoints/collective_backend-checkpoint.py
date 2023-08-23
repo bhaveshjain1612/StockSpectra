@@ -142,12 +142,27 @@ def get_hist_data(result):
     return historical_sample
 
 # Function to calculate Exponential Moving Average (EMA) for a given DataFrame, series, and interval
-def calc_ema(df, series, interval):
+def calc_ema(df, interval):
     df = df.sort_values('Trading Day', ascending=False)
-    ema = df[series].ewm(span=interval, adjust=False).mean()
-    col_name = series + "_ema_" + str(interval)
+    ema = df['Close'].ewm(span=interval, adjust=False).mean()
+    col_name = "ema_" + str(interval)
     df[col_name] = ema
     df = df.sort_values('Trading Day', ascending=True)
+    return df
+
+# Function to calc macd
+def calc_macd(df):
+    df = df.sort_values('Trading Day', ascending=False)
+
+    df['ema_12'] = df['Close'].ewm(span=12, adjust=False).mean()
+    df['ema_26'] = df['Close'].ewm(span=25, adjust=False).mean()
+    df['macd'] = df['ema_12'] - df['ema_26']
+    df['macd_signal'] = df['macd'].ewm(span=9, adjust=False).mean()
+    df['macde_histogram'] = df['macd'] - df['macd_signal']
+    df.drop(['ema_12','ema_26'],axis=1, inplace= True)
+    
+    df = df.sort_values('Trading Day', ascending=True)
+    
     return df
 
 # Function to calculate Simple Moving Average (SMA) for a given DataFrame and interval
@@ -267,54 +282,189 @@ def bollinger(df):
     
     return df
 
+#Calculate CCI
+def calculate_cci(df, interval):
+    df = df.sort_values('Trading Day', ascending=False)
+    # Calculate the Typical Price
+    df['TP'] = (df['High'] + df['Low'] + df['Close']) / 3
+    
+    # Calculate the moving average of the Typical Price
+    df['MA_TP'] = df['TP'].rolling(window=interval).mean()
+    
+    # Calculate the mean deviation
+    df['MD'] = df['TP'].rolling(window=interval).apply(lambda x: abs(x - x.mean()).mean())
+    
+    # Calculate the CCI
+    df[f'CCI_{interval}'] = (df['TP'] - df['MA_TP']) / (0.015 * df['MD'])
+    
+    # Drop the intermediate columns used for calculations
+    df.drop(['TP', 'MA_TP', 'MD'], axis=1, inplace=True)
+    df = df.sort_values('Trading Day', ascending=True)   
+    return df
+
+
+# VPT
+def calculate_vpt(df):
+    df = df.sort_values('Trading Day', ascending=False)
+    
+    df['VPT'] = (df['Close'].pct_change() + 1).cumprod() * df['Volume']
+    df['VPT_signal'] = df['VPT'].ewm(span=9, adjust=False).mean()
+    
+    df = df.sort_values('Trading Day', ascending=True)
+    
+    return df
+
+# VWAP
+def calculate_vwap(df):
+    df = df.sort_values('Trading Day', ascending=False)
+    
+    df['cum_vol'] = df['Volume'].cumsum()
+    df['cum_vol_price'] = (df['Close'] * df['Volume']).cumsum()
+    df['VWAP'] = df['cum_vol_price'] / df['cum_vol']
+    df.drop(['cum_vol', 'cum_vol_price'], axis=1, inplace=True)
+    
+    df = df.sort_values('Trading Day', ascending=True)
+    
+    return df
+
+# MFI
+def calculate_mfi(df, interval=14):
+    df = df.sort_values('Trading Day', ascending=False)
+    
+    df['TP'] = (df['High'] + df['Low'] + df['Close']) / 3
+    df['money_flow'] = df['TP'] * df['Volume']
+    
+    df['positive_money_flow'] = df['money_flow'].where(df['TP'] > df['TP'].shift(1), 0)
+    df['negative_money_flow'] = df['money_flow'].where(df['TP'] < df['TP'].shift(1), 0)
+    
+    df['positive_money_flow'] = df['positive_money_flow'].rolling(window=interval).sum()
+    df['negative_money_flow'] = df['negative_money_flow'].rolling(window=interval).sum()
+    
+    MFI = 100 - (100 / (1 + df['positive_money_flow'] / df['negative_money_flow']))
+    df[f'MFI_{interval}'] = MFI
+    
+    df.drop(['TP', 'money_flow', 'positive_money_flow', 'negative_money_flow'], axis=1, inplace=True)
+    
+    df = df.sort_values('Trading Day', ascending=True)
+    
+    return df
+
+# OBV
+def calculate_obv(df):
+    df = df.sort_values('Trading Day', ascending=False)
+    
+    df['OBV'] = (df['Volume'] * (~df['Close'].diff().le(0) * 2 - 1)).cumsum()
+    
+    df = df.sort_values('Trading Day', ascending=True)
+    
+    return df
+
+# Pivot Points with additional levels
+def calculate_pivotpoints(df):
+    df['PP'] = (df['High'] + df['Low'] + df['Close']) / 3
+    df['R1'] = (2 * df['PP']) - df['Low']
+    df['S1'] = (2 * df['PP']) - df['High']
+    df['R2'] = df['PP'] + (df['High'] - df['Low'])
+    df['S2'] = df['PP'] - (df['High'] - df['Low'])
+    df['R3'] = df['High'] + 2 * (df['PP'] - df['Low'])
+    df['S3'] = df['Low'] - 2 * (df['High'] - df['PP'])
+    return df
+
+#calculate williams r
+def calculate_williams_r(df, period=14):
+    df = df.sort_values('Trading Day', ascending=False)  
+    
+    df['Highest High'] = df['High'].rolling(window=period).max()
+    df['Lowest Low'] = df['Low'].rolling(window=period).min()
+    df['%R'] = (-100) * (df['Highest High'] - df['Close']) / (df['Highest High'] - df['Lowest Low'])
+    df.drop(['Highest High', 'Lowest Low'], axis=1, inplace=True)
+    
+    df = df.sort_values('Trading Day', ascending=True)  
+    
+    return df
+
+# Chaikin Money Flow (CMF)
+def calculate_cmf(df, period=20):
+    df = df.sort_values('Trading Day', ascending=False)  
+    
+    df['Money Flow Multiplier'] = ((df['Close'] - df['Low']) - (df['High'] - df['Close'])) / (df['High'] - df['Low'])
+    df['Money Flow Volume'] = df['Money Flow Multiplier'] * df['Volume']
+    df['CMF'] = df['Money Flow Volume'].rolling(window=period).sum() / df['Volume'].rolling(window=period).sum()
+    df.drop(['Money Flow Multiplier', 'Money Flow Volume'], axis=1, inplace=True)
+    
+    df = df.sort_values('Trading Day', ascending=True)
+    
+    return df
+
 # Function to compile historical data and technical indicators for a single company
 def compile_single(symbol):
     # Get historical data for the given symbol
     result = retrieve_api(symbol)
     historic_data = get_hist_data(result)
     
-    # Calculate technical indicators: EMA, SMA, RSI, ADX, and Bollinger Bands
-    ema_calculated = calc_ema(calc_sma(calc_ema(calc_ADX(calc_rsi(calc_ema(calc_ema(get_hist_data(result), 'Close', 12), 'Close', 26), 14), 14), 'Close', 20), 20), 'Close', 5)
-    ema_calculated["macd"] = ema_calculated["Close_ema_12"] - ema_calculated["Close_ema_26"]
-    ema_calculated = calc_ema(ema_calculated, "macd", 9)
-    ema_calculated = bollinger(ema_calculated)
-
+    # Calculate technical indicators
+    data = bollinger(historic_data) 
+    data = calculate_cci(data, 10)
+    data = calculate_cci(data, 40)
+    data = calculate_obv(data)
+    data = calculate_vpt(data)
+    data = calculate_vwap(data)
+    data = calculate_mfi(data, 14)
+    data = calculate_pivotpoints(data)
+    data = calculate_cmf(data)
+    data = calculate_williams_r(data)
+    data = calc_macd(data)
+    data = calc_rsi(data, 14)
+    data = calc_ADX(data, 14)
+    data = calc_sma(data, 5)
+    data = calc_sma(data, 20)
+    data = calc_sma(data, 50)
+    data = calc_sma(data, 100)
+    
     # Add symbol and creation timestamp columns to the DataFrame
-    ema_calculated['symbol'] = symbol
-    ema_calculated["created_on"] = datetime.now()
+    data['symbol'] = symbol
+    data["created_on"] = datetime.now()
 
     # Save the DataFrame to a CSV file
     compilation_name = "historical/" + symbol.replace('.', '_') + ".csv"
-    ema_calculated.to_csv(compilation_name, index=False)
+    data.to_csv(compilation_name, index=False)
     
-    return ema_calculated
+    return data
 
-# Function to calculate percentage change between two ends of a user-defined interval and quantity
-def calc_change(data, series, duration, changetype):
-    # If duration is not in days (e.g., 1 month is (1, 'M')), calculate the starting and ending values accordingly
-    if duration[1] != "D":
+#calculate % change b/w two ends of user defined interval and qty
+def calc_change(data,series,duration, changetype):
+    #duartion is atuple i.e 1 month is (1, 'M'), 1 week is (1, 'W') etc.
+    if duration[1]!="D":
         end = data['date_only'][0]
-        start = end - np.timedelta64(duration[0], duration[1])
-        value_start = data[data['date_only'] >= start][series].values[-1]
-        value_end = data[data['date_only'] >= end][series].values[-1]
+        start = end-np.timedelta64(duration[0], duration[1])
+        value_start = data[data['date_only']>=start][series].values[-1]
+        value_end = data[data['date_only']>=end][series].values[-1]
     else:
-        value_end = data[data["Trading Day"] == 1][series].values[0]
-        value_start = data[data["Trading Day"] == 1 + duration[0]][series].values[0]
+        value_end = data[data["Trading Day"]==1][series].values[0]
+        value_start = data[data["Trading Day"]==1+duration[0]][series].values[0]
    
-    # Calculate percentage change or absolute change based on changetype
+    #return (value_start,value_end)
     if changetype == "%":
-        return round(((value_end - value_start) / value_start) * 100, 2)
+        return round(((value_end - value_start) / value_start) * 100,2)
     else:
         return (value_end - value_start)
 
-# Function to calculate the most recent values for given columns
+def stds(data):
+    durations = [(1, "M"), (3, "M"), (6, "M"), (1, "Y")]
+    end = data['date_only'][0]
+    
+    std_values = [
+        data[data['date_only'] >= (end - np.timedelta64(duration[0], duration[1]))]['Close'].std()
+        for duration in durations
+    ]
+    
+    columns = ['std_' + str(duration[0]) + duration[1] for duration in durations]
+    volatility = pd.DataFrame([std_values], columns=columns)
+    
+    return volatility
+
 def calc_most_recent(data, column_list):
-    keys, values = [], []
-    for i in column_list:
-        values.append(data[i].values[0])
-        keys.append("Latest " + i) 
-    result_dict = dict(zip(keys, values))
-    return result_dict
+    return {"Latest " + col: data[col].values[0] for col in column_list}
 
 # Function to collect key parameters and generate features
 def collect_features(df):
@@ -326,18 +476,33 @@ def collect_features(df):
         for i in ['Close', 'Volume']:
             col_name = i + "_change_" + str(j[0]) + j[1].lower()
             changes[col_name] = calc_change(df, i, j, '%')
-        for m in ['macd', 'macd_ema_9', 'rsi', 'ADX']:
+            
+    for n in [(1, "D"), (5, "D"), (10, "D"),]:
+        for m in ['macd', 'macd_signal','CCI_10', 'CCI_40', 'OBV', 'VPT', 'VPT_signal', 'VWAP', 'MFI_14', 'rsi', 'ADX', 'sma_5', 'sma_20', 'sma_50', 'sma_100' ]:
             col_name = m + "_change_" + str(j[0]) + j[1].lower()
-            changes[col_name] = calc_change(df, m, j, "abs")
+            changes[col_name] = calc_change(df, m, n, "abs")
     changes = pd.DataFrame(changes, index=[0])
     
     # Calculate most recent values for specific columns
-    temp_latest = calc_most_recent(df, ["date_only", "Close", "Volume", "Close_ema_12", "Close_ema_26", "macd", "macd_ema_9",
-                                        "rsi", "ADX", 'Close_ema_20', 'sma_20', 'Close_ema_5', 'RollingMean', 'RollingStd',
-                                        'UpperBand1', 'LowerBand1', 'UpperBand2', 'LowerBand2', 'symbol', "created_on"])
+    temp_latest = calc_most_recent(df, ['Date', 'Open', 'High', 'Low', 'Close', 'Volume',
+       'Dividends', 'Stock Splits', 'date_only', 'RollingMean', 'RollingStd',
+       'UpperBand1', 'LowerBand1', 'UpperBand2', 'LowerBand2', 'CCI_10',
+       'CCI_40', 'OBV', 'VPT', 'VPT_signal', 'VWAP', 'MFI_14', 'PP', 'R1',
+       'S1', 'R2', 'S2', 'R3', 'S3', 'CMF', '%R', 'macd', 'macd_signal',
+       'macde_histogram', 'rsi', 'ADX', 'sma_5', 'sma_20', 'sma_50', 'sma_100',
+       'symbol', 'created_on'])
+    
+    temp_latest_sr = calc_most_recent(df[df['Trading Day']==2].rename(columns= {'PP': 'PP_previousday', 'R1': 'R1_previousday', 'S1': 'S1_previousday', 
+                                              'R2': 'R2_previousday', 'S2': 'S2_previousday', 
+                                              'R3': 'R3_previousday', 'S3': 'S3_previousday',}), 
+                                   ['PP_previousday','R1_previousday','S1_previousday',
+                                    'R2_previousday','S2_previousday',
+                                    'R3_previousday','S3_previousday'])
     
     temp = pd.concat([temp, pd.DataFrame(temp_latest, index=[0])], axis=1)
+    temp = pd.concat([temp, pd.DataFrame(temp_latest_sr, index=[0])], axis=1)
     temp = pd.concat([temp, changes], axis=1)
+    temp = pd.concat([temp, stds(df)], axis=1)
     
     temp['symbol'] = df['symbol'].values[0]
         
@@ -633,49 +798,52 @@ database['EPS (trailing)'] = database['EPS (trailing)'].astype('float')
 database['P/E ratio']=database['Latest Close']/database['EPS (trailing)']
 database = add_sector_industry_pe_median(database)
 
+#calculating volatility
+database['volatility_1M'] = database['std_1M']/database['Latest Close']
+database['volatility_3M'] = database['std_3M']/database['Latest Close']
+database['volatility_6M'] = database['std_6M']/database['Latest Close']
+database['volatility_1Y'] = database['std_1Y']/database['Latest Close']
+
 #exporting the final db
 database["Latest created_on"] = datetime.now()
 database.to_csv('database.csv', index=False,mode='w')
 print("Data Updated")
 
-
 ####################################################################################################################################################
 #Breakouts
 ####################################################################################################################################################
-#calculate bollinger breaouts
-def check_bollinger_flag(df):
-    bollinger_band = df.UpperBand2
-    closing_prices = df.Close
-    x = {}
-    i=0
-        # Check the conditions for the past 3 sessions
-    if (closing_prices[i] > bollinger_band[i]) and (closing_prices[i] >= df.Open.values[i]) and (closing_prices[i+1] > bollinger_band[i+1]) and (closing_prices[i+2] < bollinger_band[i+2]) and df.rsi.values[0]<70 and closing_prices[i+1]<closing_prices[i]:
-        flag=True
-    else:
-        flag=False
-    
-    m=0
-    for i in range(1,20):
-        if (closing_prices[i] > bollinger_band[i]) and (closing_prices[i] >= df.Open.values[i]) and (closing_prices[i+1] > bollinger_band[i+1]) and (closing_prices[i+2] < bollinger_band[i+2]) and df.rsi.values[0]<70 and closing_prices[i+1]<closing_prices[i]:
-            m+=1
-        else:
-            m+=0
-            
-    if flag  and m==0:
-        x['Breakout']=True,
-    else:
-        x['Breakout']=False
-            
-    return(pd.DataFrame(x,index=[df.symbol.values[0]]))
+#calculate breakouts
+def find_breakouts():
+    def breakout_conditions(data):
+            return (
+                (data['Close'] >= data['UpperBand1']) & 
+                (data['Close'].shift(-1) >= data['Open'].shift(-1)) &
+                (data['Close'] >= data['Close'].shift(-1)) & 
+                (data['Close'].shift(-1) >= data['UpperBand1'].shift(-1)) &
+                (data['Close'] >= data['Open']) &  
+                (data['rsi'] <= 70) &
+                ((data['CCI_10'] - data['CCI_40']> 80) | ((data['CCI_40'] - data['CCI_10'] > 0) & (data['CCI_40'] - data['CCI_10'] < 50))) & #(data['CCI_10'] < 200) &
+                (data['CCI_40'] > 100) & (data['CCI_10'] > 100) &
+                (data['MFI_14'] < 85) & (data['MFI_14'] > 40)  
+                & (data['VPT'] >= data['VPT'].shift(-1))
+            )
 
-database= pd.read_csv("database.csv")
-final = pd.DataFrame()
-for i in database.Symbol:
-    try:
-        df = pd.read_csv("historical/"+i.replace(".","_")+".csv")
-        x = check_bollinger_flag(df)
-        final = pd.concat([final,x],axis=0)
-    except:
-        continue
-final[final['Breakout']==True].to_csv("breakout.csv")
+    sym,brk = [],[]
+    for i in pd.read_csv("database.csv").Symbol:
+        x = pd.read_csv('historical/'+i.replace(".","_")+".csv")
+        try:
+            b = breakout_conditions(x)[0]
+            sym.append(i)
+            brk.append(b)
+        except:
+            continue
+
+    df1 = pd.DataFrame()
+    df1['Symbol'] =  sym
+    df1['Breakout'] =  brk    
+    df1 = df1[df1['Breakout']==True]
+    
+    return df1
+
+find_breakouts().to_csv('breakout.csv')
 print('Breakouts updated')
