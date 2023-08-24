@@ -310,8 +310,7 @@ def generate_financials(data):
 def generate_news(name):
     #try:
     news = pd.read_csv("backend_data/news_articles/"+name.replace(" ","_")+".csv").reset_index()
-
-    st.dataframe(news)
+    #st.dataframe(news)
     
     if news.empty:
         st.write("no News articles about the company in past 14 days")
@@ -319,14 +318,14 @@ def generate_news(name):
         st.header("Most Recent news articles (Last 14 Days)")
         
     for i in news.index:
-        st.subheader(news.title[i])
-    #    col1, col2, col3 = st.columns([1,1,5])
-    #    col1.write(news.source[i])
-    #    col2.write(news.date[i])
-    #    link  = "https//:"+news.link[i]  
-    #    st.write(news.summary[i])
-    #    st.write("[Read More....]("+link+")")
-    #    st.divider()
+        st.subheader(news.title.values[i])
+        col1, col2, col3 = st.columns([1,1,5])
+        col1.write(news.source.values[i])
+        col2.write(news.date.values[i])
+        link  = "https//:"+news.link.values[i]  
+        #st.write(news.summary[i])
+        st.write("[Read More....]("+link+")")
+        st.divider()
     #except:
     #    st.write("no News articles about the company in past 14 days")
     
