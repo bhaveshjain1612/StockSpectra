@@ -2,11 +2,11 @@ name: Update data
 
 on:
   schedule:
-      - cron: "30 11 * * 1"
-      - cron: "30 11 * * 2"
-      - cron: "30 11 * * 3"
-      - cron: "30 11 * * 4"
-      - cron: "30 11 * * 5"
+      - cron: "30 10 * * 1"
+      - cron: "30 10 * * 2"
+      - cron: "30 10 * * 3"
+      - cron: "30 10 * * 4"
+      - cron: "30 10 * * 5"
 
 jobs:
   run_and_push:
