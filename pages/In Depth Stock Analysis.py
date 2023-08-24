@@ -309,7 +309,7 @@ def generate_financials(data):
 #get ne2ws for stocks        
 def generate_news(name):
     try:
-        news = pd.read_csv("backend_data/news_articles/"+name.replace(" ","_")+".csv")
+        news = pd.read_csv("backend_data/news_articles/"+name.replace(" ","_")+".csv").reset_index()
 
         if news.empty:
             st.write("no News articles about the company in past 14 days")
