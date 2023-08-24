@@ -308,26 +308,26 @@ def generate_financials(data):
         
 #get ne2ws for stocks        
 def generate_news(name):
-    try:
-        news = pd.read_csv("backend_data/news_articles/"+name.replace(" ","_")+".csv").reset_index()
+    #try:
+    news = pd.read_csv("backend_data/news_articles/"+name.replace(" ","_")+".csv").reset_index()
 
-        if news.empty:
-            st.write("no News articles about the company in past 14 days")
-        else:
-            st.header("Most Recent news articles (Last 14 Days)")
-
-        #st.dataframe(news)  
-        for i in news.index:
-            st.subheader(news.title[i])
-            col1, col2, col3 = st.columns([1,1,5])
-            col1.write(news.source[i])
-            col2.write(news.date[i])
-            link  = "https//:"+news.link[i]  
-            st.write(news.summary[i])
-            st.write("[Read More....]("+link+")")
-            st.divider()
-    except:
+    if news.empty:
         st.write("no News articles about the company in past 14 days")
+    else:
+        st.header("Most Recent news articles (Last 14 Days)")
+
+    #st.dataframe(news)  
+    for i in news.index:
+        st.subheader(news.title[i])
+        col1, col2, col3 = st.columns([1,1,5])
+        col1.write(news.source[i])
+        col2.write(news.date[i])
+        link  = "https//:"+news.link[i]  
+        st.write(news.summary[i])
+        st.write("[Read More....]("+link+")")
+        st.divider()
+    #except:
+    #    st.write("no News articles about the company in past 14 days")
     
 #Load all insights
 def load_insights(data,input_symbol):
