@@ -21,243 +21,20 @@ from plotly.subplots import make_subplots
 ######################################################################################################################################
 
 #collective code to allot financial scores, outlooks and all other scores in one go
+#generate industry view table
+def industryview(df,universe): 
 
-#finaical score:
-def financial_scores(row):
-    def fin_test(df,param,score,type):
-        try:
-            if df[param]> 0:
-                score+=type
-            else:
-                score-=type
-        except:
-            score += 0
-        return score
-    
-    score = 0
-    
-    score  = fin_test(row,"ROE",score,1)
-    score  = fin_test(row,"ROA",score,1)
-    score  = fin_test(row,"Current Ratio",score,1)
-    score  = fin_test(row,"Net Profit Margin",score,1)
-    score  = fin_test(row,"Net Income",score,1)
-    score  = fin_test(row,"Free Cash Flow",score,1)
-    score  = fin_test(row,"ROCE",score,1)
-    score  = fin_test(row,"Basic EPS",score,1)
-    score  = fin_test(row,"P/E ratio",score,1)
-    score  = fin_test(row,"DE Ratio",score,-1)
-    score  = fin_test(row,"Debt",score,-1)
-    
-    return score
+    d1 = df.groupby(universe)['Close_change_1d'].agg(['median']).rename(columns={'median':'Median 1 Day Change (%)'})
+    d5 = df.groupby(universe)['Close_change_5d'].agg(['median']).rename(columns={'median':'Median 5 Day Change (%)'})
+    m1 = df.groupby(universe)['Close_change_1m'].agg(['median']).rename(columns={'median':'Median 1 Month Change (%)'})
+    m3 = df.groupby(universe)['Close_change_3m'].agg(['median']).rename(columns={'median':'Median 3 Month Change (%)'})
+    m6 = df.groupby(universe)['Close_change_6m'].agg(['median']).rename(columns={'median':'Median 6 Month Change (%)'})
+    y1 = df.groupby(universe)['Close_change_1y'].agg(['median']).rename(columns={'median':'Median 1 Year Change (%)'})
+    co = df.groupby(universe)['Close_change_1y'].agg(['count']).rename(columns={'count':'Number of Companies'})
+    cc = df.pivot_table(index=universe, columns='Cap', aggfunc='size', fill_value=0)
+    df = pd.concat([d1,d5,m1,m3,m6,y1,co,cc],axis=1).rename(columns={'Large-cap':'Number of LargeCap','Mid-cap':'Number of MidCap','Small-cap':'Number of SmallCap'})
 
-#allotting a score based on stock performance
-def allot_outlook(df):
-
-    # Weights for each parameter
-    short_term_weights = {
-        'rsi': 3,
-        'macd': 2,
-        'adx': 1,
-        'bollinger': 3,
-        'pe_ratio': 1,
-        'moving_averages': 2,
-        'financials_yoy': 1,
-        'cci_10': 3,
-        'cci_40': 1,
-        'vpt': 2,
-        'vwap': 3,
-        'mfi_14': 3
-    }
-
-
-    for index, row in df.iterrows():
-        
-        short_term_score = 0
-        long_term_score = 0
-        
-        #Short term logic
-        # RSI logic
-        if row['Latest rsi'] > 70 and row['Latest rsi'] < 90: # bullish
-            short_term_score += short_term_weights['rsi']
-        elif row['Latest rsi'] < 30 or row['Latest rsi'] > 90: # overbought
-            short_term_score -= short_term_weights['rsi']
-
-        # ADX logic
-        if row['Latest ADX'] > 30:
-            short_term_score += short_term_weights['adx'] # strong trend
-        else:
-            short_term_score -= short_term_weights['adx'] # weak trend
-
-        # MACD logic
-        if row['Latest macd'] > 0:
-            short_term_score += short_term_weights['macd']
-
-        # Bollinger Bands logic
-        price_position = (row['Latest Close'] - row['Latest RollingMean']) / (row['Latest UpperBand2'] - row['Latest LowerBand2'])
-        if price_position < -0.5:
-            short_term_score += short_term_weights['bollinger']
-        elif price_position > 0.5:
-            short_term_score -= short_term_weights['bollinger']
-
-        # Price change logic
-        if row['Close_change_1d'] > 0:
-            short_term_score += 1
-            
-        if row['Close_change_1m'] > 1:
-            long_term_score += 1
-        else:
-            long_term_score -= 1
-            
-        if row['Close_change_6m'] > 5:
-            long_term_score += 1
-        else:
-            long_term_score -= 1
-            
-        if row['Close_change_1y'] > 10:
-            long_term_score += 1
-        else:
-            long_term_score -= 1
-            
-            
-        # if DIvidend
-        if row['Dividend Rate'] != 'Not Found':
-            long_term_score -= 1
-        else:
-            long_term_score += 1
-        
-        # P/E Ratio logic
-        if row['P/E ratio'] < row['Industry Median P/E Ratio']:
-            long_term_score -= 1
-        else:
-            long_term_score += 1
-        
-        # Moving Averages logic
-        if row['Latest sma_50'] > row['Latest sma_100']:
-            long_term_score += 1
-        else:
-            long_term_score -= 1
-        
-        # CCI logic for short term
-        if row['Latest CCI_10'] > 100:
-            short_term_score += short_term_weights['cci_10']
-        elif row['Latest CCI_10'] < -100:
-            short_term_score -= short_term_weights['cci_10']
-            
-         # CCI logic for long term
-        if row['Latest CCI_40'] > 100:
-            short_term_score += short_term_weights['cci_40']
-        elif row['Latest CCI_40'] < -100:
-            short_term_score -= short_term_weights['cci_40']
-        
-        # VPT logic for short term
-        if row['Latest VPT'] -  row['Latest VPT_signal'] > 0:
-            short_term_score += short_term_weights['vpt']
-        else:
-            short_term_score -= short_term_weights['vpt']
-            
-        # MFI logic for short term
-        if row['Latest MFI_14'] > 80 and row['Latest MFI_14'] < 20: # overbought
-            short_term_score -= short_term_weights['mfi_14']
-        elif row['Latest MFI_14'] > 65 and row['Latest MFI_14'] < 80: # bullish
-            short_term_score += short_term_weights['mfi_14']
-        
-        # Financials YoY score logic
-        short_term_score += row['finscore']*0.5 
-        long_term_score += row['finscore'] 
-        
-        # Translating the scores into outlooks
-        df.at[index, 'short_term_score'] = short_term_score 
-        df.at[index, 'long_term_score'] = long_term_score 
-        
-        def outlook_category(df,col,outname):
-            
-            scr = df[col]
-
-            def assign_tier(score):
-                if score > scr.max()/2:
-                    return 'very positive'
-                elif score > scr.max()/4:
-                    return 'positive'
-                elif score > 0:
-                    return 'neutral'
-                else :
-                    return 'negative'
-                
-            df[outname] = df[col].apply(assign_tier)
-
-            return df
-
-    df = outlook_category(df,'short_term_score','Outlook 1-2Months')
-    df = outlook_category(df,'long_term_score','Outlook >1Year')
     return df
-
-def allot_risk(df,col,outname):
-    u = 0.6
-    l = 0.4
-    #out_df =pd.DataFrame()
-
-    percentiles = df[col].quantile([u,l])
-    
-    def assign_tier(score):
-        if score >= percentiles[u] :
-            return 'High'
-        if score >= percentiles[l] :
-            return 'Mid'
-        else:
-            return 'Low'
-
-    df[outname] = df[col].apply(assign_tier)
-       
-    return df
-
-#finanical strength ranking
-def finrank(df):
-    u = df.finscore.describe()['75%']
-    l = df.finscore.describe()['25%']
-    
-    r = []
-    for i in df.index:
-        if df.finscore.values[i] <= l:
-            r.append('weak')
-        elif df.finscore.values[i] > l and df.finscore.values[i] <= u:
-            r.append('mid')
-        else:
-            r.append('strong')
-    
-    df['finrank'] = r
-    
-    return df
-
-#allcoate risk based on standard deviation
-def allot_risk(df,col,outname):
-    u = 0.6
-    l = 0.4
-    #out_df =pd.DataFrame()
-
-    percentiles = df[col].quantile([u,l])
-    
-    def assign_tier(score):
-        if score >= percentiles[u] :
-            return 'High'
-        if score >= percentiles[l] :
-            return 'Mid'
-        else:
-            return 'Low'
-
-    df[outname] = df[col].apply(assign_tier)
-       
-    return df
-
-#funaction to allot all tags
-def allot_tags(df):
-    df['finscore'] = df.apply(financial_scores,axis=1)
-    df = allot_risk(df,'volatility_1M','Risk 1-2Months')
-    df = allot_risk(df,'volatility_6M','Risk 5-6Months')
-    df = allot_risk(df,'volatility_1Y','Risk >1Year')
-    df = finrank(df)
-    df = allot_outlook(df)
-    return df
-
 
 #allot strategy based on selected filter
 def strategy_allotting(argument):
@@ -273,6 +50,55 @@ def strategy_allotting(argument):
 ######################################################################################################################################
 # In Depth Functions
 ######################################################################################################################################
+
+#Related Companies
+def related_companies(symbol, df, n):
+    # Extract base company details
+    base_company = df[df['Symbol']==symbol]
+    base_industry = base_company['Industry'].iloc[0]
+    base_sector = base_company['Sector'].iloc[0]
+    base_cap = base_company['Cap'].iloc[0]
+    base_price = base_company['Latest Close'].iloc[0]
+
+    df = df[df['Exchange']==base_company['Exchange'].values[0]]
+    df = df[df['Symbol']!=symbol]
+    # Helper function to calculate priority score
+    def priority_score(row):
+        score = 9
+        if row['Industry'] == base_industry:
+            if row['Cap'] == base_cap:
+                if abs(row['Latest Close'] - base_price) <= 0.20 * base_price:
+                    score = 1
+                elif abs(row['Latest Close'] - base_price) <= 0.50 * base_price:
+                    score = 2
+                else:
+                    score = 3
+            else:
+                score = 7
+        elif row['Sector'] == base_sector:
+            if row['Cap'] == base_cap:
+                if abs(row['Latest Close'] - base_price) <= 0.20 * base_price:
+                    score = 4
+                elif abs(row['Latest Close'] - base_price) <= 0.50 * base_price:
+                    score = 5
+                else:
+                    score = 6
+            else:
+                score = 8
+        return score
+
+    # Apply the priority score function to the dataframe
+    df['priority'] = df.apply(priority_score, axis=1)
+
+    # Sort by priority and get the top n companies
+    closest_n = df.sort_values(by='priority').head(n)
+
+    # Drop the priority column for the final output
+    closest_n.drop(columns=['priority'])
+
+    return closest_n
+
+
 
 #pie chart for holding composition
 def holding_chart(df):

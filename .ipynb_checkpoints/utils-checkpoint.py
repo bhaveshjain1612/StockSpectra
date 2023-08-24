@@ -20,222 +20,85 @@ from plotly.subplots import make_subplots
 # Home Page Fuctions
 ######################################################################################################################################
 
-#finaical score:
-def financial_scores(row):
-    def fin_test(df,param,score,type):
-        try:
-            if df[param]> 0:
-                score+=type
-            else:
-                score-=type
-        except:
-            score += 0
-        return score
-    
-    score = 0
-    
-    score  = fin_test(row,"ROE",score,1)
-    score  = fin_test(row,"ROA",score,1)
-    score  = fin_test(row,"Current Ratio",score,1)
-    score  = fin_test(row,"Net Profit Margin",score,1)
-    score  = fin_test(row,"Net Income",score,1)
-    score  = fin_test(row,"Free Cash Flow",score,1)
-    score  = fin_test(row,"ROCE",score,1)
-    score  = fin_test(row,"Basic EPS",score,1)
-    score  = fin_test(row,"P/E ratio",score,1)
-    score  = fin_test(row,"DE Ratio",score,-1)
-    score  = fin_test(row,"Debt",score,-1)
-    
-    return score
+#collective code to allot financial scores, outlooks and all other scores in one go
+#generate industry view table
+def industryview(df,universe): 
 
-#base score
-def base_score(row):
-    score = 0
+    d1 = df.groupby(universe)['Close_change_1d'].agg(['median']).rename(columns={'median':'Median 1 Day Change (%)'})
+    d5 = df.groupby(universe)['Close_change_5d'].agg(['median']).rename(columns={'median':'Median 5 Day Change (%)'})
+    m1 = df.groupby(universe)['Close_change_1m'].agg(['median']).rename(columns={'median':'Median 1 Month Change (%)'})
+    m3 = df.groupby(universe)['Close_change_3m'].agg(['median']).rename(columns={'median':'Median 3 Month Change (%)'})
+    m6 = df.groupby(universe)['Close_change_6m'].agg(['median']).rename(columns={'median':'Median 6 Month Change (%)'})
+    y1 = df.groupby(universe)['Close_change_1y'].agg(['median']).rename(columns={'median':'Median 1 Year Change (%)'})
+    co = df.groupby(universe)['Close_change_1y'].agg(['count']).rename(columns={'count':'Number of Companies'})
+    cc = df.pivot_table(index=universe, columns='Cap', aggfunc='size', fill_value=0)
+    df = pd.concat([d1,d5,m1,m3,m6,y1,co,cc],axis=1).rename(columns={'Large-cap':'Number of LargeCap','Mid-cap':'Number of MidCap','Small-cap':'Number of SmallCap'})
 
-    #indicator 1 - macd > signal and macd moving upwards
-    try:
-        if row['Latest macd'] > row['Latest macd_ema_9'] and row['macd_change_5d']>0:
-            score+=1
-        else:
-            score-=1
-    except:
-        score+=0
-
-    #indicator 2 - rsi should be below 70, shouuld not be increasing if more than 60, should not be decreasing if less than 30
-    try:
-        if row['Latest rsi']>70 or (row['Latest rsi']>60 and row['rsi_change_5d']>0) or (row['Latest rsi']<30 and row['rsi_change_5d']<0):
-            score-=2
-        else:
-            score+=2
-    except:
-        score+=0
-
-    #indicator 3 - increasing price along with strong trend(ADX)
-    try:
-        if row['Latest ADX']>25 and row['Close_change_5d']>0 and row['ADX_change_5d']>0:
-            score+=1
-        else:
-            score-=1
-    except:
-        score+=0  
-
-    #indicator 4 - price above ema and ema anove sma
-    try:
-        if row['Latest Close']>row['Latest ema_5d'] and row['Latest sma_20d']<row['Latest ema_5d']:
-            score+=1
-        else:
-            score-=1
-    except:
-        score+=0  
-
-    #indicator 5 - bollinger bands
-    try:
-        if row['Latest Close']>row['Latest UpperBand1'] and  row['Latest Close']<row['Latest UpperBand2']:
-            score+=1
-        else:
-            score-=1
-    except:
-        score+=0  
-
-    return score
-
-#advanced score
-def stock_score(row):
-    index=0
-    rsi = (70 - row['Latest rsi'] )/10
-    adx = (row['Latest ADX']  - 25)/10
-    maP = (row['Latest Close']  - row['Latest Close_ema_5'] )*10/row['Latest Close_ema_5'] 
-    ma2 = (row['Latest Close_ema_5']  - row['Latest Close_ema_20'])*10/row['Latest Close_ema_20'] 
-    bb2 = (row['Latest Close']  - row['Latest UpperBand2'] )*10/(2*row['Latest RollingStd'] )
-    bb1 = (row['Latest Close']  - row['Latest UpperBand1'] )*10/row['Latest RollingStd'] 
-    fin = row['finscore'] 
-    c1d = row['Close_change_1d']/10 
-    c1w = row['Close_change_5d'] /10    
-    c2w = row['Close_change_10d']/10 
-    c1m = row['Close_change_1m']/10 
-    old = row['stkscore'] 
-
-    weights = {'rsi':3,
-                'adx':2,
-                'maP':2,
-                'ma2':1,
-                'bb2':3,
-                'bb1':0,
-                'fin':1,
-                'c1d':2,
-                'c1w':2,
-                'c2w':0,
-                'c1m':0,
-                'old':4}
-
-    score = weights['rsi']*rsi
-    score += weights['adx']*adx
-    score += weights['maP']*maP    
-    score += weights['ma2']*ma2    
-    score += weights['bb2']*bb2    
-    score += weights['bb1']*bb1    
-    score += weights['c1d']*c1d    
-    score += weights['c1w']*c1w    
-    score += weights['c2w']*c2w
-    score += weights['c1m']*c1m  
-    score += weights['fin']*fin
-    score += weights['old']*old      
-
-    return score
-
-#allot risk
-def allot_risk(df):  
-    percentiles = df['overall_score'].quantile([0.5,0.9,0.99])
-    # Function to assign tier based on percentile value
-    def assign_tier(score):
-        if score >= percentiles[0.99]:
-            return 'Low'
-        elif score >= percentiles[0.9]:
-            return 'Mid'
-        elif score >= percentiles[0.5]:
-            return 'High'
-        else:
-            return 'Caution Advised'
-
-    # Apply the function to create the 'Tier' column
-    df['Risk'] = df['overall_score'].apply(assign_tier)
-    return df
-
-#allot outlook
-def allot_outlook(df):
-    u=0.75
-    l=0.25
-    m=0.5
-    out_df =pd.DataFrame()
-    for req in ['High','Low','Mid','Caution Advised']:
-        x = df[df['Risk']==req]
-
-        percentiles = x['overall_score'].quantile([u,m,l])
-
-        def assign_tier(score):
-            if score >= percentiles[u] :
-                return 'A'
-            elif score >= percentiles[l] :
-                return 'B'
-            else:
-                return 'C'
-
-        x['Outlook'] = df['overall_score'].apply(assign_tier)
-        
-        if req=='High':
-            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'C': 'neutral', 'B': 'negative'})
-        elif req=='Mid':
-            x['Outlook'] = x['Outlook'].replace({'B': 'positive', 'C': 'neutral', 'A': 'negative'})
-        elif req=='Low':
-            x['Outlook'] = x['Outlook'].replace({'C': 'positive', 'A': 'neutral', 'B': 'negative'})
-        else:
-            x['Outlook'] = x['Outlook'].replace({'A': 'positive', 'B': 'neutral', 'C': 'negative'})
-        
-        out_df = pd.concat([out_df,x],axis=0)
-    return out_df
-
-#Allotting financial Tag
-def finrank(df):
-    u = df.finscore.describe()['75%']
-    l = df.finscore.describe()['25%']
-    
-    r = []
-    for i in df.index:
-        if df.finscore.values[i] <= l:
-            r.append('weak')
-        elif df.finscore.values[i] > l and df.finscore.values[i] <= u:
-            r.append('mid')
-        else:
-            r.append('strong')
-    
-    df['finrank'] = r
-    
-    return df
-
-
-def allot_tags(df):
-    #allotting scores
-    df['finscore'] = df.apply(financial_scores,axis=1)
-    df['stkscore'] = df.apply(base_score,axis=1)
-    df['overall_score'] = df.apply(stock_score,axis=1)
-    df = finrank(df)
-    df=allot_risk(df)
-    df=allot_outlook(df)
     return df
 
 #allot strategy based on selected filter
 def strategy_allotting(argument):
     switcher = {
         "> 1 Year": [['Low'],['positive','neutral'],['strong','mid'],("Yes","All","No")],
-        "3-6 Months": [['Low','Mid'],['positive','neutral'],['strong'],("All","Yes","No")],
+        "5-6 Months": [['Low','Mid'],['positive','neutral'],['strong'],("All","Yes","No")],
         "1-2 Months": [['Mid','High'],['positive'],['All'],("All","Yes","No")],
     }
 
-    return switcher.get(argument, [['All'],['All'],['All'],("All","Yes","No")])
+    #return switcher.get(argument, [['All'],['All'],['All'],("All","Yes","No")])
+    return [['All'],['All'],['All'],("All","Yes","No")]
 
 ######################################################################################################################################
 # In Depth Functions
 ######################################################################################################################################
+
+#Related Companies
+def related_companies(symbol, df, n):
+    # Extract base company details
+    base_company = df[df['Symbol']==symbol]
+    base_industry = base_company['Industry'].iloc[0]
+    base_sector = base_company['Sector'].iloc[0]
+    base_cap = base_company['Cap'].iloc[0]
+    base_price = base_company['Latest Close'].iloc[0]
+
+    df = df[df['Exchange']==base_company['Exchange'].values[0]]
+    df = df[df['Symbol']!=symbol]
+    # Helper function to calculate priority score
+    def priority_score(row):
+        score = 9
+        if row['Industry'] == base_industry:
+            if row['Cap'] == base_cap:
+                if abs(row['Latest Close'] - base_price) <= 0.20 * base_price:
+                    score = 1
+                elif abs(row['Latest Close'] - base_price) <= 0.50 * base_price:
+                    score = 2
+                else:
+                    score = 3
+            else:
+                score = 7
+        elif row['Sector'] == base_sector:
+            if row['Cap'] == base_cap:
+                if abs(row['Latest Close'] - base_price) <= 0.20 * base_price:
+                    score = 4
+                elif abs(row['Latest Close'] - base_price) <= 0.50 * base_price:
+                    score = 5
+                else:
+                    score = 6
+            else:
+                score = 8
+        return score
+
+    # Apply the priority score function to the dataframe
+    df['priority'] = df.apply(priority_score, axis=1)
+
+    # Sort by priority and get the top n companies
+    closest_n = df.sort_values(by='priority').head(n)
+
+    # Drop the priority column for the final output
+    closest_n.drop(columns=['priority'])
+
+    return closest_n
+
+
 
 #pie chart for holding composition
 def holding_chart(df):
@@ -320,155 +183,235 @@ def dividends_splits(data):
     return {"Normal dividend":normal_dividend,"split ratio":split, "split date":split_date}
 
 #generate primary plot
-def generate_charts(historical_sample, selected_ma, bollinger_filter, holiday_list, to_show):
-    candlesticks = go.Candlestick(
-                        x=historical_sample['date_only'],
-                        open=historical_sample['Open'],
-                        high=historical_sample['High'],
-                        low=historical_sample['Low'],
-                        close=historical_sample['Close'],
-                        showlegend=False,
-                        name= 'Price',
-                        legendgroup = '1'
-                    )
-
-    volume_bars = go.Bar(
-                    x=historical_sample['date_only'],
-                    y=historical_sample['Volume'],
-                    name = 'Volume',
-                    showlegend=False,
-                    legendgroup = '2',
-                    marker={
-                        "color": "rgba(128,128,128,0.5)"})
+def generate_charts(df, interval, items, holiday_list):
     
-    macd_line = go.Scatter(x=historical_sample['date_only'],
-                           y=historical_sample["macd"], 
-                           mode='lines', 
-                           legendgroup = '2',
-                           name = "MACD")
+    #allotting which indicator goes with price and hwich oes below
+    upper_plots, lower_plots = [],[]
+    for item in items:
+        if item in ["Volume","ADX (14)", "RSI (14)", "CCI (10)", "CCI (40)", "OBV", "VPT", "CMF", 'Williamson%R (14)', 'MACD']:
+            lower_plots.append(item)
+        elif "SMA (" in item or "EMA (" in item or "Bollinger" in item or item in ['VWAP', 'MFI (14)']:
+            upper_plots.append(item)
     
-    macd_signal_line = go.Scatter(x=historical_sample['date_only'],
-                           y=historical_sample["macd_ema_9"], 
-                           mode='lines', 
-                            legendgroup = '2',
-                           name = "Signal")
-    
-    ADX_line = go.Scatter(x=historical_sample['date_only'],
-                           y=historical_sample["ADX"], 
-                           mode='lines', 
-                            legendgroup = '2',
-                           name = "ADX")
-    
-    RSI_line = go.Scatter(x=historical_sample['date_only'],
-                           y=historical_sample["rsi"], 
-                           mode='lines', 
-                            legendgroup = '2',
-                           name = "RSI")
-    
-    bollinger_u_2 = go.Scatter(x = historical_sample['date_only'],
-                         y = historical_sample['UpperBand2'],
-                         name = 'Upper Bollinger (2 STD)',
-                               line_color = 'yellow',
-                               line = {'dash': 'dash'},
-                         opacity = 0.5)
-    
-    bollinger_l_2 = go.Scatter(x = historical_sample['date_only'],
-                         y = historical_sample['LowerBand2'],
-                         name = 'Lower Bollinger (2 STD)',
-                               line_color = 'yellow',
-                               line = {'dash': 'dash'},
-                         opacity = 0.5)
-    
-    bollinger_u_1 = go.Scatter(x = historical_sample['date_only'],
-                         y = historical_sample['UpperBand1'],
-                         line = {'dash': 'dot'},
-                         name = 'Upper Bollinger (1 STD)',
-                               line_color='gray',
-                         opacity = 0.5)
-    
-    bollinger_l_1 = go.Scatter(x = historical_sample['date_only'],
-                         y = historical_sample['LowerBand1'],
-                         line = {'dash': 'dot'},
-                         name = 'Lower Bollinger (1 STD)',
-                               line_color='gray',
-                         opacity = 0.5)
-    
-    rolling_mean = go.Scatter(x = historical_sample['date_only'],
-                         y = historical_sample['RollingMean'],
-                         name = 'Rolling Mean',
-                         opacity = 0.5)
-
-    ma_traces = {}
-    for i in [5,10,15,20,25,30,40,50,75,100,150,200]:
-        for j in ['ema','sma']:
-            name = j+"_"+str(i)+"_trace"
-            plot = go.Scatter(x=historical_sample['date_only'], y=historical_sample[j+"_"+str(i)], mode='lines', name = j.upper()+" "+str(i)+" days",legendgroup = '1')
-            ma_traces[name] = plot
-    
-    # Create subplots and mention plot grid size
-    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, 
-                   vertical_spacing=0.1,  
-                   row_width=[0.3, 0.7])
-
-    # Plot OHLC on 1st row
-    fig.add_trace(candlesticks,row=1, col=1)
-    
-    #for div in historical_sample[historical_sample['Dividends']>0].reset_index().index:
-        #pos_x = historical_sample[historical_sample['Dividends']>0].reset_index().date_only.values[div]
-        #pos_y = historical_sample[historical_sample['Dividends']>0].reset_index().Close.values[div]
-        #fig.add_vline( x=pos_x, line_width=10,  line_color="cyan")
-        #fig.add_annotation(x=pos_x,text="Dividend",textangle=270, row=1, col=1)
-        #fig['layout'].update(annotations=[dict(x=pos_x, y=pos_y, xref='x1', yref='y1',text='Dividend')])
-    
-    fig.update_yaxes(title_text="Price", row=1, col=1)
-    
-    if bollinger_filter==["1 Standard Deviation","2 Standard Deviations"] or bollinger_filter==["2 Standard Deviations","1 Standard Deviation"]:
-        fig.add_trace(bollinger_u_2,row=1, col=1)
-        fig.add_trace(bollinger_l_2,row=1, col=1)
-        fig.add_trace(bollinger_u_1,row=1, col=1)
-        fig.add_trace(bollinger_l_1,row=1, col=1)
-        fig.add_trace(rolling_mean,row=1, col=1)
-    elif bollinger_filter==["1 Standard Deviation"]:
-        fig.add_trace(bollinger_u_1,row=1, col=1)
-        fig.add_trace(bollinger_l_1,row=1, col=1)
-        fig.add_trace(rolling_mean,row=1, col=1)        
-    elif bollinger_filter==["2 Standard Deviations"]:
-        fig.add_trace(bollinger_u_2,row=1, col=1)
-        fig.add_trace(bollinger_l_2,row=1, col=1)
-        fig.add_trace(rolling_mean,row=1, col=1)
-    
-
-    for i in selected_ma:    
-        fig.add_trace(ma_traces[i],row=1, col=1)
-        
-    if to_show.upper() =="VOLUME":
-        # Bar trace for volumes on 2nd row without legend
-        fig.add_trace(volume_bars, row=2, col=1)
-        fig.update_yaxes(title_text="Volume", row=2, col=1)
-    elif to_show.upper() =="ADX":
-        # Bar trace for volumes on 2nd row without legend
-        fig.add_trace(ADX_line, row=2, col=1)
-        fig.update_yaxes(title_text="ADX", row=2, col=1)
-    elif to_show.upper() =="RSI":
-        # Bar trace for volumes on 2nd row without legend
-        fig.add_trace(RSI_line, row=2, col=1)
-        fig.update_yaxes(title_text="RSI", row=2, col=1)
+    if len(lower_plots) > 0:
+        rheights = [0.6] + [0.4/len(lower_plots) for _ in lower_plots]
     else:
-        #adding mACD
-        fig.add_trace(macd_line, row=2, col=1)
-        fig.add_trace(macd_signal_line, row=2, col=1)
-        fig.update_yaxes(title_text="MACD", row=2, col=1)
+        rheights = [1]
+    
+    # picking the inteerval
+    df['date_only'] = pd.to_datetime(df['date_only'], format='%Y-%m-%d').astype('datetime64[ns]')
+    df = df[df['date_only'] >df['date_only'][0]-np.timedelta64(interval.replace(" ","")[0], interval.replace(" ","")[1])]
+    
+    # Create subplots
+    fig = make_subplots(rows=len(lower_plots)+1, cols=1, shared_xaxes=True,  vertical_spacing=0.01,  row_heights=rheights,)
+
+    # Add candlestick trace
+    fig.add_trace(go.Candlestick(x=df['Date'],  open=df['Open'],  high=df['High'],  low=df['Low'],  close=df['Close'],  name='Price'), row=1, col=1)
+    # Add MACD traces
+    if 'MACD' in lower_plots:
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['macd'], mode='lines', name='MACD'), row=lower_plots.index('MACD')+2, col=1)
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['macd_signal'], mode='lines', name='Signal Line', line=dict(dash='dash')), row=lower_plots.index('MACD')+2, col=1)
+        fig.add_shape(
+        go.layout.Shape(
+                type="line", x0=df['Date'].iloc[0], x1=df['Date'].iloc[-1], y0=0,  y1=0, line=dict(color="Red"),
+            ),row=lower_plots.index('MACD')+2, col=1)
+
+    # Add volume trace
+    if 'Volume' in lower_plots:
+        fig.add_trace(go.Bar(x=df['Date'], y=df['Volume'], name='Volume'), row=lower_plots.index('Volume')+2, col=1)
         
+    # Add short CCI trace
+    if 'CCI (10)' in lower_plots:
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['CCI_10'], name='CCI (10)', mode='lines'), row=lower_plots.index('CCI (10)')+2, col=1)
+        fig.add_shape(
+        go.layout.Shape( type="line", x0=df['Date'].iloc[0], x1=df['Date'].iloc[-1], y0=100,  y1=100, line=dict(dash='dot'),
+            ),row=lower_plots.index('CCI (10)')+2, col=1)
+        fig.add_shape(
+        go.layout.Shape( type="line", x0=df['Date'].iloc[0], x1=df['Date'].iloc[-1], y0=-100,  y1=-100, line=dict(dash='dot'),
+            ),row=lower_plots.index('CCI (10)')+2, col=1)
+        
+    # Add long CCI trace
+    if 'CCI (40)' in lower_plots:
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['CCI_40'], name='CCI (40)', mode='lines'), row=lower_plots.index('CCI (40)')+2, col=1)
+        fig.add_shape(
+        go.layout.Shape( type="line", x0=df['Date'].iloc[0], x1=df['Date'].iloc[-1], y0=100,  y1=100, line=dict(dash='dot'),
+            ),row=lower_plots.index('CCI (40)')+2, col=1)
+        fig.add_shape(
+        go.layout.Shape( type="line", x0=df['Date'].iloc[0], x1=df['Date'].iloc[-1], y0=-100,  y1=-100, line=dict(dash='dot'),
+            ),row=lower_plots.index('CCI (40)')+2, col=1)
+    
+    # RSI trace
+    if 'RSI (14)' in lower_plots:
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['rsi'], name='RSI (14)', mode='lines'), row=lower_plots.index('RSI (14)')+2, col=1)
+    
+    # ADX trace
+    if 'ADX (14)' in lower_plots:
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['ADX'], name='ADX (14)', mode='lines'), row=lower_plots.index('ADX (14)')+2, col=1)
+        
+    #  VPT traces
+    if 'VPT' in lower_plots:
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['VPT'], mode='lines', name='VPT'), row=lower_plots.index('VPT')+2, col=1)
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['VPT_signal'], mode='lines', name='VPT Signal Line', line=dict(dash='dash')), row=lower_plots.index('VPT')+2, col=1)
+        
+     # OBV trace
+    if 'OBV' in lower_plots:
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['OBV'], name='OBV', mode='lines'), row=lower_plots.index('OBV')+2, col=1)
+        
+      # CMF trace
+    if 'CMF' in lower_plots:
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['CMF'], name='CMF', mode='lines'), row=lower_plots.index('CMF')+2, col=1)
+        
+      # Willamson R trace
+    if 'Williamson%R (14)' in lower_plots:
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['%R'], name='Williamson%R(14)', mode='lines'), row=lower_plots.index('Williamson%R (14)')+2, col=1)
+        
+    # VWAP trace
+    if 'VWAP' in upper_plots:
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['VWAP'], name='VWAP', mode='lines'), row=1, col=1)
+        
+    # VWAP trace
+    if 'MFI (14)' in upper_plots:
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['MFI_14'], name='MFI (14)', mode='lines'), row=1, col=1)
+        
+    # Bollinger 1 STD trace
+    if 'Bollinger (1 STD)' in upper_plots:
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['RollingMean'], name='Rolling Mean', mode='lines', line=dict(dash='dash')), row=1, col=1)
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['UpperBand1'], name='Upper Band (1STD)', mode='lines', line=dict(dash='dot', color= 'gray')), row=1, col=1)
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['LowerBand1'], name='Lower Band (1STD)', mode='lines', line=dict(dash='dot', color= 'gray')), row=1, col=1)
+    
+    # Bollinger 2 STD Trace
+    if 'Bollinger (2 STD)' in upper_plots:
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['RollingMean'], name='Rolling Mean', mode='lines', line=dict(dash='dash')), row=1, col=1)
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['UpperBand2'], name='Upper Band (2STD)', mode='lines', line=dict(dash='dot', color= 'yellow')), row=1, col=1)
+        fig.add_trace(go.Scatter(x=df['Date'], y=df['LowerBand2'], name='Lower Band (2STD)', mode='lines', line=dict(dash='dot', color= 'yellow')), row=1, col=1)
+        
+        #Dividend TRaces
+    div = df[df['Dividends']!=0][['Date','Close']].reset_index()
+    rng = (df.Close.max() - df.Close.min())/10
+    for i in div.index:
+        fig.add_shape(
+        go.layout.Shape( type="line", x0=div['Date'].values[i], x1=div['Date'].values[i], y0=div['Close'].values[i]-rng,  y1=div['Close'].values[i]+rng, line=dict(dash='dot'),
+                ),row=1, col=1)
+        fig.add_annotation(x=div['Date'].values[i] ,y=div['Close'].values[i]+rng, text="Dividend")
+        
+    # moving averages
+    for i in upper_plots:
+        if 'SMA (' in i or 'EMA (' in i:
+            fig.add_trace(go.Scatter(x=df['Date'], y=df[i.lower().replace('(','').replace(')','').replace(' ','_')], name=i, mode='lines',), row=1, col=1)
+            
+    #Update axes
     fig.update_yaxes(showgrid=True, minor=dict(showgrid=False),showline=True, linewidth=2)
+
+    for i in ['Price']+lower_plots:
+        fig.update_yaxes(title_text=i, row=(['Price']+lower_plots).index(i)+1, col=1)
+        
     fig.update_xaxes(
             rangeslider_visible=False,showgrid=True,showline=True, linewidth=2,
             rangebreaks=[dict(values=holiday_list),dict(bounds=["sat", "mon"])])  # hide weekends, eg. hide sat to before mon
 
-    fig.update_layout(autosize=False,width=1200,height=800,template="plotly_white")
-
-    fig.update_layout(legend={"yanchor":"top","y": 0.9})
+    fig.update_layout(autosize=False,width=1200,height=800,template="plotly_dark")
     
     return fig
+
+
+#Generate technical indicator tags
+def indicator_tags(data, hist):
+    tags = {}
+    #RSi
+    if data['Latest rsi'].values[0] < 30:
+        tags['rsi'] = 'Oversold'
+    elif data['Latest rsi'].values[0] < 50:
+        tags['rsi'] = 'Bearish'
+    elif data['Latest rsi'].values[0] < 60:
+        tags['rsi'] = 'Neutral'
+    elif data['Latest rsi'].values[0] < 80:
+        tags['rsi'] = 'Bullish'
+    else:
+        tags['rsi'] = 'Overbought'
+    #ADX
+    if data['Latest ADX'].values[0] > 30:
+        tags['adx'] = 'Strong Trend'
+    else:
+        tags['adx'] = 'Weak Trend'
+    #cci 10
+    if data['Latest CCI_10'].values[0] < -150:
+        tags['cci_10'] = 'Oversold'
+    elif data['Latest CCI_10'].values[0] < -50:
+        tags['cci_10'] = 'Bearish'
+    elif data['Latest CCI_10'].values[0] < 50:
+        tags['cci_10'] = 'Neutral'
+    elif data['Latest CCI_10'].values[0] < 150:
+        tags['cci_10'] = 'Bullish'
+    else:
+        tags['cci_10'] = 'Overbought'
+    #cci 40
+    if data['Latest CCI_40'].values[0] < -150:
+        tags['cci_40'] = 'Oversold'
+    elif data['Latest CCI_40'].values[0] < -50:
+        tags['cci_40'] = 'Bearish'
+    elif data['Latest CCI_40'].values[0] < 50:
+        tags['cci_40'] = 'Neutral'
+    elif data['Latest CCI_40'].values[0] < 150:
+        tags['cci_40'] = 'Bullish'
+    else:
+        tags['cci_40'] = 'Overbought'
+    #MFI
+    if data['Latest MFI_14'].values[0] < 20:
+        tags['mfi_14'] = 'Oversold'
+    elif data['Latest MFI_14'].values[0] < 80:
+        tags['mfi_14'] = 'Neutral'
+    else:
+        tags['mfi_14'] = 'Overbought'
+    #MACD
+    if data['Latest macd'].values[0] >0 and data['Latest macd'].values[0] > data['Latest macd_signal'].values[0]:
+        tags['macd'] = 'Bullish'
+    elif data['Latest macd'].values[0] < 0 and  data['Latest macd_signal'].values[0] > data['Latest macd'].values[0]:
+        tags['macd'] = 'Bearish'
+    else:
+        tags['macd'] = 'Neutral'
+    #MACD
+    if data['Latest VPT'].values[0] > data['Latest VPT_signal'].values[0]:
+        tags['VPT'] = 'Bullish'
+    elif data['Latest VPT_signal'].values[0] > data['Latest VPT'].values[0]:
+        tags['VPT'] = 'Bearish'
+    else:
+        tags['VPT'] = 'Neutral'
+    #Willamson %R
+    if data['Latest %R'].values[0] < -80:
+        tags['%R'] = 'Oversold'
+    elif data['Latest %R'].values[0] < -60:
+        tags['%R'] = 'Bearish'
+    elif data['Latest %R'].values[0] < -40:
+        tags['%R'] = 'Neutral'
+    elif data['Latest %R'].values[0] < -20:
+        tags['%R'] = 'Bullish'
+    else:
+        tags['%R'] = 'Overbought'
+
+    #Moving averages
+    for i in ['sma_','ema_']:
+        for j in [5,10,20,50,100]:
+            if hist.Close.values[0] > hist[i+str(j)].values[0]:
+                tags[i+str(j)] = 'Bullish'
+            else:
+                tags[i+str(j)] = 'Bearish'
+                
+    #crossovers
+    for i in ['ema_','sma_']:
+        if hist[i+'5'].values[0] > hist[i+'20'].values[0]:
+            tags[i+'shortcross'] = 'Bullish'
+        else:
+            tags[i+'shortcross'] = 'Bearish'
+        if hist[i+'20'].values[0] > hist[i+'50'].values[0]:
+            tags[i+'midcross'] = 'Bullish'
+        else:
+            tags[i+'midcross'] = 'Bearish'
+        if hist[i+'50'].values[0] > hist[i+'100'].values[0]:
+            tags[i+'longcross'] = 'Bullish'
+        else:
+            tags[i+'longcross'] = 'Bearish'
+            
+    return tags
 
 #Calculate Financial KPIs
 def calc_KPIs(financials,mode):
@@ -478,15 +421,15 @@ def calc_KPIs(financials,mode):
     kpis['ROE'] = {'desc' : 'Efficiency of Equity utilisation'}
     try:
         if financials['Stockholders Equity'][0] and financials['Net Income'][0]:
-            kpis['ROE']['current'] = financials['Stockholders Equity'][0]/financials['Net Income'][0]
+            kpis['ROE']['current'] = round(financials['Stockholders Equity'][0]/financials['Net Income'][0],2)
         else:
             kpis['ROE']['current'] = None
         if financials['Stockholders Equity'][1] and financials['Net Income'][1]:
-            kpis['ROE']['previous'] = financials['Stockholders Equity'][1]/financials['Net Income'][1]
+            kpis['ROE']['previous'] = round(financials['Stockholders Equity'][1]/financials['Net Income'][1],2)
         else:
             kpis['ROE']['previous'] = None
         if kpis['ROE']['previous'] and kpis['ROE']['current']:
-            kpis['ROE']['delta'] = kpis['ROE']['current'] - kpis['ROE']['previous']
+            kpis['ROE']['delta'] = round(kpis['ROE']['current'] - kpis['ROE']['previous'],2)
         else:
             kpis['ROE']['delta'] = None
     except:
@@ -496,62 +439,77 @@ def calc_KPIs(financials,mode):
         
     #ROA
     kpis['ROA'] = {'desc' : 'Efficiency of Assets utilisation'}
-    if financials['Total Assets'][0] and financials['Net Income'][0]:
-        kpis['ROA']['current'] = financials['Net Income'][0]/financials['Total Assets'][0]
-    else:
-        kpis['ROA']['current'] = None
-    if financials['Total Assets'][1] and financials['Net Income'][1]:
-        kpis['ROA']['previous'] = financials['Net Income'][1]/financials['Total Assets'][1]
-    else:
-        kpis['ROA']['previous'] = None
-    if kpis['ROA']['previous'] and kpis['ROA']['current']:
-        kpis['ROA']['delta'] = kpis['ROA']['current'] - kpis['ROA']['previous']
-    else:
+    try:
+        if financials['Total Assets'][0] and financials['Net Income'][0]:
+            kpis['ROA']['current'] = round(financials['Net Income'][0]/financials['Total Assets'][0],2)
+        else:
+            kpis['ROA']['current'] = None
+        if financials['Total Assets'][1] and financials['Net Income'][1]:
+            kpis['ROA']['previous'] = round(financials['Net Income'][1]/financials['Total Assets'][1],2)
+        else:
+            kpis['ROA']['previous'] = None
+        if kpis['ROA']['previous'] and kpis['ROA']['current']:
+            kpis['ROA']['delta'] = round(kpis['ROA']['current'] - kpis['ROA']['previous'],2)
+        else:
+            kpis['ROA']['delta'] = None
+    except:
         kpis['ROA']['delta'] = None
+        kpis['ROA']['current'] = None
+        kpis['ROA']['previous'] = None
         
      #Current Ratio
     kpis['Current Ratio'] = {'desc' : 'Ability to pay short term liabilities'}
-    if financials['Current Assets'][0] and financials['Current Liabilities'][0]:
-        kpis['Current Ratio']['current'] = financials['Current Assets'][0]/financials['Current Liabilities'][0]
-    else:
-        kpis['Current Ratio']['current'] = None
-    if financials['Current Assets'][1] and financials['Current Liabilities'][1]:
-        kpis['Current Ratio']['previous'] = financials['Current Assets'][1]/financials['Current Liabilities'][1]
-    else:
-        kpis['Current Ratio']['previous'] = None
-    if kpis['Current Ratio']['previous'] and kpis['Current Ratio']['current']:
-        kpis['Current Ratio']['delta'] = kpis['Current Ratio']['current'] - kpis['Current Ratio']['previous']
-    else:
+    try:
+        if financials['Current Assets'][0] and financials['Current Liabilities'][0]:
+            kpis['Current Ratio']['current'] = round(financials['Current Assets'][0]/financials['Current Liabilities'][0],2)
+        else:
+            kpis['Current Ratio']['current'] = None
+        if financials['Current Assets'][1] and financials['Current Liabilities'][1]:
+            kpis['Current Ratio']['previous'] = round(financials['Current Assets'][1]/financials['Current Liabilities'][1],2)
+        else:
+            kpis['Current Ratio']['previous'] = None
+        if kpis['Current Ratio']['previous'] and kpis['Current Ratio']['current']:
+            kpis['Current Ratio']['delta'] = round(kpis['Current Ratio']['current'] - kpis['Current Ratio']['previous'],2)
+        else:
+            kpis['Current Ratio']['delta'] = None
+    except:
         kpis['Current Ratio']['delta'] = None
+        kpis['Current Ratio']['current'] = None
+        kpis['Current Ratio']['previous'] = None
         
     #Gross Margin
     kpis['Net Profit Margin'] = {'desc' : 'Profitability of a company'}
-    if financials['Total Revenue'][0] and financials['Net Income'][0]:
-        kpis['Net Profit Margin']['current'] = financials['Net Income'][0]/financials['Total Revenue'][0]
-    else:
-        kpis['Net Profit Margin']['current'] = None
-    if financials['Total Revenue'][1] and financials['Net Income'][1]:
-        kpis['Net Profit Margin']['previous'] = financials['Net Income'][1]/financials['Total Revenue'][1]
-    else:
-        kpis['Net Profit Margin']['previous'] = None
-    if kpis['Net Profit Margin']['previous'] and kpis['Net Profit Margin']['current']:
-        kpis['Net Profit Margin']['delta'] = kpis['Net Profit Margin']['current'] - kpis['Net Profit Margin']['previous']
-    else:
+    try:
+        if financials['Total Revenue'][0] and financials['Net Income'][0]:
+            kpis['Net Profit Margin']['current'] = round(financials['Net Income'][0]/financials['Total Revenue'][0],2)
+        else:
+            kpis['Net Profit Margin']['current'] = None
+        if financials['Total Revenue'][1] and financials['Net Income'][1]:
+            kpis['Net Profit Margin']['previous'] = round(financials['Net Income'][1]/financials['Total Revenue'][1],2)
+        else:
+            kpis['Net Profit Margin']['previous'] = None
+        if kpis['Net Profit Margin']['previous'] and kpis['Net Profit Margin']['current']:
+            kpis['Net Profit Margin']['delta'] = round(kpis['Net Profit Margin']['current'] - kpis['Net Profit Margin']['previous'],2)
+        else:
+            kpis['Net Profit Margin']['delta'] = None
+    except:
         kpis['Net Profit Margin']['delta'] = None
+        kpis['Net Profit Margin']['current'] = None
+        kpis['Net Profit Margin']['previous'] = None
         
     #Debt to equity ratio
     kpis['DE Ratio'] = {'desc' : 'Total debt comapred to equity'}
     try:
         if financials['Stockholders Equity'][0] and financials['Total Debt'][0]:
-            kpis['DE Ratio']['current'] = financials['Total Debt'][0]/financials['Stockholders Equity'][0]
+            kpis['DE Ratio']['current'] = round(financials['Total Debt'][0]/financials['Stockholders Equity'][0],2)
         else:
             kpis['DE Ratio']['current'] = None
         if financials['Stockholders Equity'][1] and financials['Total Debt'][1]:
-            kpis['DE Ratio']['previous'] = financials['Total Debt'][1]/financials['Stockholders Equity'][1]
+            kpis['DE Ratio']['previous'] = round(financials['Total Debt'][1]/financials['Stockholders Equity'][1],2)
         else:
             kpis['DE Ratio']['previous'] = None
         if kpis['DE Ratio']['previous'] and kpis['DE Ratio']['current']:
-            kpis['DE Ratio']['delta'] = kpis['DE Ratio']['current'] - kpis['DE Ratio']['previous']
+            kpis['DE Ratio']['delta'] = round(kpis['DE Ratio']['current'] - kpis['DE Ratio']['previous'],2)
         else:
             kpis['DE Ratio']['delta'] = None
     except:
@@ -561,78 +519,103 @@ def calc_KPIs(financials,mode):
         
     #Net Income
     kpis['Net Income'] = {'desc' : 'Net Income of the company'}
-    if financials['Net Income'][0]:
-        kpis['Net Income']['current'] = financials['Net Income'][0]
-    else:
-        kpis['Net Income']['current'] = None
-    if financials['Net Income'][1]:
-        kpis['Net Income']['previous'] = financials['Net Income'][1]
-    else:
-        kpis['Net Income']['previous'] = None
-    if kpis['Net Income']['previous'] and kpis['Net Income']['current']:
-        kpis['Net Income']['delta'] = kpis['Net Income']['current'] - kpis['Net Income']['previous']
-    else:
+    try:
+        if financials['Net Income'][0]:
+            kpis['Net Income']['current'] = financials['Net Income'][0]
+        else:
+            kpis['Net Income']['current'] = None
+        if financials['Net Income'][1]:
+            kpis['Net Income']['previous'] = financials['Net Income'][1]
+        else:
+            kpis['Net Income']['previous'] = None
+        if kpis['Net Income']['previous'] and kpis['Net Income']['current']:
+            kpis['Net Income']['delta'] = round(kpis['Net Income']['current'] - kpis['Net Income']['previous'],2)
+        else:
+            kpis['Net Income']['delta'] = None
+    except:
         kpis['Net Income']['delta'] = None
+        kpis['Net Income']['current'] = None
+        kpis['Net Income']['previous'] = None
         
     #Free Cash Flow
     kpis['Free Cash Flow'] = {'desc' : 'In Hand cash flow'}
-    if financials['Free Cash Flow'][0]:
-        kpis['Free Cash Flow']['current'] = financials['Free Cash Flow'][0]
-    else:
-        kpis['Free Cash Flow']['current'] = None
-    if financials['Free Cash Flow'][1]:
-        kpis['Free Cash Flow']['previous'] = financials['Free Cash Flow'][1]
-    else:
-        kpis['Free Cash Flow']['previous'] = None
-    if kpis['Free Cash Flow']['previous'] and kpis['Free Cash Flow']['current']:
-        kpis['Free Cash Flow']['delta'] = kpis['Free Cash Flow']['current'] - kpis['Free Cash Flow']['previous']
-    else:
+    try:
+        if financials['Free Cash Flow'][0]:
+            kpis['Free Cash Flow']['current'] = financials['Free Cash Flow'][0]
+        else:
+            kpis['Free Cash Flow']['current'] = None
+        if financials['Free Cash Flow'][1]:
+            kpis['Free Cash Flow']['previous'] = financials['Free Cash Flow'][1]
+        else:
+            kpis['Free Cash Flow']['previous'] = None
+        if kpis['Free Cash Flow']['previous'] and kpis['Free Cash Flow']['current']:
+            kpis['Free Cash Flow']['delta'] = round(kpis['Free Cash Flow']['current'] - kpis['Free Cash Flow']['previous'],2)
+        else:
+            kpis['Free Cash Flow']['delta'] = None
+    except:
         kpis['Free Cash Flow']['delta'] = None
+        kpis['Free Cash Flow']['current'] = None
+        kpis['Free Cash Flow']['previous'] = None
         
     #Total Debt
     kpis['Debt'] = {'desc' : 'Total debt of the company'}
-    if financials['Total Debt'][0]:
-        kpis['Debt']['current'] = financials['Total Debt'][0]
-    else:
-        kpis['Debt']['current'] = None
-    if financials['Total Debt'][1]:
-        kpis['Debt']['previous'] = financials['Total Debt'][1]
-    else:
-        kpis['Debt']['previous'] = None
-    if kpis['Debt']['previous'] and kpis['ROE']['current']:
-        kpis['Debt']['delta'] = kpis['Debt']['current'] - kpis['Debt']['previous']
-    else:
+    try:
+        if financials['Total Debt'][0]:
+            kpis['Debt']['current'] = financials['Total Debt'][0]
+        else:
+            kpis['Debt']['current'] = None
+        if financials['Total Debt'][1]:
+            kpis['Debt']['previous'] = financials['Total Debt'][1]
+        else:
+            kpis['Debt']['previous'] = None
+        if kpis['Debt']['previous'] and kpis['Debt']['current']:
+            kpis['Debt']['delta'] = round(kpis['Debt']['current'] - kpis['Debt']['previous'],2)
+        else:
+            kpis['Debt']['delta'] = None
+    except:
         kpis['Debt']['delta'] = None
+        kpis['Debt']['current'] = None
+        kpis['Debt']['previous'] = None
         
     #Basic EPS
     kpis['Basic EPS'] = {'desc' : 'Earnings of the company per share'}
-    if financials['Net Income'][0]:
-        kpis['Basic EPS']['current'] = financials['Basic EPS'][0]
-    else:
-        kpis['Net Income']['current'] = None
-    if financials['Net Income'][1]:
-        kpis['Basic EPS']['previous'] = financials['Basic EPS'][1]
-    else:
-        kpis['Basic EPS']['previous'] = None
-    if kpis['Basic EPS']['previous'] and kpis['Basic EPS']['current']:
-        kpis['Basic EPS']['delta'] = kpis['Basic EPS']['current'] - kpis['Basic EPS']['previous']
-    else:
+    try:
+        if financials['Net Income'][0]:
+            kpis['Basic EPS']['current'] = financials['Basic EPS'][0]
+        else:
+            kpis['Net Income']['current'] = None
+        if financials['Net Income'][1]:
+            kpis['Basic EPS']['previous'] = financials['Basic EPS'][1]
+        else:
+            kpis['Basic EPS']['previous'] = None
+        if kpis['Basic EPS']['previous'] and kpis['Basic EPS']['current']:
+            kpis['Basic EPS']['delta'] = round(kpis['Basic EPS']['current'] - kpis['Basic EPS']['previous'],2)
+        else:
+            kpis['Basic EPS']['delta'] = None
+    except:
         kpis['Basic EPS']['delta'] = None
+        kpis['Basic EPS']['current'] = None
+        kpis['Basic EPS']['previous'] = None
         
     #ROCE
     kpis['ROCE'] = {'desc':"Utilization of capital employed"}
-    if financials['EBIT'][0] and financials['Total Assets'][0] and financials['Current Liabilities'][0]:
-        kpis['ROCE']['current'] = financials['EBIT'][0] / (financials['Total Assets'][0]-financials['Current Liabilities'][0])
-    else:
-        kpis['ROCE']['current'] = None
-    if financials['EBIT'][1] and financials['Total Assets'][1] and financials['Current Liabilities'][1]:
-        kpis['ROCE']['previous'] = financials['EBIT'][1] / (financials['Total Assets'][1]-financials['Current Liabilities'][1])
-    else:
-        kpis['ROCE']['previous'] = None
-    if kpis['ROCE']['previous'] and kpis['ROCE']['current']:
-        kpis['ROCE']['delta'] = kpis['ROCE']['current'] - kpis['ROCE']['previous']
-    else:
+    try:
+        if financials['EBIT'][0] and financials['Total Assets'][0] and financials['Current Liabilities'][0]:
+            kpis['ROCE']['current'] = round(financials['EBIT'][0] / (financials['Total Assets'][0]-financials['Current Liabilities'][0]),2)
+        else:
+            kpis['ROCE']['current'] = None
+        if financials['EBIT'][1] and financials['Total Assets'][1] and financials['Current Liabilities'][1]:
+            kpis['ROCE']['previous'] = round(financials['EBIT'][1] / (financials['Total Assets'][1]-financials['Current Liabilities'][1]),2)
+        else:
+            kpis['ROCE']['previous'] = None
+        if kpis['ROCE']['previous'] and kpis['ROCE']['current']:
+            kpis['ROCE']['delta'] = round(kpis['ROCE']['current'] - kpis['ROCE']['previous'],2)
+        else:
+            kpis['ROCE']['delta'] = None
+    except:
         kpis['ROCE']['delta'] = None
+        kpis['ROCE']['current'] = None
+        kpis['ROCE']['previous'] = None
         
     if mode == "delta":
         return pd.DataFrame(kpis).loc['delta'].reset_index().set_index('index').T
@@ -797,13 +780,16 @@ def indicator_summary(x):
 
     # Tag desirable or non-desirable change for each indicator
     for indicator in summary:
-        if summary[indicator]['Change']*summary[indicator]['type'] > 0:
-            summary[indicator]['Tag'] = 'Desirable'
-            summary[indicator]['To display'] = summary[indicator]['Positive Change']
-        elif summary[indicator]['Change']*summary[indicator]['type'] < 0:
-            summary[indicator]['Tag'] = 'Non-Desirable'
-            summary[indicator]['To display'] = summary[indicator]['Negative Change']
-        else:
+        try:
+            if summary[indicator]['Change']*summary[indicator]['type'] > 0:
+                summary[indicator]['Tag'] = 'Desirable'
+                summary[indicator]['To display'] = summary[indicator]['Positive Change']
+            elif summary[indicator]['Change']*summary[indicator]['type'] < 0:
+                summary[indicator]['Tag'] = 'Non-Desirable'
+                summary[indicator]['To display'] = summary[indicator]['Negative Change']
+            else:
+                summary[indicator]['Tag'] = 'NA'
+        except:
             summary[indicator]['Tag'] = 'NA'
 
     return summary
@@ -836,7 +822,7 @@ def stock_summary(stock_data,historical,week_52,dividend_split):
     #52 week proximity   
     summary['52 Week Proximity'] = {}
     if stock_data['Latest Close'].values[0] - week_52['52 Week Low'] > -1*(stock_data['Latest Close'].values[0] - week_52['52 Week High']):
-        summary['52 Week Proximity']['Display'] = "CLoser to 52 Week High"
+        summary['52 Week Proximity']['Display'] = "Closer to 52 Week High"
         summary['52 Week Proximity']['Type'] = 1
     elif stock_data['Latest Close'].values[0] - week_52['52 Week Low'] < -1*(stock_data['Latest Close'].values[0] - week_52['52 Week High']):
         summary['52 Week Proximity']['Display'] = "Closer to 52 Week Low"
@@ -849,7 +835,7 @@ def stock_summary(stock_data,historical,week_52,dividend_split):
     if stock_data['Latest rsi'].values[0] < 30:
         summary['RSI']['Display'] = "Stock appears oversold and may rise soon"
         summary['RSI']['Type'] = 1
-    elif stock_data['Latest rsi'].values[0] > 70:
+    elif stock_data['Latest rsi'].values[0] > 80:
         summary['RSI']['Display'] = "Stock appears overbought and may fall soon"
         summary['RSI']['Type'] = -1
     else:
@@ -857,13 +843,13 @@ def stock_summary(stock_data,historical,week_52,dividend_split):
 
     #ADX
     summary['ADX'] = {}
-    if stock_data['Latest ADX'].values[0] > 27 and stock_data['Close_change_10d'].values[0] > 0:
+    if stock_data['Latest ADX'].values[0] > 25 and stock_data['Close_change_10d'].values[0] > 0:
         summary['ADX']['Display'] = "Stock having strong uptrend"
         summary['ADX']['Type'] = 1
-    elif stock_data['Latest ADX'].values[0] > 27 and stock_data['Close_change_10d'].values[0] < 0:
+    elif stock_data['Latest ADX'].values[0] > 25 and stock_data['Close_change_10d'].values[0] < 0:
         summary['ADX']['Display'] = "Stock having strong downtrend"
         summary['ADX']['Type'] = -1
-    elif stock_data['Latest ADX'].values[0] <= 27:
+    elif stock_data['Latest ADX'].values[0] <= 25:
         summary['ADX']['Display'] = "Stock having weak trend"
         summary['ADX']['Type'] = -1
     else:
@@ -894,7 +880,7 @@ def stock_summary(stock_data,historical,week_52,dividend_split):
     #Momentum
     summary['Momentum'] = {}
     if stock_data['Latest Close'].values[0] > historical['sma_5'].values[0] and historical['sma_5'].values[0] > historical['sma_25'].values[0]:
-        summary['Momentum']['Display'] = "Bullish Moemntum"
+        summary['Momentum']['Display'] = "Bullish Momentum"
         summary['Momentum']['Type'] = 1
     elif stock_data['Latest Close'].values[0] < historical['sma_5'].values[0] and historical['sma_5'].values[0] < historical['sma_25'].values[0]:
         summary['Momentum']['Display'] = "Bearish Momentum"
