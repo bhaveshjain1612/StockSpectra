@@ -804,6 +804,261 @@ database['volatility_3M'] = database['std_3M']/database['Latest Close']
 database['volatility_6M'] = database['std_6M']/database['Latest Close']
 database['volatility_1Y'] = database['std_1Y']/database['Latest Close']
 
+#allotting all necessary tags
+#finaical score:
+def financial_scores(row):
+    def fin_test(df,param,score,type):
+        try:
+            if df[param]> 0:
+                score+=type
+            else:
+                score-=type
+        except:
+            score += 0
+        return score
+    
+    score = 0
+    
+    score  = fin_test(row,"ROE",score,1)
+    score  = fin_test(row,"ROA",score,1)
+    score  = fin_test(row,"Current Ratio",score,1)
+    score  = fin_test(row,"Net Profit Margin",score,1)
+    score  = fin_test(row,"Net Income",score,1)
+    score  = fin_test(row,"Free Cash Flow",score,1)
+    score  = fin_test(row,"ROCE",score,1)
+    score  = fin_test(row,"Basic EPS",score,1)
+    score  = fin_test(row,"P/E ratio",score,1)
+    score  = fin_test(row,"DE Ratio",score,-1)
+    score  = fin_test(row,"Debt",score,-1)
+    
+    return score
+
+#allotting a score based on stock performance
+def allot_outlook(df):
+
+    # Weights for each parameter
+    short_term_weights = {
+        'rsi': 3,
+        'macd': 2,
+        'adx': 1,
+        'bollinger': 3,
+        'pe_ratio': 1,
+        'moving_averages': 2,
+        'financials_yoy': 1,
+        'cci_10': 3,
+        'cci_40': 1,
+        'vpt': 2,
+        'vwap': 3,
+        'mfi_14': 3
+    }
+
+
+    for index, row in df.iterrows():
+        
+        short_term_score = 0
+        long_term_score = 0
+        
+        #Short term logic
+        # RSI logic
+        if row['Latest rsi'] > 70 and row['Latest rsi'] < 90: # bullish
+            short_term_score += short_term_weights['rsi']
+        elif row['Latest rsi'] < 30 or row['Latest rsi'] > 90: # overbought
+            short_term_score -= short_term_weights['rsi']
+
+        # ADX logic
+        if row['Latest ADX'] > 30:
+            short_term_score += short_term_weights['adx'] # strong trend
+        else:
+            short_term_score -= short_term_weights['adx'] # weak trend
+
+        # MACD logic
+        if row['Latest macd'] > 0:
+            short_term_score += short_term_weights['macd']
+
+        # Bollinger Bands logic
+        price_position = (row['Latest Close'] - row['Latest RollingMean']) / (row['Latest UpperBand2'] - row['Latest LowerBand2'])
+        if price_position < -0.5:
+            short_term_score += short_term_weights['bollinger']
+        elif price_position > 0.5:
+            short_term_score -= short_term_weights['bollinger']
+
+        # Price change logic
+        if row['Close_change_1d'] > 0:
+            short_term_score += 1
+            
+        if row['Close_change_1m'] > 1:
+            long_term_score += 1
+        else:
+            long_term_score -= 1
+            
+        if row['Close_change_6m'] > 5:
+            long_term_score += 1
+        else:
+            long_term_score -= 1
+            
+        if row['Close_change_1y'] > 10:
+            long_term_score += 1
+        else:
+            long_term_score -= 1
+            
+            
+        # if DIvidend
+        if row['Dividend Rate'] != 'Not Found':
+            long_term_score -= 1
+        else:
+            long_term_score += 1
+        
+        # P/E Ratio logic
+        if row['P/E ratio'] < row['Industry Median P/E Ratio']:
+            long_term_score -= 1
+        else:
+            long_term_score += 1
+        
+        # Moving Averages logic
+        if row['Latest sma_50'] > row['Latest sma_100']:
+            long_term_score += 1
+        else:
+            long_term_score -= 1
+        
+        # CCI logic for short term
+        if row['Latest CCI_10'] > 100:
+            short_term_score += short_term_weights['cci_10']
+        elif row['Latest CCI_10'] < -100:
+            short_term_score -= short_term_weights['cci_10']
+            
+         # CCI logic for long term
+        if row['Latest CCI_40'] > 100:
+            short_term_score += short_term_weights['cci_40']
+        elif row['Latest CCI_40'] < -100:
+            short_term_score -= short_term_weights['cci_40']
+        
+        # VPT logic for short term
+        if row['Latest VPT'] -  row['Latest VPT_signal'] > 0:
+            short_term_score += short_term_weights['vpt']
+        else:
+            short_term_score -= short_term_weights['vpt']
+            
+        # MFI logic for short term
+        if row['Latest MFI_14'] > 80 and row['Latest MFI_14'] < 20: # overbought
+            short_term_score -= short_term_weights['mfi_14']
+        elif row['Latest MFI_14'] > 65 and row['Latest MFI_14'] < 80: # bullish
+            short_term_score += short_term_weights['mfi_14']
+        
+        # Financials YoY score logic
+        short_term_score += row['finscore']*0.5 
+        long_term_score += row['finscore'] 
+        
+        # Translating the scores into outlooks
+        df.at[index, 'short_term_score'] = short_term_score 
+        df.at[index, 'long_term_score'] = long_term_score 
+        
+        def outlook_category(df,col,outname):
+            
+            scr = df[col]
+
+            def assign_tier(score):
+                if score > scr.max()/2:
+                    return 'very positive'
+                elif score > scr.max()/4:
+                    return 'positive'
+                elif score > 0:
+                    return 'neutral'
+                else :
+                    return 'negative'
+                
+            df[outname] = df[col].apply(assign_tier)
+
+            return df
+
+    df = outlook_category(df,'short_term_score','Outlook 1-2Months')
+    df = outlook_category(df,'long_term_score','Outlook >1Year')
+    return df
+
+def allot_risk(df,col,outname):
+    u = 0.6
+    l = 0.4
+    #out_df =pd.DataFrame()
+
+    percentiles = df[col].quantile([u,l])
+    
+    def assign_tier(score):
+        if score >= percentiles[u] :
+            return 'High'
+        if score >= percentiles[l] :
+            return 'Mid'
+        else:
+            return 'Low'
+
+    df[outname] = df[col].apply(assign_tier)
+       
+    return df
+
+#finanical strength ranking
+def finrank(df):
+    u = df.finscore.describe()['75%']
+    l = df.finscore.describe()['25%']
+    
+    r = []
+    for i in df.index:
+        if df.finscore.values[i] <= l:
+            r.append('weak')
+        elif df.finscore.values[i] > l and df.finscore.values[i] <= u:
+            r.append('mid')
+        else:
+            r.append('strong')
+    
+    df['finrank'] = r
+    
+    return df
+
+#allcoate risk based on standard deviation
+def allot_risk(df,col,outname):
+    u = 0.6
+    l = 0.4
+    #out_df =pd.DataFrame()
+
+    percentiles = df[col].quantile([u,l])
+    
+    def assign_tier(score):
+        if score >= percentiles[u] :
+            return 'High'
+        if score >= percentiles[l] :
+            return 'Mid'
+        else:
+            return 'Low'
+
+    df[outname] = df[col].apply(assign_tier)
+       
+    return df
+
+#funaction to allot all tags
+def allot_tags(df):
+    df['finscore'] = df.apply(financial_scores,axis=1)
+    df = allot_risk(df,'volatility_1M','Risk 1-2Months')
+    df = allot_risk(df,'volatility_6M','Risk 5-6Months')
+    df = allot_risk(df,'volatility_1Y','Risk >1Year')
+    df = finrank(df)
+    df = allot_outlook(df)
+    return df
+
+#allot tags and dividend yield cols
+database = allot_tags(database)
+database['Annual Dividend'] = database['Dividend Rate'].replace('Not Found', '0').astype(float)
+database['Dividend Yield'] = database['Annual Dividend']*100/database['Latest Close']
+
+# Allot market cap catergorization
+def categorize_cap(value):
+        if value >= 20000000000:  # 20,000 crores in rupees
+            return 'Large-cap'
+        elif 5000000000 <= value < 20000000000:  # Between 5,000 crores and 20,000 crores in rupees
+            return 'Mid-cap'
+        else:
+            return 'Small-cap'
+
+database = database[database['Market Cap'] != 'Not Found']
+database['Market Cap'] = database['Market Cap'].astype('int64')
+database['Cap'] = database['Market Cap'].apply(categorize_cap)
+
 #exporting the final db
 database["Latest created_on"] = datetime.now()
 database.to_csv('database.csv', index=False,mode='w')

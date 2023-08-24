@@ -232,23 +232,37 @@ def potential_breakout(df):
     with st.container():
         add_links(pb)
 
+#function for sector overview
+def sector_overview(df):
     
+    col1,col2,col3 = st.columns(3)
+    
+    universe = col1.selectbox("See Overview for",('Industry','Sector'))
+    
+    indview = industryview(df,universe)
+    
+    indsortby = col2.selectbox("Sort by",('Median 1 Day Change (%)', 'Median 5 Day Change (%)',
+                                       'Median 1 Month Change (%)', 'Median 3 Month Change (%)',
+                                       'Median 6 Month Change (%)', 'Median 1 Year Change (%)',
+                                       'Number of Companies', 'Number of LargeCap', 'Number of MidCap',
+                                       'Number of SmallCap'))
+    indsortmethod = col3.selectbox("Sort Method",('Descending','Ascending'))
+    
+    st.dataframe(indview.sort_values(by=indsortby,ascending = (indsortmethod=='Ascending')))
+
+# Main Function
 def main():
     # Load data from the CSV file and preprocess
     df = load_data("backend_data/database.csv")
-    
-    df = allot_tags(df)
-    df['Annual Dividend'] = df['Dividend Rate'].replace('Not Found', '0').astype(float)
-    df['Dividend Yield'] = df['Annual Dividend']*100/df['Latest Close']
-    
+
     # Set up the Streamlit dashboard
     st.header("Find Stocks")
     st.write("Updated On: " + df['Latest date_only'].values[0])
     
     # Display the filtered data using the collective function
-    tab1, tab2, tab3, tab4 = st.tabs(["Top Picks", "Top Price Changes","potential Breakouts","Screener"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Top Picks", "Top Price Changes","Potential Breakouts","Sector-Industry Overview","Screener"])
 
-    with tab4:
+    with tab5:
         collective(df)
         
     with tab1:
@@ -259,7 +273,9 @@ def main():
         
     with tab3:
         potential_breakout(df)
-
+        
+    with tab4:
+        sector_overview(df)
 
 # Check if the script is being run as the main module
 if __name__ == "__main__":

@@ -38,7 +38,8 @@ def add_links(df):
 
 #Generate FirmoGraphic Data
 def generate_firmo(data):
-    col1, col2 = st.columns([4,2])
+    
+    col1, col2, col3 = st.columns(3)
     
     col1.header(data.Sector.values[0])
     col1.write("Sector")
@@ -46,12 +47,30 @@ def generate_firmo(data):
     col2.header(data.Industry.values[0])
     col2.write("Industry")
     
-    st.subheader("About the company")
+    col3.header(data.Cap.values[0])
+    col3.write("Market Size")
     
+    st.subheader("About the company")
+
     col1, col2 = st.columns([4,2])
     col1.write(data.Description.values[0])
     col2.plotly_chart(holding_chart(data),use_container_width=True,height=200)
-
+    
+    st.divider()
+    
+    st.subheader('Related Companies')
+    
+    related  = related_companies(data.Symbol.values[0], load_data('backend_data/database.csv'), 5).reset_index()[['Name','Symbol']]
+    
+    col1,col2,col3,col4,col5 = st.columns(5)
+    
+    n=0
+    for j in [col1,col2,col3,col4,col5]:
+        j.write(related.Name.values[n])
+        url = f'https://stock-recommendation.streamlit.app/In_Depth_Stock_Analysis/?symbol={related.Symbol.values[n].replace(".","_")}'
+        j.write("[In Depth Analysis]("+url+")")
+        n+=1
+        
 #Generate Stock Based Insights
 def generate_stock(data):
     hist_file = "backend_data/historical/"+data.Symbol.values[0].replace(".","_")+".csv"
@@ -360,7 +379,7 @@ def load_insights(data,input_symbol):
 
 def main():
     data = load_data("backend_data/database.csv")
-    data = allot_tags(data)
+    #data = allot_tags(data)
     
     input_symbol = st.sidebar.text_input("Enter stock ticker/name")       
     

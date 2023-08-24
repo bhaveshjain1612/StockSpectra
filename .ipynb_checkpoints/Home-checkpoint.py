@@ -30,6 +30,7 @@ def add_links(df):
     # Function to convert URL to clickable link
     def make_clickable(url, text):
         return f'<a target="_self" href="{url}">{text}</a>'
+        #return url
 
     # Add 'Analysis' column with clickable links to DataFrame
     df['Analysis'] = add_ind_depth_url(df.Symbol)
@@ -41,6 +42,7 @@ def add_links(df):
     else:
         st.write(str(df.shape[0]) + " Companies found")
         st.write(df.to_html(escape=False), unsafe_allow_html=True)
+        #st.dataframe(df)
 
 # Function for collective filtering and displaying of data
 def collective(df):
@@ -50,19 +52,22 @@ def collective(df):
     
     #_________________ALL COLUMN 1 FILTERS_____________________________
     #Create Filter by investment strategy
-    strategy =  col1.selectbox("Strategy", ("None","1-2 Months", "3-6 Months", "> 1 Year","Potential Breakout"))
+    strategy_selected =  col1.selectbox("Investment Duration", ("1-2 Months","> 1 Year"))
+    #filtering based on possible breakout
+    strategy=strategy_selected
+    final=df
 
     # Filter by stock name
     name = col1.text_input('Enter name')
         
-    # Filter by view option (Top Picks, All, or Potential Breakout)
+    # Filter by Dividend
     dividend = col1.selectbox("Dividend", strategy_allotting(strategy)[3])
         
     #_________________ALL COLUMN 2 FILTERS_____________________________    
     #Filter based on Risk
-    risk_filter = col2.multiselect('Risk/Reward Preference',np.insert(df['Risk'].unique(), 0, "All"), strategy_allotting(strategy)[0])
+    risk_filter = col2.multiselect('Risk/Reward Preference',np.insert(df["Risk "+strategy.replace(" ","")].unique(), 0, "All"), strategy_allotting(strategy)[0])
     if 'All' in risk_filter or risk_filter ==[]:
-        risk_filter = df['Risk'].unique()    
+        risk_filter = df["Risk "+strategy.replace(" ","")].unique()    
         
     # Filter by stock exchange (NSE or BSE)
     exchange = col2.selectbox("Exchange", ("All","NSE", "BSE"))
@@ -76,9 +81,9 @@ def collective(df):
     
     #_________________ALL COLUMN 3 FILTERS_____________________________    
     # Filter by stock rank (outlook)
-    stkrank_filter = col3.multiselect('Outlook Preference',np.insert(df['Outlook'].unique(), 0, "All"), strategy_allotting(strategy)[1])
+    stkrank_filter = col3.multiselect('Outlook Preference',np.insert(df["Outlook "+strategy.replace(" ","")].unique(), 0, "All"), strategy_allotting(strategy)[1])
     if 'All' in stkrank_filter or stkrank_filter ==[]:
-        stkrank_filter = df['Outlook'].unique()    
+        stkrank_filter = df["Outlook "+strategy.replace(" ","")].unique()    
         
     #Filter by sector
     sector_filter = col3.multiselect('Select Sector', np.insert(df['Sector'].unique(), 0, "All"), ['All'])
@@ -104,14 +109,9 @@ def collective(df):
     
     #_________________Executing Filters and showing df_____________________________ 
     
-    #filtering based on possible breakout
-    if strategy == 'Potential Breakout':
-        final=df[df['Symbol'].isin(load_data("backend_data/breakout.csv")['Unnamed: 0'])]
-    else:
-        final=df
     #filtering based on name
     if name:
-        final = final[final['Name'].str.contains(name, case=False) | df['Symbol'].str.contains(name, case=False)]
+        final = final[final['Name'].str.contains(name, case=False) | final['Symbol'].str.contains(name, case=False)]
         
     #dividend filter:
     final = final.loc[lambda x: (x['Dividend Yield'] > 0) if dividend == "Yes" else ((x['Dividend Yield'] == 0) if dividend == "No" else x['Dividend Yield']!='Not Found')]
@@ -123,22 +123,23 @@ def collective(df):
     # Applying industry_filters
     final=final[final['Industry'].isin(industry_filter)]
     # Applying risk_filters
-    final=final[final['Risk'].isin(risk_filter)]
+    final=final[final["Risk "+strategy.replace(" ","")].isin(risk_filter)]
     # Applying outlook_filters
-    final=final[final['Outlook'].isin(stkrank_filter)]
+    final=final[final["Outlook "+strategy.replace(" ","")].isin(stkrank_filter)]
     # Applying financials_filters
     final=final[final['finrank'].isin(finrank_filter)]
     #applying time interval filter
-    final.rename(columns = {"Close_change_"+filter_interval[:3].lower().replace(" ",""):'Change (%)'}, inplace = True)
+    final.rename(columns = {"Close_change_"+filter_interval[:3].lower().replace(" ",""):'Change (%)',
+                           "Risk "+strategy.replace(" ",""): "Risk",
+                           "Outlook "+strategy.replace(" ",""): "Outlook"}, inplace = True)
 
     # Display the final DataFrame with links
-    final = final[['Name', 'Symbol','Exchange', 'Sector', 'Industry', 'Latest Close','Change (%)','Outlook','Risk', 'finrank','Dividend Yield']].rename(columns={'finrank': 'Company Financials', 'stkrank': 'Outlook'})
+    final = final[['Name', 'Symbol','Exchange', 'Sector', 'Industry', 'Latest Close','Change (%)','Outlook','Risk', 'finrank','Dividend Yield']].rename(columns={'finrank': 'Company Financials'})
     final = final.drop_duplicates(subset='Name').set_index('Name')
     # Beautifying some columns
     final = final.round(2)
     final['Company Financials'] = final['Company Financials'].str.title()
     final['Outlook'] = final['Outlook'].str.title()
-    
     #Sorting Functions
     if sort_type != "None":
         final = final.sort_values(by=sort_by,ascending=(sort_type=="Ascending"))
@@ -148,21 +149,133 @@ def collective(df):
  
     with st.container():
         add_links(final)
+        
+#function for top picks
+def top_picks(df):
     
+    #creating sols in dahsboard
+    col1, col2, col3 = st.columns(3)
+    
+    exchange_p = col1.selectbox("Exchange", ("NSE", "BSE"), key = 'tp_exchange')
+    tp = df[df['Exchange']==exchange_p]
+    
+    #Select column to sort by
+    sort_by = col2.selectbox('Order by' , ("Name","Latest Close","Dividend Yield","Change (%)"),key='tp_sortby')
+    # Sorting Method 
+    sort_type = col3.selectbox('Order method', ("None","Ascending","Descending") ,key='tp_sorttype')
+
+    #selecting companies with high short volatility, mid to low in mid ter and low in long term
+    tp = tp[tp['finrank']=='strong']
+    tp = tp[(tp['Outlook 1-2Months']=='positive') | (tp['Outlook 1-2Months']=='very positive')]
+    tp = tp[(tp['Outlook >1Year']=='positive') | (tp['Outlook >1Year']=='very positive')]
+    tp = tp[(tp['Risk 1-2Months']=='Mid') | (tp['Risk 1-2Months']=='Low')]
+    tp = tp[tp['Risk >1Year']=='Low']
+    tp = tp[tp['Dividend Yield']>0]
+
+    tp = tp[['Name','Symbol','Sector','Industry','Latest Close','Close_change_1d','Dividend Yield']].rename(columns={'Close_change_1d':'Change (%)'}).drop_duplicates(subset=['Name']).set_index('Name').round(2)
+    
+    if sort_type != "None":
+        tp = tp.sort_values(by=sort_by,ascending=(sort_type=="Ascending"))
+    
+    if tp.shape[0] > 10:
+        tp = tp.head(st.slider('Companies to Display', 0, tp.shape[0], 10))
+ 
+    with st.container():
+        add_links(tp)
+        
+#function for top gainers
+def top_price_changes(df):
+    
+    # Filter by stock exchange (NSE or BSE)
+    col1,col2 = st.columns(2)
+    
+    chng_type = col1.selectbox("Price change type", ("Top Gainers", "Top Losers"))
+    
+    exchange_g = col2.selectbox("Exchange", ("NSE", "BSE"), key = 'tpc_exchange')
+    tg = df[df['Exchange']==exchange_g]
+    
+    tg = tg[['Name','Symbol','Sector','Industry','Latest Close','Close_change_1d','Dividend Yield']].rename(columns={'Close_change_1d':'Change (%)'}).drop_duplicates(subset=['Name']).set_index('Name').round(2)
+    
+    tg = tg.sort_values(by='Change (%)',ascending=(chng_type=="Top Losers")).head(10)
+ 
+    with st.container():
+        add_links(tg)
+    
+
+#function for top gainers
+def potential_breakout(df):
+    
+    #st.write("These are some stocks that have the possibility of shifting from a bearish trend to a strong bullish trend. However, This change is always uncertain. Please proceed with caution"
+    
+    #creating sols in dahsboard
+    col1, col2, col3 = st.columns(3)
+    
+    exchange_p = col1.selectbox("Exchange", ("NSE", "BSE"), key = 'pb_exchange')
+    
+    pb = df[df['Exchange']==exchange_p]
+    
+    pb=pb[pb['Symbol'].isin(load_data("backend_data/breakout.csv")['Symbol'])]
+
+    #Select column to sort by
+    sort_by = col2.selectbox('Order by' , ("Name","Latest Close","Dividend Yield","Change (%)"),key='pb_sortby')
+    # Sorting Method 
+    sort_type = col3.selectbox('Order method', ("None","Ascending","Descending") ,key='pb_sorttype')
+    
+    pb = pb[['Name','Symbol','Sector','Industry','Latest Close','Close_change_1d','Dividend Yield']].rename(columns={'Close_change_1d':'Change (%)'}).drop_duplicates(subset=['Name']).set_index('Name').round(2)
+    
+    if sort_type != "None":
+        pb = pb.sort_values(by=sort_by,ascending=(sort_type=="Ascending"))
+    
+    if pb.shape[0] > 10:
+        pb = pb.head(st.slider('Companies to Display', 0, pb.shape[0], 10))
+ 
+    with st.container():
+        add_links(pb)
+
+#function for sector overview
+def sector_overview(df):
+    
+    col1,col2,col3 = st.columns(3)
+    
+    universe = col1.selectbox("See Overview for",('Industry','Sector'))
+    
+    indview = industryview(df,universe)
+    
+    indsortby = col2.selectbox("Sort by",('Median 1 Day Change (%)', 'Median 5 Day Change (%)',
+                                       'Median 1 Month Change (%)', 'Median 3 Month Change (%)',
+                                       'Median 6 Month Change (%)', 'Median 1 Year Change (%)',
+                                       'Number of Companies', 'Number of LargeCap', 'Number of MidCap',
+                                       'Number of SmallCap'))
+    indsortmethod = col3.selectbox("Sort Method",('Descending','Ascending'))
+    
+    st.dataframe(indview.sort_values(by=indsortby,ascending = (indsortmethod=='Ascending')))
+
+# Main Function
 def main():
     # Load data from the CSV file and preprocess
     df = load_data("backend_data/database.csv")
 
-    df = allot_tags(df)
-    df['Annual Dividend'] = df['Dividend Rate'].replace('Not Found', '0').astype(float)
-    df['Dividend Yield'] = df['Annual Dividend']*100/df['Latest Close']
-    
     # Set up the Streamlit dashboard
     st.header("Find Stocks")
     st.write("Updated On: " + df['Latest date_only'].values[0])
     
     # Display the filtered data using the collective function
-    collective(df)
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Top Picks", "Top Price Changes","Potential Breakouts","Sector-Industry Overview","Screener"])
+
+    with tab5:
+        collective(df)
+        
+    with tab1:
+        top_picks(df)
+        
+    with tab2:
+        top_price_changes(df)
+        
+    with tab3:
+        potential_breakout(df)
+        
+    with tab4:
+        sector_overview(df)
 
 # Check if the script is being run as the main module
 if __name__ == "__main__":

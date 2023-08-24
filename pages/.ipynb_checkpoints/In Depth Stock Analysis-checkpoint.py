@@ -14,9 +14,32 @@ st.set_page_config(page_title="Detailed Analysis", layout = "wide")
 def load_data(file_path):
     return pd.read_csv(file_path)
 
+# Function to add clickable links to the DataFrame
+def add_links(df):
+    # Function to generate the URL for in-depth stock analysis
+    def add_ind_depth_url(Symbol):
+        return [f'https://stock-recommendation.streamlit.app/In_Depth_Stock_Analysis/?symbol={t.replace(".","_")}' for t in Symbol]
+
+    # Function to convert URL to clickable link
+    def make_clickable(url, text):
+        return f'<a target="_self" href="{url}">{text}</a>'
+        #return url
+
+    # Add 'Analysis' column with clickable links to DataFrame
+    df['Analysis'] = add_ind_depth_url(df.Symbol)
+    df['Analysis'] = df['Analysis'].apply(make_clickable, text='See in Depth')
+        
+    if df.empty:
+        st.error("No companies found for the selection")
+        st.empty()
+    else:
+        st.write(str(df.shape[0]) + " Companies found")
+        st.write(df.to_html(escape=False), unsafe_allow_html=True)
+
 #Generate FirmoGraphic Data
 def generate_firmo(data):
-    col1, col2 = st.columns([4,2])
+    
+    col1, col2, col3 = st.columns(3)
     
     col1.header(data.Sector.values[0])
     col1.write("Sector")
@@ -24,12 +47,30 @@ def generate_firmo(data):
     col2.header(data.Industry.values[0])
     col2.write("Industry")
     
-    st.subheader("About the company")
+    col3.header(data.Cap.values[0])
+    col3.write("Market Size")
     
+    st.subheader("About the company")
+
     col1, col2 = st.columns([4,2])
     col1.write(data.Description.values[0])
     col2.plotly_chart(holding_chart(data),use_container_width=True,height=200)
-
+    
+    st.divider()
+    
+    st.subheader('Related Companies')
+    
+    related  = related_companies(data.Symbol.values[0], load_data('backend_data/database.csv'), 5).reset_index()[['Name','Symbol']]
+    
+    col1,col2,col3,col4,col5 = st.columns(5)
+    
+    n=0
+    for j in [col1,col2,col3,col4,col5]:
+        j.write(related.Name.values[n])
+        url = f'https://stock-recommendation.streamlit.app/In_Depth_Stock_Analysis/?symbol={related.Symbol.values[n].replace(".","_")}'
+        j.write("[In Depth Analysis]("+url+")")
+        n+=1
+        
 #Generate Stock Based Insights
 def generate_stock(data):
     hist_file = "backend_data/historical/"+data.Symbol.values[0].replace(".","_")+".csv"
@@ -67,16 +108,17 @@ def generate_stock(data):
     col4.metric(label ="52 Week Low",value=round(week52_data['52 Week Low'],2), delta='') 
     
     st.divider()
-    st.subheader("Key Takeaways")
+    col1,col2,col3 = st.columns([1,1,2])
+    col1.subheader("Key Takeaways")
+    outdur = col2.selectbox("Outlook Duration",("1-2 Months",">1 Year"))
+    
     stksummary = stock_summary(data,historical_with_ma,week52_data,dividend_split_data)
     if len(stksummary)>1:
-        col1, col2, col3 = st.columns(3)
-        
+        col1, col2, col3 = st.columns([2,2,2])
         
         if len(stksummary)%2 ==1:
             for m in list(stksummary.items())[:(len(stksummary)//2)+1]:
                 col2.write(m[1]['Display'])
-            #col3.subheader("_")
             for m in list(stksummary.items())[(len(stksummary)//2)+1:]:
                 col3.write(m[1]['Display'])
         else:
@@ -86,17 +128,103 @@ def generate_stock(data):
                 col3.write(m[1]['Display'])
     else:
         col1, col2 = st.columns(2)
-        col2.subheader("Key Takeaways")
         for m in list(stksummary.items()):
             col2.write(m[1]['Display'])
+            
+    col1.header(data['Outlook '+outdur.replace(" ","")].values[0].title()+" - "+data['Risk '+outdur.replace(" ","")].values[0].title()+" Risk")
     
-    col1.header(data.Outlook.values[0].upper())
-    col1.subheader(data.Risk.values[0]+" Risk / "+data.Risk.values[0]+" Reward")
+    #Technical Inidcators Latest Values
+    with st.expander("Technical Indicators (Latest Values)"):
+        col1, col2, col3, col4 = st.columns(4)
+
+        col1.write("**Average Directional Index (14)**")
+        col1.write(str(round(data['Latest ADX'].values[0],2))+" - "+indicator_tags(data, historical_with_ma)['adx'])
+        
+        col2.write("**Relative Strength Index (14)**")
+        col2.write(str(round(data['Latest rsi'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['rsi'])
+        
+        col3.write("**Commodity Channel Index (10)**")
+        col3.write(str(round(data['Latest CCI_10'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['cci_10'])
+        
+        col4.write("**Commodity Channel Index (40)**")
+        col4.write(str(round(data['Latest CCI_40'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['cci_40'])
+        
+        col2.write("**Money Flow Index (14)**")
+        col2.write(str(round(data['Latest MFI_14'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['mfi_14'])
+        
+        col1.write("**Moving Average Convergence Divergence**")
+        col1.write(str(round(data['Latest macd'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['macd'])
+        
+        col3.write("**Volume Price Trend**")
+        col3.write(str(round(data['Latest VPT'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['VPT'])
+        
+        col4.write("**Williamson%R (14)**")
+        col4.write(str(round(data['Latest %R'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['%R'])
+     
+        #Moving Averages
+        st.divider()
+        matype = st.selectbox('Moving Average Type',('SMA','EMA'))
+        col1,col2 = st.columns([5,3])
+        col1.write('Values')
+        col2.write('Crossovers')
+        c1,c2,c3,c4,c5 = col1.columns(5)
+        
+        c1.write('**5 Days**')
+        c1.write(str(round(historical_with_ma[matype.lower()+"_5"].values[0],2)))
+        c1.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_5"])
+                 
+        c2.write('**10 Days**')
+        c2.write(str(round(historical_with_ma[matype.lower()+"_10"].values[0],2)))
+        c2.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_10"])
+                 
+        c3.write('**20 Days**')
+        c3.write(str(round(historical_with_ma[matype.lower()+"_20"].values[0],2)))
+        c3.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_20"])
+                 
+        c4.write('**50 Days**')
+        c4.write(str(round(historical_with_ma[matype.lower()+"_50"].values[0],2)))
+        c4.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_50"])
+                 
+        c5.write('**100 Days**')
+        c5.write(str(round(historical_with_ma[matype.lower()+"_100"].values[0],2)))
+        c5.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_100"])
+                 
+        c1,c2,c3 = col2.columns(3)
+        c1.write('**Short**')
+        c1.write('5 & 20 Days')
+        c1.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_shortcross"])
+        
+        c2.write('**Median**')
+        c2.write('20 & 50 Days')
+        c2.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_midcross"])
+        
+        c3.write('**Long**')
+        c3.write('50 & 100 Days')
+        c3.write(indicator_tags(data, historical_with_ma)[matype.lower()+"_longcross"])
+
+        #Pivot levels
+        st.divider()   
+        st.write("Expected pivot points for next day:")
+        col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
+        col1.write("R3")
+        col1.write(str(round(data['Latest R3'].values[0],2)))
+        col2.write("R2")
+        col2.write(str(round(data['Latest R2'].values[0],2)))
+        col3.write("R1")
+        col3.write(str(round(data['Latest R1'].values[0],2)))
+        col4.write("PP")
+        col4.write(str(round(data['Latest PP'].values[0],2)))
+        col5.write("S1")
+        col5.write(str(round(data['Latest S1'].values[0],2)))
+        col6.write("S2")
+        col6.write(str(round(data['Latest S2'].values[0],2)))
+        col7.write("S3")
+        col7.write(str(round(data['Latest S3'].values[0],2)))
     
-    st.divider()
-    
-    st.subheader("Stock Price and technical charts")
     ##Charts
+    st.divider()
+    st.subheader("Stock Price and technical charts")
+
     holiday_list = [
     "2023-01-26",#	Republic Day
     "2023-03-07",#	Holi
@@ -112,81 +240,41 @@ def generate_stock(data):
     "2023-10-24",#	Dussehra
     "2023-11-14",#	Diwali-Balipratipada
     "2023-11-27",#	Gurunanak Jayanti
-    "2023-12-25",#	Christmas
     ]
-    
     #ma duratiosn for plotting
-    ma_durations = [5,10,15,20,25,30,40,50,75,100,150,200]
-    col1, col2, col3, col4, col5 = st.columns([2,2,2,2,2])
-         
-    sma_filter = col3.multiselect('Select SMAs to show',ma_durations)
-    ema_filter = col4.multiselect('Select EMAs to show',ma_durations)  
-    bollinger_filter = col5.multiselect('Select Bollinger Bands to show',["1 Standard Deviation","2 Standard Deviations"])
+    col1, col2 = st.columns([2,8])
+    
+    ma_names = []
+    for i in [5,10,15,20,25,30,40,50,75,100,150,200]:
+        ma_names.append('SMA ('+str(i)+')')
+        ma_names.append('EMA ('+str(i)+')') 
+    ta_list = ma_names+["Volume","ADX (14)", "RSI (14)", "CCI (10)", "CCI (40)","OBV", "VPT", "CMF", 'Williamson%R (14)', 'MACD', 'VWAP', 'MFI (14)',"Bollinger (1 STD)", "Bollinger (2 STD)"]
+
     filter_interval = col1.selectbox('Select a Time Interval', ["6 Months","1 Day", "5 Days", "1 Month","3 Months",  "1 Year", "2 Years"])
-    plot_filter = col2.selectbox('Select Bottom Plot',['Volume','MACD','ADX','RSI'])
+    plot_filter = col2.multiselect('Select Technical Indicators',ta_list, "Volume")
     
-    #selecting right MA
-    if filter_interval: 
-        if filter_interval == "1 Day":
-            if historical_with_ma.date_only.values[-1] <= historical_with_ma.date_only.values[0] - np.timedelta64(1, "D"):
-                historical_sample = historical_with_ma[historical_with_ma['date_only'] >historical_with_ma['date_only'][0]-np.timedelta64(1, "D")]
-            else:
-                historical_sample = historical_with_ma
-        elif filter_interval == "5 Days":
-            if historical_with_ma.date_only.values[-1] <= historical_with_ma.date_only.values[0] - np.timedelta64(5, "D"):
-                historical_sample = historical_with_ma[historical_with_ma['date_only'] >historical_with_ma['date_only'][0]-np.timedelta64(5, "D")]
-            else:
-                historical_sample = historical_with_ma
-        elif filter_interval == "1 Month":
-            if historical_with_ma.date_only.values[-1] <= historical_with_ma.date_only.values[0] - np.timedelta64(31, "D"):
-                historical_sample = historical_with_ma[historical_with_ma['date_only'] >historical_with_ma['date_only'][0]-np.timedelta64(1, "M")]
-            else:
-                historical_sample = historical_with_ma
-        elif filter_interval == "3 Months":
-            if historical_with_ma.date_only.values[-1] <= historical_with_ma.date_only.values[0] - np.timedelta64(93, "D"):
-                historical_sample = historical_with_ma[historical_with_ma['date_only'] >historical_with_ma['date_only'][0]-np.timedelta64(3, "M")]
-            else:
-                historical_sample = historical_with_ma
-        elif filter_interval == "6 Months":
-            if historical_with_ma.date_only.values[-1] <= historical_with_ma.date_only.values[0] - np.timedelta64(183, "D"):
-                historical_sample = historical_with_ma[historical_with_ma['date_only'] >historical_with_ma['date_only'][0]-np.timedelta64(6, "M")]
-            else:
-                historical_sample = historical_with_ma
-        elif filter_interval == "1 Year":
-            if historical_with_ma.date_only.values[-1] <= historical_with_ma.date_only.values[0] - np.timedelta64(366, "D"):
-                historical_sample = historical_with_ma[historical_with_ma['date_only'] >historical_with_ma['date_only'][0]-np.timedelta64(1, "Y")]
-            else:
-                historical_sample = historical_with_ma
-        elif filter_interval == "2 Years":
-            if historical_with_ma.date_only.values[-1] <= historical_with_ma.date_only.values[0] - np.timedelta64(736, "D"):
-                historical_sample = historical_with_ma[historical_with_ma['date_only'] >historical_with_ma['date_only'][0]-np.timedelta64(2, "Y")]
-            else:
-                historical_sample = historical_with_ma
-            
-    selected_mas = []
-    #creating filtering names for sma
-    for i in sma_filter:
-        selected_mas.append("sma_"+str(i)+"_trace")
-            
-    #creating filtering names for ema   :                         
-    for i in ema_filter:
-        selected_mas.append("ema_"+str(i)+"_trace")
-    
-    fig = generate_charts(historical_sample,selected_mas,bollinger_filter,holiday_list, plot_filter)
+    fig = generate_charts(historical_with_ma,filter_interval,plot_filter, holiday_list)
         
     st.plotly_chart(fig,theme="streamlit", use_container_height=True, use_container_width=True, height=1000)
     
+    #technical inidcator values 
+    
+    
+# Generate financial details    
 def generate_financials(data):
-    def simplify(x):    
-        if x >1000000000 or x <-1000000000:
-            y = str(round(x/10000000))+" Cr"    
-        elif x > 10000000 or x < -10000000:
-            y = str(round(x/10000000,2))+" Cr"
-        elif x > 100000 or x <-100000:
-            y = str(round(x/100000,2))+" L"
-        else:
-            y = x
-        return y
+    def simplify(x):
+        try:
+            if x >1000000000 or x <-1000000000:
+                y = str(round(x/10000000))+" Cr"    
+            elif x > 10000000 or x < -10000000:
+                y = str(round(x/10000000,2))+" Cr"
+            elif x > 100000 or x <-100000:
+                y = str(round(x/100000,2))+" L"
+            else:
+                y = x
+            return y
+        except:
+            return None
     
     fin_file = "backend_data/company_financials/"+data.Symbol.values[0].replace(".","_")+".csv"
     fin = load_data(fin_file)
@@ -200,14 +288,14 @@ def generate_financials(data):
     col1.metric("Net Income",simplify(kpis['Net Income']['current']), simplify(kpis['Net Income']['delta']))
     col2.metric("Debt",simplify(kpis['Debt']['current']), simplify(kpis['Debt']['delta']))
     col3.metric("Free Cash Flow",simplify(kpis['Free Cash Flow']['current']), simplify(kpis['Free Cash Flow']['delta']))
-    col4.metric("Basic EPS",round(kpis['Basic EPS']['current'],2), round(kpis['Basic EPS']['delta'],2))
-    col5.metric("Net Profit Margin",round(kpis['Net Profit Margin']['current'],2), round(kpis['Net Profit Margin']['delta'],2))
+    col4.metric("Basic EPS",kpis['Basic EPS']['current'], kpis['Basic EPS']['delta'])
+    col5.metric("Net Profit Margin",kpis['Net Profit Margin']['current'], kpis['Net Profit Margin']['delta'])
     st.divider()
-    col1.metric("ROA",round(kpis['ROA']['current'],2), round(kpis['ROA']['delta'],2))
-    col2.metric("ROE",round(kpis['ROE']['current'],2), round(kpis['ROE']['delta'],2))
-    col3.metric("ROCE",round(kpis['ROCE']['current'],2), round(kpis['ROCE']['delta'],2))
-    col4.metric("Current Ratio",round(kpis['Current Ratio']['current'],2), round(kpis['Current Ratio']['delta'],2))
-    col5.metric("DE Ratio",round(kpis['DE Ratio']['current'],2), round(kpis['DE Ratio']['delta'],2))
+    col1.metric("ROA",kpis['ROA']['current'], kpis['ROA']['delta'])
+    col2.metric("ROE",kpis['ROE']['current'], kpis['ROE']['delta'])
+    col3.metric("ROCE",kpis['ROCE']['current'], kpis['ROCE']['delta'])
+    col4.metric("Current Ratio",kpis['Current Ratio']['current'], kpis['Current Ratio']['delta'])
+    col5.metric("DE Ratio",kpis['DE Ratio']['current'], kpis['DE Ratio']['delta'])
     
     mapping = load_data("backend_data/financials_mapping.csv")
     #st.dataframe(fin)
@@ -227,7 +315,6 @@ def generate_financials(data):
             con.append(s[i]['To display'][0])
             col2.write(s[i]['To display'][0])
 
-    
     #display
     with st.expander("Income Statement"):
         st.dataframe(fin[fin['sheet']=='i'].drop(['Unnamed: 0','sheet'],axis=1))
@@ -237,6 +324,29 @@ def generate_financials(data):
         
     with st.expander("Cash Flow"):
         st.dataframe(fin[fin['sheet']=='c'].drop(['Unnamed: 0','sheet'],axis=1)) 
+        
+#get newws for stocks        
+def generate_news(name):
+    #try:
+    news = pd.read_csv("backend_data/news_articles/"+name.replace(" ","_")+".csv").reset_index()
+    #st.dataframe(news)
+    
+    if news.empty:
+        st.write("no News articles about the company in past 14 days")
+    else:
+        st.header("Most Recent news articles (Last 14 Days)")
+        
+    for i in news.index:
+        st.subheader(news.title.values[i])
+        col1, col2, col3 = st.columns([1,1,5])
+        col1.write(news.source.values[i])
+        col2.write(news.date.values[i])
+        link  = "https//:"+news.link.values[i]  
+        #st.write(news.summary[i])
+        st.write("[Read More....]("+link+")")
+        st.divider()
+    #except:
+    #    st.write("no News articles about the company in past 14 days")
     
 #Load all insights
 def load_insights(data,input_symbol):
@@ -255,7 +365,7 @@ def load_insights(data,input_symbol):
         
     st.subheader(data.Exchange.values[0]+" : " +data.Symbol.values[0][:-3])   
         
-    tab1, tab2, tab3 = st.tabs(["Company Details", "Stock", "Financial"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Company Details", "Technical Analysis", "Financials", "News"])
     
     with tab1:
         generate_firmo(data)
@@ -263,19 +373,27 @@ def load_insights(data,input_symbol):
         generate_stock(data)
     with tab3:
         generate_financials(data)
+    with tab4:
+        generate_news(data.Name.values[0])
     #st.dataframe(data)
 
 def main():
     data = load_data("backend_data/database.csv")
-    data = allot_tags(data)
+    #data = allot_tags(data)
     
-    input_symbol = st.sidebar.text_input("Enter stock Ticker")       
+    input_symbol = st.sidebar.text_input("Enter stock ticker/name")       
     
     if input_symbol:
         st.experimental_set_query_params()
-        data = data[(data['Symbol'] == input_symbol.upper()+".NS") | (data['Symbol'] == input_symbol.upper()+".BO")].reset_index().drop('index',axis=1)        
-        load_insights(data,input_symbol)
-        
+        data_company = data[(data['Symbol'] == input_symbol.upper()+".NS") | (data['Symbol'] == input_symbol.upper()+".BO")].reset_index().drop('index',axis=1)    
+        #load_insights(data,input_symbol)
+        if data_company.shape[0] == 0:
+            found = data[data['Name'].str.contains(input_symbol, case=False) | data['Symbol'].str.contains(input_symbol, case=False)][['Name','Symbol','Exchange','Sector','Industry','Latest Close']].set_index('Name')
+            st.subheader("Results of search:")
+            add_links(found)
+        else:
+            load_insights(data_company,input_symbol)
+  
     elif st.experimental_get_query_params() != {}:
         in_s = st.experimental_get_query_params()['symbol'][0][:-3]
         data = data[(data['Symbol']==in_s.upper()+".NS")|(data['Symbol']==in_s.upper()+".BO")].reset_index().drop('index',axis=1)
