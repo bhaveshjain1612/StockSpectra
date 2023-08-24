@@ -60,12 +60,10 @@ def generate_firmo(data):
     col1,col2 = st.columns([4,1])
     col1.subheader('Related Companies')
     
-    related  = related_companies(data.Symbol.values[0], load_data('backend_data/database.csv'), 5).reset_index()[['Name','Symbol']]
-    
     #comparision url
     related  = related_companies(data.Symbol.values[0], load_data('backend_data/database.csv'), 5).reset_index()[['Name','Symbol']]
     
-    relatedurl = f'https://stock-recommendation.streamlit.app//Compare_Stocks/?symbols={",".join(related.Symbol.values).replace(".","_")}'
+    relatedurl = f'https://stock-recommendation.streamlit.app//Compare_Stocks/?symbols={",".join(np.append(related.Symbol.values,data.Symbol.values[0])).replace(".","_")}'
     
     col2.subheader("[Compare Stocks]("+relatedurl+")")
     
