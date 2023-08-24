@@ -622,6 +622,21 @@ def calc_KPIs(financials,mode):
     else:
         return kpis
     
+#Simp[lyfying parametres
+def simplify(x):
+    try:
+        if x >1000000000 or x <-1000000000:
+            y = str(round(x/10000000))+" Cr"    
+        elif x > 10000000 or x < -10000000:
+            y = str(round(x/10000000,2))+" Cr"
+        elif x > 100000 or x <-100000:
+            y = str(round(x/100000,2))+" L"
+        else:
+            y = x
+        return y
+    except:
+        return None
+    
 #financial explanantion
 def indicator_summary(x):
 
@@ -890,3 +905,70 @@ def stock_summary(stock_data,historical,week_52,dividend_split):
         summary['Momentum']['Type'] = 1
 
     return summary
+
+######################################################################################################################################
+# Comparision FUnctions
+######################################################################################################################################
+
+#single company financials
+def get_financials_single(Name,db): 
+    symbol = db[db['Name']==Name].Symbol.values[0]
+    
+    fin_file = "backend_data/company_financials/"+symbol.replace(".","_")+".csv"
+    fin = pd.read_csv(fin_file)
+
+    #st.dataframe(fin)
+
+    kpis = calc_KPIs(fin.set_index('Unnamed: 0').T.reset_index(),'normal')
+
+    df ={
+    'Net Income': simplify(kpis['Net Income']['current'])
+    ,'Net Income Change': simplify(kpis['Net Income']['delta'])
+    ,'Debt': simplify(kpis['Debt']['current'])
+    ,'Debt Change': simplify(kpis['Debt']['delta'])
+    ,'Free Cash Flow': simplify(kpis['Free Cash Flow']['current'])
+    ,'Free Cash Flow Change': simplify(kpis['Free Cash Flow']['delta'])
+    ,'Basic EPS': kpis['Basic EPS']['current']
+    ,'Basic EPS Change': kpis['Basic EPS']['delta']
+    ,'Net Profit Margin': kpis['Net Profit Margin']['current']
+    ,'Net Profit Margin Change': kpis['Net Profit Margin']['delta']
+    ,'ROA': kpis['ROA']['current']
+    ,'ROA Change': kpis['ROA']['delta']
+    ,'ROE': kpis['ROE']['current']
+    ,'ROE Change': kpis['ROE']['delta']
+    ,'ROCE': kpis['ROCE']['current']
+    ,'ROCE Change': kpis['ROCE']['delta']
+    ,'Current Ratio': kpis['Current Ratio']['current']
+    ,'Current Ratio Change': kpis['Current Ratio']['delta']
+    ,'DE Ratio': kpis['DE Ratio']['current']
+    ,'DE Ratio Change': kpis['DE Ratio']['delta']}
+
+    return pd.DataFrame(df,index=[Name])
+
+#Single company technicals
+def get_technicals_single(Name,data): 
+    
+    data = data[data["Name"]==Name]
+    
+    def trend(a, b):
+        return "Bullish" if a > b else "Bearish"
+
+    df ={
+    "ADX":(round(data['Latest ADX'].values[0],2)),
+    "RSI (14)":(round(data['Latest rsi'].values[0],2)),
+    "CCI (10)":(round(data['Latest CCI_10'].values[0],2)),
+    "CCI (40)":(round(data['Latest CCI_40'].values[0],2)),
+    "MFI (14)":(round(data['Latest MFI_14'].values[0],2)),
+    "MACD" : (round(data['Latest macd'].values[0],2)),
+    "VWAP" : (round(data['Latest VWAP'].values[0],2)),
+    "Willaimson %R": (round(data['Latest %R'].values[0],2)),
+    "Price v. SMA (5)" : trend(data['Latest Close'].values[0], data['Latest sma_5'].values[0]),
+    "Price v. SMA (20)" : trend(data['Latest Close'].values[0], data['Latest sma_20'].values[0]),
+    "Price v. SMA (50)" : trend(data['Latest Close'].values[0], data['Latest sma_50'].values[0]),
+    "Price v. SMA (100)" : trend(data['Latest Close'].values[0], data['Latest sma_100'].values[0]),
+    "SMA(5) v. SMA (20)" : trend(data['Latest sma_5'].values[0], data['Latest sma_20'].values[0]),
+    "SMA(20) v. SMA (50)" : trend(data['Latest sma_20'].values[0], data['Latest sma_50'].values[0]),
+    "SMA(50) v. SMA (100)" : trend(data['Latest sma_50'].values[0], data['Latest sma_100'].values[0]),   
+    }
+
+    return pd.DataFrame(df,index=[Name])

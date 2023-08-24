@@ -12,8 +12,7 @@ from utils import *  # Custom utility functions
 import pandas as pd  # Library for data handling and manipulation
 
 # Set Streamlit page configuration
-st.set_page_config(
-    page_title="Dashboard",  # Title of the page
+st.set_page_config( 
     layout="wide"  # Wide layout to maximize dashboard space
 )
 
@@ -256,7 +255,7 @@ def main():
     df = load_data("backend_data/database.csv")
 
     # Set up the Streamlit dashboard
-    st.header("Find Stocks")
+    st.title("StockSpectra")
     st.write("Updated On: " + df['Latest date_only'].values[0])
     
     # Display the filtered data using the collective function

@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 import pytz
 from utils import *
 
-st.set_page_config(page_title="Detailed Analysis", layout = "wide")
+st.set_page_config(layout = "wide")
 
 def load_data(file_path):
     return pd.read_csv(file_path)
@@ -57,10 +57,17 @@ def generate_firmo(data):
     col2.plotly_chart(holding_chart(data),use_container_width=True,height=200)
     
     st.divider()
-    
-    st.subheader('Related Companies')
+    col1,col2 = st.columns([4,1])
+    col1.subheader('Related Companies')
     
     related  = related_companies(data.Symbol.values[0], load_data('backend_data/database.csv'), 5).reset_index()[['Name','Symbol']]
+    
+    #comparision url
+    related  = related_companies(data.Symbol.values[0], load_data('backend_data/database.csv'), 5).reset_index()[['Name','Symbol']]
+    
+    relatedurl = f'https://stock-recommendation.streamlit.app//Compare_Stocks/?symbols={",".join(related.Symbol.values).replace(".","_")}'
+    
+    col2.subheader("[Compare Stocks]("+relatedurl+")")
     
     col1,col2,col3,col4,col5 = st.columns(5)
     
@@ -262,19 +269,6 @@ def generate_stock(data):
     
 # Generate financial details    
 def generate_financials(data):
-    def simplify(x):
-        try:
-            if x >1000000000 or x <-1000000000:
-                y = str(round(x/10000000))+" Cr"    
-            elif x > 10000000 or x < -10000000:
-                y = str(round(x/10000000,2))+" Cr"
-            elif x > 100000 or x <-100000:
-                y = str(round(x/100000,2))+" L"
-            else:
-                y = x
-            return y
-        except:
-            return None
     
     fin_file = "backend_data/company_financials/"+data.Symbol.values[0].replace(".","_")+".csv"
     fin = load_data(fin_file)
@@ -325,7 +319,7 @@ def generate_financials(data):
     with st.expander("Cash Flow"):
         st.dataframe(fin[fin['sheet']=='c'].drop(['Unnamed: 0','sheet'],axis=1)) 
         
-#get newws for stocks        
+#get newws for stocks      
 def generate_news(name):
     #try:
     news = pd.read_csv("backend_data/news_articles/"+name.replace(" ","_")+".csv").reset_index()
@@ -352,7 +346,8 @@ def generate_news(name):
 def load_insights(data,input_symbol):
     ex_list = data['Exchange'].tolist()
     
-    st.title(data.Name.values[0])  
+    st.title('StockSpectra - In Depth Analysis')  
+    st.header(data.Name.values[0])  
     
     ex_sel = st.sidebar.radio("Exchange: ",ex_list)
     
