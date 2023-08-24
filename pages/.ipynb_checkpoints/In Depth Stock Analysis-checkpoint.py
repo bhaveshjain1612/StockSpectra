@@ -344,7 +344,6 @@ def generate_news(name):
 def load_insights(data,input_symbol):
     ex_list = data['Exchange'].tolist()
     
-    st.title('StockSpectra - In Depth Analysis')  
     st.header(data.Name.values[0])  
     
     ex_sel = st.sidebar.radio("Exchange: ",ex_list)
@@ -373,6 +372,7 @@ def load_insights(data,input_symbol):
 def main():
     data = load_data("backend_data/database.csv")
     #data = allot_tags(data)
+    st.title('StockSpectra - In Depth Analysis')  
     
     input_symbol = st.sidebar.text_input("Enter stock ticker/name")       
     
@@ -401,6 +401,8 @@ def main():
         except:
             st.experimental_set_query_params()
             
+    if st.experimental_get_query_params() == {} and input_symbol==False:
+        st.info('Enter The Stock Name/Symbol in the sidebar', icon="ℹ️")
         #st.dataframe(data)
     
 
