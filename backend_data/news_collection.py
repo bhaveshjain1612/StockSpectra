@@ -25,7 +25,7 @@ def get_news(name):
 
         return urls
 
-    url = "https://news.google.com/search?q="+name+"&hl=en-IN&gl=IN&ceid=IN%3Aen"
+    url = "https://news.google.com/search?q="+name[:-3]+"&hl=en-IN&gl=IN&ceid=IN%3Aen"
     class_name = "xrnccd"
     element_urls = find_elements_with_class(url, class_name)
     
