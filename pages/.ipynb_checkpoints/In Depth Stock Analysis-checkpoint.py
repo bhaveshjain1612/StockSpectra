@@ -388,12 +388,16 @@ def main():
             load_insights(data_company,input_symbol)
   
     elif st.experimental_get_query_params() != {}:
-        in_s = st.experimental_get_query_params()['symbol'][0][:-3]
-        data = data[(data['Symbol']==in_s.upper()+".NS")|(data['Symbol']==in_s.upper()+".BO")].reset_index().drop('index',axis=1)
-        if st.experimental_get_query_params()['symbol'][0][-3:]=="_BO":
-            data = data.sort_values(by="Exchange")
-        else:
-            data = data.sort_values(by="Exchange", ascending = False)
+        try:
+            in_s = st.experimental_get_query_params()['symbol'][0][:-3]
+            data = data[(data['Symbol']==in_s.upper()+".NS")|(data['Symbol']==in_s.upper()+".BO")].reset_index().drop('index',axis=1)
+            if st.experimental_get_query_params()['symbol'][0][-3:]=="_BO":
+                data = data.sort_values(by="Exchange")
+            else:
+                data = data.sort_values(by="Exchange", ascending = False)
+        except:
+            st.experimental_set_query_params()
+            
           
         #st.dataframe(data)
         load_insights(data,in_s)
