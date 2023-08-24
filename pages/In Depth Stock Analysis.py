@@ -395,12 +395,13 @@ def main():
                 data = data.sort_values(by="Exchange")
             else:
                 data = data.sort_values(by="Exchange", ascending = False)
+            
+            load_insights(data,in_s)
+            
         except:
             st.experimental_set_query_params()
             
-          
         #st.dataframe(data)
-        load_insights(data,in_s)
     
 
 if __name__ == "__main__":
