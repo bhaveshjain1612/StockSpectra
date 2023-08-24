@@ -401,7 +401,7 @@ def main():
         except:
             st.experimental_set_query_params()
             
-    if st.experimental_get_query_params() == {} and input_symbol==False:
+    if st.experimental_get_query_params() == {} and input_symbol is None:
         st.info('Enter The Stock Name/Symbol in the sidebar', icon="ℹ️")
         #st.dataframe(data)
     
