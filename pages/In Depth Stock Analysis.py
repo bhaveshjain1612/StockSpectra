@@ -18,7 +18,7 @@ def load_data(file_path):
 def add_links(df):
     # Function to generate the URL for in-depth stock analysis
     def add_ind_depth_url(Symbol):
-        return [f'https://stock-recommendation.streamlit.app/In_Depth_Stock_Analysis/?symbol={t.replace(".","_")}' for t in Symbol]
+        return [f'https://stockspectra.streamlit.app/In_Depth_Stock_Analysis/?symbol={t.replace(".","_")}' for t in Symbol]
 
     # Function to convert URL to clickable link
     def make_clickable(url, text):
@@ -63,7 +63,7 @@ def generate_firmo(data):
     #comparision url
     related  = related_companies(data.Symbol.values[0], load_data('backend_data/database.csv'), 5).reset_index()[['Name','Symbol']]
     
-    relatedurl = f'https://stock-recommendation.streamlit.app//Compare_Stocks/?symbols={",".join(np.append(related.Symbol.values,data.Symbol.values[0])).replace(".","_")}'
+    relatedurl = f'https://stockspectra.streamlit.app//Compare_Stocks/?symbols={",".join(np.append(related.Symbol.values,data.Symbol.values[0])).replace(".","_")}'
     
     col2.subheader("[Compare Stocks]("+relatedurl+")")
     
@@ -72,7 +72,7 @@ def generate_firmo(data):
     n=0
     for j in [col1,col2,col3,col4,col5]:
         j.write(related.Name.values[n])
-        url = f'https://stock-recommendation.streamlit.app/In_Depth_Stock_Analysis/?symbol={related.Symbol.values[n].replace(".","_")}'
+        url = f'https://stockspectra.streamlit.app/In_Depth_Stock_Analysis/?symbol={related.Symbol.values[n].replace(".","_")}'
         j.write("[In Depth Analysis]("+url+")")
         n+=1
         
