@@ -78,7 +78,7 @@ def main():
     data = load_data("backend_data/database.csv")
     #getting stocks from url
     lst= []
-    if st.experimental_get_query_params() != {} and 'Symbols' in st.experimental_get_query_params().keys():
+    if st.experimental_get_query_params() != {} and 'symbols' in st.experimental_get_query_params().keys():
         lst = st.experimental_get_query_params()['symbols'][0].replace("_",".")
         lst = lst.split(",")
         n = len(lst)
