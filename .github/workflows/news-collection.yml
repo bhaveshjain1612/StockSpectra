@@ -2,7 +2,7 @@ name: Update News
 
 on:
   schedule:
-      - cron: "30 2 * * *"
+      - cron: "50 2 * * *"
       - cron: "30 6 * * *"
       - cron: "30 12 * * *"
       - cron: "30 16 * * *"
