@@ -1,0 +1,64 @@
+import streamlit as st
+import sys
+from streamlit_autorefresh import st_autorefresh
+import pandas as pd
+import re
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import pprint
+from datetime import datetime
+import os
+import sys
+
+def is_valid_email(email):
+    pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return re.match(pattern, email) is not None
+
+def send_message(name,email,txt):
+    sheet = client.open('Feedbacks').sheet1
+    python_sheet = sheet.get_all_records()
+    
+    current_timestamp = datetime.now()
+    row = [name,email,text,str(current_timestamp)]
+    index = len(python_sheet) +2
+    sheet.insert_row(row,index)
+
+# Set Streamlit page configuration
+st.set_page_config(
+    layout="wide"
+)
+
+def feedback():
+    st.header('Feedback')
+    st.write('Your feedback matters! Help us enhance your experience by sharing your thoughts. We value your input as it guides us in making improvements. Let us know what you loved and where we can do better. Thank you for being a part of our journey to provide you with the best service possible!')
+    
+    col1,col2= st.columns(2)
+    
+    name = col1.text_input('Name*', '')
+    email = col2.text_input('Email*', '')
+    txt = st.text_area('Message*', '')
+    
+    if name and txt and is_valid_email(email):
+        if st.button('Send'):
+            send_message(name,email,txt)
+
+def main():
+    st.title("StockSpectra")
+    
+    #Authorize the API
+    scope = [
+        'https://www.googleapis.com/auth/drive',
+        'https://www.googleapis.com/auth/drive.file'
+        ]
+    file_name = 'client_key.json'
+    creds = ServiceAccountCredentials.from_json_keyfile_name(file_name,scope)
+    client = gspread.authorize(creds)
+    
+    feedback()
+
+# Check if the script is being run as the main module
+if __name__ == "__main__":
+    # Set Streamlit query parameters for refreshing the dashboard
+    st.experimental_set_query_params()
+
+    main()
