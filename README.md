@@ -10,7 +10,7 @@ The app, hosted on **Streamlit** is a result of relentless efforts to merge tech
 
 But this journey is far from over. I'm eager to receive your feedback and suggestions. Your insights can refine and elevate this project, making it a valuable resource for the wider community. Please share your thoughts as we continue to shape this app together.
 
-Link to the app: [https://stock-recommendation.streamlit.app/](https://stockspectra.streamlit.app/)
+Link to the app: https://stockspectra.streamlit.app/
 ---
 ## Motivation
 
