@@ -19,7 +19,7 @@ def send_message(client,name,email,txt):
     python_sheet = sheet.get_all_records()
     
     current_timestamp = datetime.now()
-    row = [name,email,text,str(current_timestamp)]
+    row = [name,email,txt,str(current_timestamp)]
     index = len(python_sheet) +2
     sheet.insert_row(row,index)
 
