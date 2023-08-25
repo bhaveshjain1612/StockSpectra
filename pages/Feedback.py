@@ -50,8 +50,21 @@ def main():
         'https://www.googleapis.com/auth/drive',
         'https://www.googleapis.com/auth/drive.file'
         ]
-    file_name = 'pages/client_key.json'
-    creds = ServiceAccountCredentials.from_json_keyfile_name(file_name,scope)
+    #file_name = 'pages/client_key.json'
+    
+    dictjson = {'type':"service_account",
+            'project_id':"stockspectra",
+            'private_key_id':"c79f5a65eaf22a889c637a1faa0c48bc737fc23a",
+            'private_key':"-----BEGIN PRIVATE KEY----- MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDae9eLzW+u+Zbp Mj4hi/K9oAMlaZCjdEqiMl/EzmT4TbAB7SZVmmAZug0nkap0thxwO8u6CETZwlKb NvcEejFn2KrKYRD8rD5Ba3BMbTFxxuv3neCNFSI0yB26u+DfINruaQU9HMN602gW sexR+B/fZDRaOzfbq2+9BQoMn+FHpQDwftfXHMpG8duByoq2dBsBb6D3PibePUFn zFlZwp06tcYKiBTWXR630J7ZhLIYl0B8+1GpZ+OBWS62Etzl+jBMFOyTpYADFnte mvJKdumpUiClXyCNuAvy6GAmqNL3LLv1B6fjVh+ALN8MOvRgm7DYuEv1mu/SYWMa qUjKm7+hAgMBAAECggEABEVToTuOvBUha9AMB7RYYPgMhQdIqO/4Qy49vIILVmY7 CKKbM0+tTWYbZTizTreTm+cIqbYz1azh1/+4TumuPGPaHNLOa0iuU9w23wDrF0Nb 7/nG/q2ufuki2aMGt4iJIbbC/97nfFJpxbh3JeK2NB6dk7OgzntjV7F48OZm194Q LmA79OmS1IbsBpAGaLM6j6QXZZvM86KSAPvOLn131PE99BjqgY3QCuRdOasziSvE /0vbJj4BZkajpQjexPS8Nt4dr9Eal/bfmsm5ROU+zjnmbyaedIbYeGQ7VfFlzUal z8D5bvgPnopyFkH6Ix5nxPILqqT8SYlVEruZ6QbptQKBgQD0oUQ655n4p8YKimz6 ccAevfc8ECLedUVn2ywPFjll7ybhgfICfBQBzzHnW5pYhQzgOr9HEnaa8dI+UiMM FLqHzNhd3/KR8jUzYhVB4NagaxhMR5GOSOovKA9+Hjkf6LqFKKjzbPfIbAfTjBp2 OQvOCUoCjc3zIlpow5GTNYkHdQKBgQDko3l+SD8cZ68xzdcqk3m7gtYOq0jMhxrb 63vnjg9FgEP11ZjdhSK1ny8jQr8yDU9K2NYfL5UVR/aX/0CaajOeHlo884UnPLuZ ayVxRolIMxxfVq6GxBpZLEp9yGkW4yBQ3NUIs9FO+1pKfWZWiRq1IPcqRvK4Agzz btqy8Ta9/QKBgCWMFxffcm+K+MenZYCvMujFCYyLgX6Zi1ScfE+4fojZwyL7ufSN rNh2P9ed5LvPeCF2guNavx+bHET6gGybReIQG+mUtPuXrHi9hju9UdP/fBRBK+Ml 5+PjBzW5V9VA+Ff13LC4OfPmOPFMYMdijCBMprJrp3+49x17Xv20Str9AoGBAIL0 gyTqeoNpe7YaARCY0ZOt968FOjgzdhXaheh1vJeBROusgNb4Z44Bc/1NQLeJWg4z rkjEdy5uPnaGs9j91TzOg77/eBemOIlCDnsX/I+G/sw4mNQFxFWpAa2TuWVrh9no 8nf+jncfjnK16oTMGKkADbGAW4s7WXGg39C4SjN9AoGBAPHKO13gNPmWYMJyh64L 5fjjsQpN6Sv3FgYGuxPquYnG22xYTRquaq2QYFwV+qvPjR1roDkg5CYNgDDWSvxv KqIJ5EHjzYZUgIL2hlXiw9lTqsdrHoiY4xlLLj9yAe2svqNp05qYr+JI8MwPfinA mfUC3bH8GHFD54/okWmAQv5g -----END PRIVATE KEY----- ",
+            'client_email':"feedback@stockspectra.iam.gserviceaccount.com",
+            'client_id':"103196756199048933131",
+            'auth_uri':"https://accounts.google.com/o/oauth2/auth",
+            'token_uri':"https://oauth2.googleapis.com/token",
+            'auth_provider_x509_cert_url':"https://www.googleapis.com/oauth2/v1/certs",
+            'client_x509_cert_url':"https://www.googleapis.com/robot/v1/metadata/x509/feedback%40stockspectra.iam.gserviceaccount.com",
+            'universe_domain':"googleapis.com"}
+    
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(dictjson,scope)
     client = gspread.authorize(creds)
     
     feedback(client)
