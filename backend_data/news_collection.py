@@ -80,9 +80,9 @@ def get_details(df):
 
     return df
 
-names = pd.read_csv("db_firmo.csv").Name.unique()
+names = pd.read_csv("db_firmo.csv").Symbol.unique()
 for n in tqdm(names):
     #print(n.replace(" ","_"))
     links = get_news(n)
     #news = get_details(links)
-    links.to_csv("news_articles/"+n.replace(" ","_")+".csv")
+    links.to_csv("news_articles/"+n.replace(".","_")+".csv")

@@ -319,26 +319,26 @@ def generate_financials(data):
         
 #get newws for stocks      
 def generate_news(name):
-    #try:
-    news = pd.read_csv("backend_data/news_articles/"+name.replace(" ","_")+".csv").reset_index()
-    #st.dataframe(news)
-    
-    if news.empty:
-        st.write("no News articles about the company in past 14 days")
-    else:
-        st.header("Most Recent news articles (Last 14 Days)")
+    try:
+        news = pd.read_csv("backend_data/news_articles/"+name.replace(".","_")+".csv").reset_index()
+        #st.dataframe(news)
         
-    for i in news.index:
-        st.subheader(news.title.values[i])
-        col1, col2, col3 = st.columns([1,1,5])
-        col1.write(news.source.values[i])
-        col2.write(news.date.values[i])
-        link  = "https//:"+news.link.values[i]  
-        #st.write(news.summary[i])
-        st.write("[Read More....]("+link+")")
-        st.divider()
-    #except:
-    #    st.write("no News articles about the company in past 14 days")
+        if news.empty:
+            st.write("no News articles about the company in past 14 days")
+        else:
+            st.header("Most Recent news articles (Last 14 Days)")
+            
+        for i in news.index:
+            st.subheader(news.title.values[i])
+            col1, col2, col3 = st.columns([1,1,5])
+            col1.write(news.source.values[i])
+            col2.write(news.date.values[i])
+            link  = "https//:"+news.link.values[i]  
+            #st.write(news.summary[i])
+            st.write("[Read More....]("+link+")")
+            st.divider()
+    except:
+        st.write("no News articles about the company in past 14 days")
     
 #Load all insights
 def load_insights(data,input_symbol):
@@ -366,7 +366,7 @@ def load_insights(data,input_symbol):
     with tab3:
         generate_financials(data)
     with tab4:
-        generate_news(data.Name.values[0])
+        generate_news(data.Symbol.values[0])
     #st.dataframe(data)
 
 def main():
