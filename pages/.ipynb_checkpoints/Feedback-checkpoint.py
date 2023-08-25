@@ -14,7 +14,7 @@ def is_valid_email(email):
     pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     return re.match(pattern, email) is not None
 
-def send_message(name,email,txt):
+def send_message(client,name,email,txt):
     sheet = client.open('Feedbacks').sheet1
     python_sheet = sheet.get_all_records()
     
@@ -28,7 +28,7 @@ st.set_page_config(
     layout="wide"
 )
 
-def feedback():
+def feedback(client):
     st.header('Feedback')
     st.write('Your feedback matters! Help us enhance your experience by sharing your thoughts. We value your input as it guides us in making improvements. Let us know what you loved and where we can do better. Thank you for being a part of our journey to provide you with the best service possible!')
     
@@ -40,7 +40,7 @@ def feedback():
     
     if name and txt and is_valid_email(email):
         if st.button('Send'):
-            send_message(name,email,txt)
+            send_message(client,name,email,txt)
 
 def main():
     st.title("StockSpectra")
@@ -54,7 +54,7 @@ def main():
     creds = ServiceAccountCredentials.from_json_keyfile_name(file_name,scope)
     client = gspread.authorize(creds)
     
-    feedback()
+    feedback(client)
 
 # Check if the script is being run as the main module
 if __name__ == "__main__":
