@@ -52,7 +52,7 @@ def main():
         ]
     #file_name = 'pages/client_key.json'
     
-    dictjson = {'type': st.secrets['googlekeys']['type'],
+    dictjson = {'type': 'service-account',
  'project_id': st.secrets['googlekeys']['project_id'],
  'private_key_id': st.secrets['googlekeys']['private_key_id'],
  'private_key': st.secrets['googlekeys']['private_key'],
