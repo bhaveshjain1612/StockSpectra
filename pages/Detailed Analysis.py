@@ -74,7 +74,7 @@ def generate_firmo(data):
     n=0
     for j in [col1,col2,col3,col4,col5]:
         j.write(related.Name.values[n])
-        url = f'https://stock-recommendation.streamlit.app/Detailed_Analysis/?symbol={related.Symbol.values[n].replace(".","_")}'
+        url = f'https://stockspectra.streamlit.app/Detailed_Analysis/?symbol={related.Symbol.values[n].replace(".","_")}'
         j.write("[In Depth Analysis]("+url+")")
         n+=1
         
