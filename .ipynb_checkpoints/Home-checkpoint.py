@@ -13,6 +13,7 @@ import pandas as pd  # Library for data handling and manipulation
 
 # Set Streamlit page configuration
 st.set_page_config( 
+    page_title="StockSpectra - Home",  # Title of the page
     layout="wide"  # Wide layout to maximize dashboard space
 )
 
@@ -46,6 +47,8 @@ def add_links(df):
 # Function for collective filtering and displaying of data
 def collective(df):
     # Split the dashboard into four columns
+    st.info('''Sse the plethora of filters here to pick the stocks that match your exact needs.''', icon="ℹ️")
+    
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     db=df
     
@@ -151,7 +154,7 @@ def collective(df):
         
 #function for top picks
 def top_picks(df):
-    
+    st.info('''These are handpicked stocks that have positive oultooks for short and long term both with low- mid risk. They also yield Dividends and have strong YoY financials''', icon="ℹ️")
     #creating sols in dahsboard
     col1, col2, col3 = st.columns(3)
     
@@ -184,6 +187,7 @@ def top_picks(df):
         
 #function for top gainers
 def top_price_changes(df):
+    st.info('''These stocks have moved the most in the previous trading session.''', icon="ℹ️")
     
     # Filter by stock exchange (NSE or BSE)
     col1,col2 = st.columns(2)
@@ -204,7 +208,7 @@ def top_price_changes(df):
 #function for top gainers
 def potential_breakout(df):
     
-    #st.write("These are some stocks that have the possibility of shifting from a bearish trend to a strong bullish trend. However, This change is always uncertain. Please proceed with caution"
+    st.info('''These are some stocks that have the possibility of shifting from a bearish trend to a strong bullish trend. However, This change is always uncertain. Please proceed with caution''', icon="ℹ️")
     
     #creating sols in dahsboard
     col1, col2, col3 = st.columns(3)

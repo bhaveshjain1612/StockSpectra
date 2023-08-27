@@ -1,5 +1,15 @@
 import streamlit as st
 
+st.set_page_config(page_title="StockSpectra - Glossary", layout = "wide")
+
+def reorder_keys(data_dict, element):
+    if element not in data_dict:
+        return sorted(data_dict.keys())
+
+    # Create a list with the element followed by other keys
+    keys_list = [element] + [key for key in data_dict if key != element]
+    return keys_list
+
 # Define the indicators and their details
 indicators = {
     "CCI": {
@@ -179,14 +189,40 @@ indicators = {
         "usefulness": "The DE ratio helps investors understand the risk associated with a company's debt levels.",
         "calculation": r"\text{DE Ratio} = \frac{\text{Total Liabilities}}{\text{Shareholder's Equity}}"
     },
+    "MFI" : {
+        "full_name": "Money Flow Index (MFI)",
+        "description": "The Money Flow Index (MFI) is a momentum indicator that measures the inflow and outflow of money into an asset over a specific period of time.",
+        "how_it_works": "MFI takes both price and volume into consideration. A value above 80 is generally considered overbought, while a value below 20 is considered oversold.",
+        "usefulness": "MFI can be used to identify potential price reversals and validate price movements. It's also useful for spotting divergences between price and volume momentum.",
+        "calculation": r"\text{MFI} = 100 - \left( \frac{100}{1 + \text{Money Ratio}} \right) \text{ where Money Ratio} = \frac{\text{Positive Money Flow}}{\text{Negative Money Flow}}"
+    },
+    "Pivot Points": {
+        "full_name": "Pivot Points",
+        "description": "Pivot Points are horizontal support and resistance levels used to determine potential price movements.",
+        "how_it_works": "Pivot Points are used as predictive indicators. If the market opens above the pivot point, then the bias for the day is bullish, and if it opens below the pivot point, the bias is bearish.",
+        "usefulness": "They provide traders with levels to place stop losses, take profits, or identify entry points.",
+        "calculation": r"""
+        \begin{align*}
+        \text{Pivot Point (PP)} & : \frac{\text{High} + \text{Low} + \text{Close}}{3} \\
+        \text{Resistance 1 (R1)} & : 2 \times \text{PP} - \text{Low} \\
+        \text{Resistance 2 (R2)} & : \text{PP} + \text{High} - \text{Low} \\
+        \text{Resistance 3 (R3)} & : \text{High} + 2(\text{PP} - \text{Low}) \\
+        \text{Support 1 (S1)} & : 2 \times \text{PP} - \text{High} \\
+        \text{Support 2 (S2)} & : \text{PP} - \text{High} + \text{Low} \\
+        \text{Support 3 (S3)} & : \text{Low} - 2(\text{High} - \text{PP})
+        \end{align*}
+        """
+    }
     # ... add the rest of the indicators similarly
 }
-def main():
-# Create a select box in the Streamlit app
+
+#glossary function
+def glossary(key=''):
+    
     st.title("StockSpectra")
     st.header("Glossary")
 
-    selected_indicator = st.selectbox("Select an Indicator", list(indicators.keys()))
+    selected_indicator = st.selectbox("Select an Indicator", reorder_keys(indicators,key))
     st.divider()
     # Display the details of the selected indicator
     st.write("###", indicators[selected_indicator]["full_name"])
@@ -204,6 +240,17 @@ def main():
     x = 'https://www.investopedia.com/search?q='+indicators[selected_indicator]["full_name"].replace(" ","+")
     st.write(f"For more details, check out [this Link]( {x} )")
 
+
+#main function
+def main():
+# Create a select box in the Streamlit app    
+    if st.experimental_get_query_params() != {}:
+        item = st.experimental_get_query_params()['item'][0].replace("_"," ")
+        glossary(item)
+    else:
+        glossary()
+    st.experimental_set_query_params()
+           
 # Run the app
 if __name__ == "__main__":
     main()

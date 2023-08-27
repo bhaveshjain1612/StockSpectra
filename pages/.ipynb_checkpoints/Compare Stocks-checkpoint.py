@@ -6,7 +6,7 @@ from streamlit_autorefresh import st_autorefresh
 import numpy as np
 from utils import *
 
-st.set_page_config(page_title="Comparision", layout = "wide")
+st.set_page_config(page_title="StockSpectra - Compare Stocks",layout = "wide")
 
 def get_names_from_symbols(symbols, df):
     # Create a dictionary from the dataframe for faster lookup
@@ -86,6 +86,7 @@ def main():
         lst = st.experimental_get_query_params()['symbol'][0].replace("_",".")
         lst = [lst]
         n = len(lst)
+        st.experimental_set_query_params()
         
     starting_names = get_names_from_symbols(lst,data)
         

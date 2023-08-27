@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 import pytz
 from utils import *
 
-st.set_page_config(layout = "wide")
+st.set_page_config(page_title="StockSpectra - Detailed Analysis", layout = "wide")
 
 def load_data(file_path):
     return pd.read_csv(file_path)
@@ -60,10 +60,12 @@ def generate_firmo(data):
     col1,col2 = st.columns([4,1])
     col1.subheader('Related Companies')
     
+    related  = related_companies(data.Symbol.values[0], load_data('backend_data/database.csv'), 5).reset_index()[['Name','Symbol']]
+    
     #comparision url
     related  = related_companies(data.Symbol.values[0], load_data('backend_data/database.csv'), 5).reset_index()[['Name','Symbol']]
     
-    relatedurl = f'https://stockspectra.streamlit.app//Compare_Stocks/?symbols={",".join(np.append(related.Symbol.values,data.Symbol.values[0])).replace(".","_")}'
+    relatedurl = f'http://stockspectra.streamlit.app/Compare_Stocks/?symbols={",".join(related.Symbol.values).replace(".","_")}'
     
     col2.subheader("[Compare Stocks]("+relatedurl+")")
     
@@ -72,7 +74,7 @@ def generate_firmo(data):
     n=0
     for j in [col1,col2,col3,col4,col5]:
         j.write(related.Name.values[n])
-        url = f'https://stockspectra.streamlit.app/In_Depth_Stock_Analysis/?symbol={related.Symbol.values[n].replace(".","_")}'
+        url = f'https://stock-recommendation.streamlit.app/In_Depth_Stock_Analysis/?symbol={related.Symbol.values[n].replace(".","_")}'
         j.write("[In Depth Analysis]("+url+")")
         n+=1
         
@@ -104,13 +106,13 @@ def generate_stock(data):
     col1.metric(label ="Close",value=round(latest_close,2), delta=str(str(change_abs_p)+ " ( "+ str(data['Close_change_1d'].values[0]).strip("-")+" %)"))
     col2.metric(label ="Volume",value=round(latest_volume,2), delta=str(str(change_abs_v)+ " ( "+ str(data['Volume_change_1d'].values[0]).strip("-")+" %)"))
     
-    col1.metric(label ="High",value=round(latest_High,2), delta='') 
-    col2.metric(label ="Low",value=round(latest_Low,2), delta='') 
+    col1.metric(label ="High",value=round(latest_High,2), delta=None) 
+    col2.metric(label ="Low",value=round(latest_Low,2), delta=None) 
     
-    col3.metric(label ="Normal Dividend",value=dividend_split_data['Normal dividend'], delta = "Financial year FY23")
-    col4.metric(label ="Stock Split",value=dividend_split_data['split ratio'], delta = dividend_split_data["split date"])
-    col3.metric(label ="52 Week High",value=round(week52_data['52 Week High'],2), delta='') 
-    col4.metric(label ="52 Week Low",value=round(week52_data['52 Week Low'],2), delta='') 
+    col3.metric(label ="Normal Dividend",value=dividend_split_data['Normal dividend'], delta = 'Financial Year FY23', delta_color="off")
+    col4.metric(label ="Stock Split",value=dividend_split_data['split ratio'], delta = dividend_split_data["split date"], delta_color="off")
+    col3.metric(label ="52 Week High",value=round(week52_data['52 Week High'],2), delta=None) 
+    col4.metric(label ="52 Week Low",value=round(week52_data['52 Week Low'],2), delta=None) 
     
     st.divider()
     col1,col2,col3 = st.columns([1,1,2])
@@ -142,35 +144,40 @@ def generate_stock(data):
     with st.expander("Technical Indicators (Latest Values)"):
         col1, col2, col3, col4 = st.columns(4)
 
-        col1.write("**Average Directional Index (14)**")
+        #col1.write("**Average Directional Index (14)**")
+        col1.write(f'**Average Directional Index (14)** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=ADX"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
         col1.write(str(round(data['Latest ADX'].values[0],2))+" - "+indicator_tags(data, historical_with_ma)['adx'])
         
-        col2.write("**Relative Strength Index (14)**")
+        col2.write(f'**Relative Strength Index (14)** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=RSI"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
         col2.write(str(round(data['Latest rsi'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['rsi'])
         
-        col3.write("**Commodity Channel Index (10)**")
+        col3.write(f'**Commodity Channel Index (10)** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=CCI"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
         col3.write(str(round(data['Latest CCI_10'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['cci_10'])
         
-        col4.write("**Commodity Channel Index (40)**")
+        col4.write(f'**Commodity Channel Index (40)** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=CCI"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
         col4.write(str(round(data['Latest CCI_40'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['cci_40'])
         
-        col2.write("**Money Flow Index (14)**")
+        col2.write(f'**Money Flow Index (14)** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=MFI"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
         col2.write(str(round(data['Latest MFI_14'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['mfi_14'])
         
-        col1.write("**Moving Average Convergence Divergence**")
+        col1.write(f'**Moving Average Convergence Divergence** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=MACD"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
         col1.write(str(round(data['Latest macd'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['macd'])
         
-        col3.write("**Volume Price Trend**")
+        col3.write(f'**Volume Price Trend** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=VPT"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
         col3.write(str(round(data['Latest VPT'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['VPT'])
         
-        col4.write("**Williamson%R (14)**")
+        col4.write(f'**Williamson%R (14)** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=Williams_%R"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
         col4.write(str(round(data['Latest %R'].values[0],2))+ " - " +indicator_tags(data, historical_with_ma)['%R'])
      
         #Moving Averages
         st.divider()
         matype = st.selectbox('Moving Average Type',('SMA','EMA'))
         col1,col2 = st.columns([5,3])
-        col1.write('Values')
+        if matype == 'SMA':
+            col1.write(f'Values <a href="{"http://stockspectra.streamlit.app/Glossary/?item=SMA"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
+        else:
+            col1.write(f'Values <a href="{"http://stockspectra.streamlit.app/Glossary/?item=EMA"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
+        
         col2.write('Crossovers')
         c1,c2,c3,c4,c5 = col1.columns(5)
         
@@ -209,7 +216,7 @@ def generate_stock(data):
 
         #Pivot levels
         st.divider()   
-        st.write("Expected pivot points for next day:")
+        st.write(f'Expected pivot points for next day: <a href="{"http://stockspectra.streamlit.app/Glossary/?item=Pivot_Points"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
         col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
         col1.write("R3")
         col1.write(str(round(data['Latest R3'].values[0],2)))
@@ -276,19 +283,29 @@ def generate_financials(data):
     kpis = calc_KPIs(fin.set_index('Unnamed: 0').T.reset_index(),'normal')
     
     col1, col2, col3, col4, col5 = st.columns(5)
+    col1.write(f'**Net Income** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=Net_Income"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
+    col1.metric("Net Income",simplify(kpis['Net Income']['current']), simplify(kpis['Net Income']['delta']), label_visibility ='collapsed')
+    col2.write(f'**Debt** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=Debt"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
+    col2.metric("Debt",simplify(kpis['Debt']['current']), simplify(kpis['Debt']['delta']),  delta_color="inverse", label_visibility ='collapsed')
+    col3.write(f'**Free Cash Flow** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=Free_Cash_Flow"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
+    col3.metric("Free Cash Flow",simplify(kpis['Free Cash Flow']['current']), simplify(kpis['Free Cash Flow']['delta']), label_visibility ='collapsed')
+    col4.write(f'**Basic EPS** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=Basic_EPS"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
+    col4.metric("Basic EPS",kpis['Basic EPS']['current'], kpis['Basic EPS']['delta'], label_visibility ='collapsed')
+    col5.write(f'**Net Profit Margin** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=Net_Profit_Margin"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
+    col5.metric("Net Profit Margin",kpis['Net Profit Margin']['current'], kpis['Net Profit Margin']['delta'], label_visibility ='collapsed')
     
-    col1.metric("Net Income",simplify(kpis['Net Income']['current']), simplify(kpis['Net Income']['delta']))
-    col2.metric("Debt",simplify(kpis['Debt']['current']), simplify(kpis['Debt']['delta']))
-    col3.metric("Free Cash Flow",simplify(kpis['Free Cash Flow']['current']), simplify(kpis['Free Cash Flow']['delta']))
-    col4.metric("Basic EPS",kpis['Basic EPS']['current'], kpis['Basic EPS']['delta'])
-    col5.metric("Net Profit Margin",kpis['Net Profit Margin']['current'], kpis['Net Profit Margin']['delta'])
     st.divider()
-    col1.metric("ROA",kpis['ROA']['current'], kpis['ROA']['delta'])
-    col2.metric("ROE",kpis['ROE']['current'], kpis['ROE']['delta'])
-    col3.metric("ROCE",kpis['ROCE']['current'], kpis['ROCE']['delta'])
-    col4.metric("Current Ratio",kpis['Current Ratio']['current'], kpis['Current Ratio']['delta'])
-    col5.metric("DE Ratio",kpis['DE Ratio']['current'], kpis['DE Ratio']['delta'])
-    
+    col1.write(f'**ROA** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=ROA"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
+    col1.metric("ROA",kpis['ROA']['current'], kpis['ROA']['delta'], label_visibility ='collapsed')
+    col2.write(f'**ROE** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=ROE"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
+    col2.metric("ROE",kpis['ROE']['current'], kpis['ROE']['delta'], label_visibility ='collapsed')
+    col3.write(f'**ROCE** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=ROCE"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
+    col3.metric("ROCE",kpis['ROCE']['current'], kpis['ROCE']['delta'], label_visibility ='collapsed')
+    col4.write(f'**Current Ratio** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=Current_Ratio"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
+    col4.metric("Current Ratio",kpis['Current Ratio']['current'], kpis['Current Ratio']['delta'], label_visibility ='collapsed')
+    col5.write(f'**DE Ratio** <a href="{"http://stockspectra.streamlit.app/Glossary/?item=DE_Ratio"}" target="_blank">ℹ️</a>', unsafe_allow_html=True)
+    col5.metric("DE Ratio",kpis['DE Ratio']['current'], kpis['DE Ratio']['delta'],  delta_color="inverse", label_visibility ='collapsed')
+        
     mapping = load_data("backend_data/financials_mapping.csv")
     #st.dataframe(fin)
     fin = pd.merge(fin.set_index('Unnamed: 0'), mapping, left_on='Unnamed: 0', right_on='index', how='inner').rename(columns={'index': 'items'})
@@ -317,7 +334,7 @@ def generate_financials(data):
     with st.expander("Cash Flow"):
         st.dataframe(fin[fin['sheet']=='c'].drop(['Unnamed: 0','sheet'],axis=1)) 
         
-#get newws for stocks      
+#get newws for stocks        
 def generate_news(name):
     #try:
     news = pd.read_csv("backend_data/news_articles/"+name.replace(" ","_")+".csv").reset_index()
@@ -344,6 +361,7 @@ def generate_news(name):
 def load_insights(data,input_symbol):
     ex_list = data['Exchange'].tolist()
     
+    st.title('StockSage - In Depth Analysis')  
     st.header(data.Name.values[0])  
     
     ex_sel = st.sidebar.radio("Exchange: ",ex_list)
@@ -372,7 +390,6 @@ def load_insights(data,input_symbol):
 def main():
     data = load_data("backend_data/database.csv")
     #data = allot_tags(data)
-    st.title('StockSpectra - In Depth Analysis')  
     
     input_symbol = st.sidebar.text_input("Enter stock ticker/name")       
     
@@ -388,24 +405,17 @@ def main():
             load_insights(data_company,input_symbol)
   
     elif st.experimental_get_query_params() != {}:
-        try:
-            in_s = st.experimental_get_query_params()['symbol'][0][:-3]
-            data = data[(data['Symbol']==in_s.upper()+".NS")|(data['Symbol']==in_s.upper()+".BO")].reset_index().drop('index',axis=1)
-            if st.experimental_get_query_params()['symbol'][0][-3:]=="_BO":
-                data = data.sort_values(by="Exchange")
-            else:
-                data = data.sort_values(by="Exchange", ascending = False)
-            
-            load_insights(data,in_s)
-            
-        except:
-            st.experimental_set_query_params()
-            
-    if st.experimental_get_query_params() == {} and input_symbol is None:
-        st.info('Enter The Stock Name/Symbol in the sidebar', icon="ℹ️")
+        in_s = st.experimental_get_query_params()['symbol'][0][:-3]
+        data = data[(data['Symbol']==in_s.upper()+".NS")|(data['Symbol']==in_s.upper()+".BO")].reset_index().drop('index',axis=1)
+        if st.experimental_get_query_params()['symbol'][0][-3:]=="_BO":
+            data = data.sort_values(by="Exchange")
+        else:
+            data = data.sort_values(by="Exchange", ascending = False)
+          
         #st.dataframe(data)
+        load_insights(data,in_s)
     
 
 if __name__ == "__main__":
 
-    main() 
+    main()

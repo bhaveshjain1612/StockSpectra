@@ -860,9 +860,9 @@ def allot_outlook(df):
         
         #Short term logic
         # RSI logic
-        if row['Latest rsi'] > 70 and row['Latest rsi'] < 90: # bullish
+        if row['Latest rsi'] > 60 and row['Latest rsi'] < 80: # bullish
             short_term_score += short_term_weights['rsi']
-        elif row['Latest rsi'] < 30 or row['Latest rsi'] > 90: # overbought
+        elif row['Latest rsi'] < 30 or row['Latest rsi'] > 80: # overbought
             short_term_score -= short_term_weights['rsi']
 
         # ADX logic
