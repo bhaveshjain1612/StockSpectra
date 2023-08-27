@@ -393,7 +393,7 @@ def main():
     
     input_symbol = st.sidebar.text_input("Enter stock ticker/name")       
     
-    if input_symbol:
+    if input_symbol or 'symbols' in st.experimental_get_query_params().keys():
         st.experimental_set_query_params()
         data_company = data[(data['Symbol'] == input_symbol.upper()+".NS") | (data['Symbol'] == input_symbol.upper()+".BO")].reset_index().drop('index',axis=1)    
         #load_insights(data,input_symbol)

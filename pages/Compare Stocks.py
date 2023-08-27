@@ -82,7 +82,7 @@ def main():
         lst = st.experimental_get_query_params()['symbols'][0].replace("_",".")
         lst = lst.split(",")
         n = len(lst)
-        st.experimental_set_query_params()
+        #st.experimental_set_query_params()
     elif st.experimental_get_query_params() != {} and 'symbol' in st.experimental_get_query_params().keys():
         lst = st.experimental_get_query_params()['symbol'][0].replace("_",".")
         lst = [lst]
