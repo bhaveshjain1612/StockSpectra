@@ -18,7 +18,7 @@ def load_data(file_path):
 def add_links(df):
     # Function to generate the URL for in-depth stock analysis
     def add_ind_depth_url(Symbol):
-        return [f'https://stockspectra.streamlit.app/In_Depth_Stock_Analysis/?symbol={t.replace(".","_")}' for t in Symbol]
+        return [f'https://stockspectra.streamlit.app/Detailed_Analysis/?symbol={t.replace(".","_")}' for t in Symbol]
 
     # Function to convert URL to clickable link
     def make_clickable(url, text):
@@ -74,7 +74,7 @@ def generate_firmo(data):
     n=0
     for j in [col1,col2,col3,col4,col5]:
         j.write(related.Name.values[n])
-        url = f'https://stock-recommendation.streamlit.app/In_Depth_Stock_Analysis/?symbol={related.Symbol.values[n].replace(".","_")}'
+        url = f'https://stock-recommendation.streamlit.app/Detailed_Analysis/?symbol={related.Symbol.values[n].replace(".","_")}'
         j.write("[In Depth Analysis]("+url+")")
         n+=1
         
@@ -350,7 +350,7 @@ def generate_news(name):
         col1, col2, col3 = st.columns([1,1,5])
         col1.write(news.source.values[i])
         col2.write(news.date.values[i])
-        link  = "https//:"+news.link.values[i]  
+        link  = "https://"+news.link.values[i]  
         #st.write(news.summary[i])
         st.write("[Read More....]("+link+")")
         st.divider()
