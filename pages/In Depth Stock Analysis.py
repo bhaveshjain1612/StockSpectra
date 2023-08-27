@@ -337,7 +337,7 @@ def generate_financials(data):
 #get newws for stocks        
 def generate_news(name):
     #try:
-    news = pd.read_csv("backend_data/news_articles/"+name.replace(" ","_")+".csv").reset_index()
+    news = pd.read_csv("backend_data/news_articles/"+name.replace(".","_")+".csv").reset_index()
     #st.dataframe(news)
     
     if news.empty:
