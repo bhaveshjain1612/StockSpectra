@@ -110,7 +110,7 @@ def top_pick_strategy(strategy, df):
         
     else:
         result['info'] = 'Stocks with strong financials, positive outlooks for short and long rangfe with decreasing risk over time. They pay regular dividends'
-        result['df'] = df[(df['finrank']=='strong'])
+        result['df'] = df[(df['finrank']=='strong')
                         & ((df['Outlook 1-2Months']=='positive') | (df['Outlook 1-2Months']=='very positive'))
                         & ((df['Outlook >1Year']=='positive') | (df['Outlook >1Year']=='very positive'))
                         & ((df['Risk 1-2Months']=='Mid') | (df['Risk 1-2Months']=='High'))
