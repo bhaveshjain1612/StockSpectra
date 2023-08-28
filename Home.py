@@ -182,8 +182,7 @@ def top_picks(df):
     # Sorting Method 
     sort_type = col4.selectbox('Order method', ("None","Ascending","Descending") ,key='tp_sorttype')
     
-    st.info(strategy_alloting(selected_strategy)['info'], icon="ℹ️")
-    
+    st.info(top_pick_strategy(selected_strategy)['info'], icon="ℹ️")
 
     #selecting companies with high short volatility, mid to low in mid ter and low in long term
     tp = tp[tp['finrank']=='strong']
