@@ -180,7 +180,7 @@ def top_picks(df):
     # Sorting Method 
     sort_type = col4.selectbox('Order method', ("None","Ascending","Descending") ,key='tp_sorttype')
     #display strategy info
-    st.info(top_pick_strategy(selected_strategy)['info'], icon="ℹ️")
+    st.info(top_pick_strategy(selected_strategy, df)['info'], icon="ℹ️")
     '''
     #selecting companies with high short volatility, mid to low in mid ter and low in long term
     tp = tp[tp['finrank']=='strong']
@@ -190,7 +190,7 @@ def top_picks(df):
     tp = tp[ (tp['Risk >1Year']=='Mid')]
     tp = tp[tp['Dividend Yield']>0]
     '''
-    tp = top_pick_strategy(selected_strategy)['df']
+    tp = top_pick_strategy(selected_strategy, df)['df']
     
     tp = tp[['Name','Symbol','Sector','Industry','Latest Close','Close_change_1d','Dividend Yield']].rename(columns={'Close_change_1d':'Change (%)'}).drop_duplicates(subset=['Name']).set_index('Name').round(2)
     
