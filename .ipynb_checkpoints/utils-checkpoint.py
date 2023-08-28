@@ -37,8 +37,17 @@ def industryview(df,universe):
     return df
 
 #allot strategy based on selected filter
-def strategy_allotting(strategy):
-    
+def strategy_allotting(argument):
+    switcher = {
+        "> 1 Year": [['Low'],['positive','neutral'],['strong','mid'],("Yes","All","No")],
+        "5-6 Months": [['Low','Mid'],['positive','neutral'],['strong'],("All","Yes","No")],
+        "1-2 Months": [['Mid','High'],['positive'],['All'],("All","Yes","No")],
+    }
+
+    #return switcher.get(argument, [['All'],['All'],['All'],("All","Yes","No")])
+    return [['All'],['All'],['All'],("All","Yes","No")]
+
+def top_pick_strategy(strategy):
     result = {}
     
     if strategy == "Short-Term High Gains Strategy" :
