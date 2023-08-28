@@ -206,7 +206,7 @@ def top_price_changes(df):
     
     exchange_g = col2.selectbox("Exchange", ("NSE", "BSE"), key = 'tpc_exchange')
     
-    mktcap_g = col3.multiselect("Exchange", ['Large-cap','Mid-cap','Small-cap'],['Large-cap'] key = 'tpc_mktcap')
+    mktcap_g = col3.multiselect("Exchange", ['Large-cap','Mid-cap','Small-cap'],['Large-cap'], key = 'tpc_mktcap')
     
     tg = df[df['Exchange']==exchange_g]
     
