@@ -80,11 +80,21 @@ def top_pick_strategy(strategy, df):
         
     elif strategy == "Conservative Income Strategy" :
         result['info'] = "This strategy is for investors seeking a steady income with minimal risk. Stocks selected under this strategy are expected to have a consistent dividend payout and exhibit low volatility."
-        #result['df'] = 
+        result['df'] = df[(df['Risk 1-2Months']=='Low')
+                         & ((df['Outlook 1-2Months']=='positive') | (df['Outlook 1-2Months']=='neutral'))
+                         & (df['Risk >1Year']=='Low') 
+                         & ((df['Outlook >1Year']=='positive') | (df['Outlook >1Year']=='neutral') )
+                         & (df['finrank']=='strong')
+                         & (df['Dividend Yield'] > 2)]
         
     elif strategy == "Turnaround Play" :
         result['info'] = "This strategy targets stocks that are currently underperforming but are expected to rebound in the long term. It's a speculative play, betting on the company's potential to turn its fortunes around."
-        #result['df'] = 
+        result['df'] = df[(df['Risk 1-2Months']=='High')
+                         & (df['Outlook 1-2Months']=='negative') 
+                         & (df['Risk >1Year']=='Mid') 
+                         & ((df['Outlook >1Year']=='very positive') | (df['Outlook >1Year']=='positive') )
+                         & (df['finrank']=='weak')
+                         & (df['Dividend Yield'] ==0)]
         
     elif strategy == "Balanced Portfolio Strategy" :
         result['info'] = "This strategy aims to maintain a balanced portfolio with a mix of growth and value stocks. It's suitable for investors seeking moderate growth with controlled risk."
@@ -96,7 +106,16 @@ def top_pick_strategy(strategy, df):
         
     elif strategy == "Momentum Chaser" :
         result['info'] = "This strategy is for investors looking to capitalize on current market trends. It targets stocks that have shown strong recent performance and are expected to continue their upward trajectory."
-        #result['df'] =         
+        #result['df'] = 
+        
+    else:
+        result['info'] = 'Stocks with strong financials, positive outlooks for short and long rangfe with decreasing risk over time. They pay regular dividends'
+        result['df'] = df[(df['finrank']=='strong'])
+                        & ((df['Outlook 1-2Months']=='positive') | (df['Outlook 1-2Months']=='very positive'))
+                        & ((df['Outlook >1Year']=='positive') | (df['Outlook >1Year']=='very positive'))
+                        & ((df['Risk 1-2Months']=='Mid') | (df['Risk 1-2Months']=='High'))
+                        & (df['Risk >1Year']=='Mid')
+                        & (df['Dividend Yield']>0)]
     
     return result
 
