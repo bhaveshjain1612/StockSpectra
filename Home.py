@@ -200,12 +200,17 @@ def top_price_changes(df):
     st.info('''These stocks have moved the most in the previous trading session.''', icon="ℹ️")
     
     # Filter by stock exchange (NSE or BSE)
-    col1,col2 = st.columns(2)
+    col1,col2,col3 = st.columns(3)
     
     chng_type = col1.selectbox("Price change type", ("Top Gainers", "Top Losers"))
     
     exchange_g = col2.selectbox("Exchange", ("NSE", "BSE"), key = 'tpc_exchange')
+    
+    mktcap_g = col3.multiselect("Exchange", ['Large-cap','Mid-cap','Small-cap'],['Large-cap'] key = 'tpc_mktcap')
+    
     tg = df[df['Exchange']==exchange_g]
+    
+    tg = tg[tg['Cap'].isin(mktcap_g)]
     
     tg = tg[['Name','Symbol','Sector','Industry','Latest Close','Close_change_1d','Dividend Yield']].rename(columns={'Close_change_1d':'Change (%)'}).drop_duplicates(subset=['Name']).set_index('Name').round(2)
     
