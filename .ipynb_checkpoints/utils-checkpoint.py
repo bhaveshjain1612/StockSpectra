@@ -93,7 +93,7 @@ def top_pick_strategy(strategy, df):
                          & (df['Outlook 1-2Months']=='negative') 
                          & (df['Risk >1Year']=='Mid') 
                          & ((df['Outlook >1Year']=='very positive') | (df['Outlook >1Year']=='positive') )
-                         & (df['finrank']=='weak')]
+                         & ((df['finrank']=='weak') | (df['finrank']=='mid'))]
         
     elif strategy == "Balanced Portfolio Strategy" :
         result['info'] = "This strategy aims to maintain a balanced portfolio with a mix of growth and value stocks. It's suitable for investors seeking moderate growth with controlled risk."
