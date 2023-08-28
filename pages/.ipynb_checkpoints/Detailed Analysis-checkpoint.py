@@ -114,6 +114,11 @@ def generate_stock(data):
     col3.metric(label ="52 Week High",value=round(week52_data['52 Week High'],2), delta=None) 
     col4.metric(label ="52 Week Low",value=round(week52_data['52 Week Low'],2), delta=None) 
     
+    col1.metric(label ="1 Week Returns (%)",value=round(data['Close_change_5d'].values[0],2), delta=None)
+    col2.metric(label ="1 Month Returns (%)",value=round(data['Close_change_1m'].values[0],2), delta=None)
+    col3.metric(label ="3 Month Returns (%)",value=round(data['Close_change_3m'].values[0],2), delta=None)
+    col4.metric(label ="1 Year Returns (%)",value=round(data['Close_change_1y'].values[0],2), delta=None)    
+    
     st.divider()
     col1,col2,col3 = st.columns([1,1,2])
     col1.subheader("Key Takeaways")
@@ -361,7 +366,7 @@ def generate_news(name):
 def load_insights(data,input_symbol):
     ex_list = data['Exchange'].tolist()
     
-    st.title('StockSage - In Depth Analysis')  
+    st.title('StockSpectra - In Depth Analysis')  
     st.header(data.Name.values[0])  
     
     ex_sel = st.sidebar.radio("Exchange: ",ex_list)

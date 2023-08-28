@@ -170,8 +170,8 @@ def top_picks(df):
     tp = tp[tp['finrank']=='strong']
     tp = tp[(tp['Outlook 1-2Months']=='positive') | (tp['Outlook 1-2Months']=='very positive')]
     tp = tp[(tp['Outlook >1Year']=='positive') | (tp['Outlook >1Year']=='very positive')]
-    tp = tp[(tp['Risk 1-2Months']=='Mid') | (tp['Risk 1-2Months']=='Low')]
-    tp = tp[tp['Risk >1Year']=='Low']
+    tp = tp[(tp['Risk 1-2Months']=='Mid') | (tp['Risk 1-2Months']=='High')]
+    tp = tp[ (tp['Risk >1Year']=='Mid')]
     tp = tp[tp['Dividend Yield']>0]
 
     tp = tp[['Name','Symbol','Sector','Industry','Latest Close','Close_change_1d','Dividend Yield']].rename(columns={'Close_change_1d':'Change (%)'}).drop_duplicates(subset=['Name']).set_index('Name').round(2)
@@ -218,6 +218,9 @@ def potential_breakout(df):
     pb = df[df['Exchange']==exchange_p]
     
     pb=pb[pb['Symbol'].isin(load_data("backend_data/breakout.csv")['Symbol'])]
+    
+    compare_link_symbols = f'http://localhost:8501/Compare_Stocks/?symbols={",".join(list(pb["Symbol"])).replace(".","_")}'
+    col4.header("[Compare Stocks]("+compare_link_symbols+")")
 
     #Select column to sort by
     sort_by = col2.selectbox('Order by' , ("Name","Latest Close","Dividend Yield","Change (%)"),key='pb_sortby')

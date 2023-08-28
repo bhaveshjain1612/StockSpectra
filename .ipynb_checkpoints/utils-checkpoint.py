@@ -622,6 +622,21 @@ def calc_KPIs(financials,mode):
     else:
         return kpis
     
+#Simp[lyfying parametres
+def simplify(x):
+    try:
+        if x >1000000000 or x <-1000000000:
+            y = str(round(x/10000000))+" Cr"    
+        elif x > 10000000 or x < -10000000:
+            y = str(round(x/10000000,2))+" Cr"
+        elif x > 100000 or x <-100000:
+            y = str(round(x/100000,2))+" L"
+        else:
+            y = x
+        return y
+    except:
+        return None
+    
 #financial explanantion
 def indicator_summary(x):
 
@@ -797,23 +812,13 @@ def indicator_summary(x):
 #in depth stock summary
 def stock_summary(stock_data,historical,week_52,dividend_split):
     summary = {}
-    #monthly return
-    summary['Monthly Returns'] = {}
-    if stock_data.Close_change_1m.values[0] > 10:
-        summary['Monthly Returns']['Display'] = "Up by "+str(round(stock_data.Close_change_1m.values[0],2)) +"% in 1 past month"
-        summary['Monthly Returns']['Type'] = 1
-    elif stock_data.Close_change_1m.values[0] < -10:
-        summary['Monthly Returns']['Display'] = "Fell by "+str(round(stock_data.Close_change_1m.values[0],2)*-1) +"% in 1 past month"
-        summary['Monthly Returns']['Type'] = -1
-    else:
-        summary.pop("Monthly Returns")
-
+    
     #yearly return   
     summary['Yearly Returns'] = {}
-    if stock_data.Close_change_1y.values[0] > 20:
-        summary['Yearly Returns']['Display'] = "Up by "+str(round(stock_data.Close_change_1y.values[0],2)) +"% in 1 past Year"
+    if stock_data.Close_change_1y.values[0] > 100:
+        summary['Yearly Returns']['Display'] = "Multibagger Returns of "+str(round(stock_data.Close_change_1y.values[0],2)) +"% in 1 past Year"
         summary['Yearly Returns']['Type'] = 1
-    elif stock_data.Close_change_1y.values[0] < -20:
+    elif stock_data.Close_change_1y.values[0] < -100:
         summary['Yearly Returns']['Display'] = "Fell by "+str(round(stock_data.Close_change_1y.values[0],2)*-1) +"% in 1 past Year"
         summary['Yearly Returns']['Type'] = -1
     else:
@@ -837,6 +842,9 @@ def stock_summary(stock_data,historical,week_52,dividend_split):
         summary['RSI']['Type'] = 1
     elif stock_data['Latest rsi'].values[0] > 80:
         summary['RSI']['Display'] = "Stock appears overbought and may fall soon"
+        summary['RSI']['Type'] = -1
+    elif stock_data['Latest rsi'].values[0] > 60:
+        summary['RSI']['Display'] = "RSI indicates Good Price strength"
         summary['RSI']['Type'] = -1
     else:
         summary.pop("RSI")
@@ -888,5 +896,308 @@ def stock_summary(stock_data,historical,week_52,dividend_split):
     else:
         summary['Momentum']['Display'] = "Mid Range Momentum"
         summary['Momentum']['Type'] = 1
-
+    
+    # Pivot Points
+    summary['Pivot points'] = {}
+    if stock_data['Latest Close'].values[0] < stock_data['Latest S3_previousday'].values[0]:
+        summary['Pivot points']['Display'] = "Price fell below S3 levels"
+        summary['Pivot points']['Type'] = - 1
+    elif stock_data['Latest Close'].values[0] < stock_data['Latest S2_previousday'].values[0]:
+        summary['Pivot points']['Display'] = "Price fell below S2 levels"
+        summary['Pivot points']['Type'] = - 1
+    elif stock_data['Latest Close'].values[0] < stock_data['Latest S1_previousday'].values[0]:
+        summary['Pivot points']['Display'] = "Price fell below S1 levels"
+        summary['Pivot points']['Type'] = - 1
+    elif stock_data['Latest Close'].values[0] > stock_data['Latest R3_previousday'].values[0]:
+        summary['Pivot points']['Display'] = "Price rose above R3 levels"
+        summary['Pivot points']['Type'] =  1
+    elif stock_data['Latest Close'].values[0] > stock_data['Latest R2_previousday'].values[0]:
+        summary['Pivot points']['Display'] = "Price rose above R2 levels"
+        summary['Pivot points']['Type'] =  1
+    elif stock_data['Latest Close'].values[0] > stock_data['Latest R1_previousday'].values[0]:
+        summary['Pivot points']['Display'] = "Price rose above R1 levels"
+        summary['Pivot points']['Type'] =  1
+    else:
+        summary.pop('Pivot points')
+        
     return summary
+
+######################################################################################################################################
+# Comparision FUnctions
+######################################################################################################################################
+
+#single company financials
+def get_financials_single(Name,db): 
+    symbol = db[db['Name']==Name].Symbol.values[0]
+    
+    fin_file = "backend_data/company_financials/"+symbol.replace(".","_")+".csv"
+    fin = pd.read_csv(fin_file)
+
+    #st.dataframe(fin)
+
+    kpis = calc_KPIs(fin.set_index('Unnamed: 0').T.reset_index(),'normal')
+
+    df ={
+    'Net Income': simplify(kpis['Net Income']['current'])
+    ,'Net Income Change': simplify(kpis['Net Income']['delta'])
+    ,'Debt': simplify(kpis['Debt']['current'])
+    ,'Debt Change': simplify(kpis['Debt']['delta'])
+    ,'Free Cash Flow': simplify(kpis['Free Cash Flow']['current'])
+    ,'Free Cash Flow Change': simplify(kpis['Free Cash Flow']['delta'])
+    ,'Basic EPS': kpis['Basic EPS']['current']
+    ,'Basic EPS Change': kpis['Basic EPS']['delta']
+    ,'Net Profit Margin': kpis['Net Profit Margin']['current']
+    ,'Net Profit Margin Change': kpis['Net Profit Margin']['delta']
+    ,'ROA': kpis['ROA']['current']
+    ,'ROA Change': kpis['ROA']['delta']
+    ,'ROE': kpis['ROE']['current']
+    ,'ROE Change': kpis['ROE']['delta']
+    ,'ROCE': kpis['ROCE']['current']
+    ,'ROCE Change': kpis['ROCE']['delta']
+    ,'Current Ratio': kpis['Current Ratio']['current']
+    ,'Current Ratio Change': kpis['Current Ratio']['delta']
+    ,'DE Ratio': kpis['DE Ratio']['current']
+    ,'DE Ratio Change': kpis['DE Ratio']['delta']}
+
+    return pd.DataFrame(df,index=[Name])
+
+#Single company technicals
+def get_technicals_single(Name,data): 
+    
+    data = data[data["Name"]==Name]
+    
+    def trend(a, b):
+        return "Bullish" if a > b else "Bearish"
+
+    df ={
+    "ADX":(round(data['Latest ADX'].values[0],2)),
+    "RSI (14)":(round(data['Latest rsi'].values[0],2)),
+    "CCI (10)":(round(data['Latest CCI_10'].values[0],2)),
+    "CCI (40)":(round(data['Latest CCI_40'].values[0],2)),
+    "MFI (14)":(round(data['Latest MFI_14'].values[0],2)),
+    "MACD" : (round(data['Latest macd'].values[0],2)),
+    "VWAP" : (round(data['Latest VWAP'].values[0],2)),
+    "Willaimson %R": (round(data['Latest %R'].values[0],2)),
+    "Price v. SMA (5)" : trend(data['Latest Close'].values[0], data['Latest sma_5'].values[0]),
+    "Price v. SMA (20)" : trend(data['Latest Close'].values[0], data['Latest sma_20'].values[0]),
+    "Price v. SMA (50)" : trend(data['Latest Close'].values[0], data['Latest sma_50'].values[0]),
+    "Price v. SMA (100)" : trend(data['Latest Close'].values[0], data['Latest sma_100'].values[0]),
+    "SMA(5) v. SMA (20)" : trend(data['Latest sma_5'].values[0], data['Latest sma_20'].values[0]),
+    "SMA(20) v. SMA (50)" : trend(data['Latest sma_20'].values[0], data['Latest sma_50'].values[0]),
+    "SMA(50) v. SMA (100)" : trend(data['Latest sma_50'].values[0], data['Latest sma_100'].values[0]),   
+    }
+
+    return pd.DataFrame(df,index=[Name])
+
+######################################################################################################################################
+# Glossary Functions
+######################################################################################################################################
+
+def get_indicatordetails():
+    # Define the indicators and their details
+    indicators = {
+        "CCI": {
+            "full_name": "Commodity Channel Index (CCI)",
+            "description": "The Commodity Channel Index (CCI) is a tool that helps investors understand the momentum of an investment. Think of it as a thermometer for stocks or other investments. It tells you if an investment might be 'too hot' (overbought) or 'too cold' (oversold).",
+            "how_it_works": "The CCI measures how the current price of an investment compares to its average price over a certain period. If the CCI is above zero, it means the price is higher than its average. If it's below zero, the price is lower than its average.",
+            "usefulness": "The CCI can give hints about potential new trends. For example, if the CCI moves from a low value to above 100, it might mean that the price is starting a new upward trend. On the other hand, if the CCI drops below -100, a downward trend might be starting. This can help investors decide when to buy or sell.",
+            "calculation": r'''
+    \begin{align*}
+    \text{CCI} & = \frac{\text{Typical Price} - \text{20-period SMA of TP}}{\text{Mean Deviation} \times 0.015} \\
+    \text{Where:} \\
+    \text{Typical Price (TP)} & = \frac{\text{High} + \text{Low} + \text{Close}}{3}
+    \end{align*}
+    '''
+        },
+        "VPT": {
+            "full_name": "Volume Price Trend (VPT)",
+            "description": "Volume Price Trend (VPT) is a technical analysis indicator that combines price and volume data. It helps in determining the strength of price movements.",
+            "how_it_works": "VPT is similar to the On-Balance Volume (OBV) but incorporates price changes. It adds or subtracts a multiple of the percentage change in share price trend and current volume, depending upon the movement of the price.",
+            "usefulness": "VPT can provide insights into the strength of a price trend, help in confirming price trends, and indicate potential reversals when there's a divergence between VPT and price.",
+            "calculation": r'''
+    \begin{align*}
+    \text{VPT} & = \text{Previous VPT} + \text{Volume} \times (\text{Close}_{\text{today}} - \text{Close}_{\text{yesterday}})
+    \end{align*}
+    '''
+        },
+        "ADX": {
+            "full_name": "Average Directional Index (ADX)",
+            "description": "The Average Directional Index (ADX) is a technical indicator that measures the strength of a trend. It doesn't indicate the direction of the trend, just its strength.",
+            "how_it_works": "ADX ranges between 0 to 100. Generally, ADX readings below 20 indicate a weak trend or a non-trending market, while readings above 20 indicate a strong trend.",
+            "usefulness": "ADX can help traders identify the strongest and most profitable trends, provide insights into whether a trend is strengthening or weakening, and assist in filtering out price consolidations.",
+            "calculation": r"ADX = \frac{ \text{Moving Average of DX} }{ \text{Period} } \text{ where DX is the difference between +DI and -DI}"
+        },
+            "RSI": {
+            "full_name": "Relative Strength Index (RSI)",
+            "description": "RSI is a momentum oscillator that measures the speed and change of price movements. It oscillates between 0 and 100 and is typically used to identify overbought or oversold conditions in a traded security.",
+            "how_it_works": "RSI compares the magnitude of recent gains to recent losses to determine overbought or oversold conditions.",
+            "usefulness": "RSI can help traders identify potential buy or sell opportunities, recognize potential price reversals, and gauge the strength of a trend.",
+            "calculation": r"RSI = 100 - \frac{100}{1 + RS} \text{ where } RS \text{ is the average of } n \text{ days' up closes divided by the average of } n \text{ days' down closes.}"
+        },
+        "EMA": {
+            "full_name": "Exponential Moving Average (EMA)",
+            "description": "EMA is a type of moving average that gives more weight to recent prices, making it more responsive to new information.",
+            "how_it_works": "EMA reacts faster to price changes compared to a Simple Moving Average (SMA).",
+            "usefulness": "EMA can help traders identify trend direction, determine support and resistance levels, and recognize potential entry and exit points.",
+            "calculation": r"EMA = (Close - Previous EMA) \times (2 / (Selected Time Period + 1)) + Previous EMA"
+        },
+        "SMA": {
+            "full_name": "Simple Moving Average (SMA)",
+            "description": "SMA is an arithmetic moving average calculated by adding recent closing prices and then dividing that by the number of time periods.",
+            "how_it_works": "SMA provides a smoothed line that tracks the price over a given period.",
+            "usefulness": "SMA can help traders identify trend direction, recognize potential price reversals, and determine support and resistance levels.",
+            "calculation": r"SMA = \frac{Sum \ of \ Closing \ Prices}{Number \ of \ Periods}"
+        },
+        "VWAP": {
+            "full_name": "Volume Weighted Average Price (VWAP)",
+            "description": "VWAP is the average price a security has traded at throughout the day, based on both volume and price.",
+            "how_it_works": "VWAP provides a benchmark that gives an idea of the average price at which investors have bought a security over a given time frame.",
+            "usefulness": "VWAP can help traders determine the market direction, recognize fair value for a security, and identify potential buy or sell signals.",
+            "calculation": r"VWAP = \frac{\sum (Price \times Volume)}{\sum Volume}"
+        },
+        "OBV": {
+            "full_name": "On-Balance Volume (OBV)",
+            "description": "OBV is a momentum indicator that uses volume flow to predict changes in stock price.",
+            "how_it_works": "OBV measures buying and selling pressure by adding volume on up days and subtracting volume on down days.",
+            "usefulness": "OBV can help traders identify potential price reversals, confirm price trends, and recognize accumulation or distribution phases.",
+            "calculation": r'''
+    \begin{align*}
+    \text{If } \text{Close}_{\text{today}} > \text{Close}_{\text{yesterday}} & : \\
+    \text{OBV}_{\text{today}} & = \text{OBV}_{\text{yesterday}} + \text{Volume}_{\text{today}} \\
+    \text{If } \text{Close}_{\text{today}} < \text{Close}_{\text{yesterday}} & : \\
+    \text{OBV}_{\text{today}} & = \text{OBV}_{\text{yesterday}} - \text{Volume}_{\text{today}}
+    \end{align*}
+    '''
+        },
+        "Williams %R": {
+            "full_name": "Williams %R",
+            "description": "Williams %R, also known as the Williams Percent Range, is a type of momentum indicator that moves between 0 and -100 and measures overbought and oversold levels.",
+            "how_it_works": "The Williams %R oscillates between 0 to -100. Readings from 0 to -20 are considered overbought, and readings from -80 to -100 are considered oversold.",
+            "usefulness": "Williams %R can help traders identify potential price reversals, recognize overbought or oversold conditions, and confirm momentum shifts.",
+            "calculation": r"Williams \ \%R = \frac{Highest \ High \ - \ Close}{Highest \ High \ - \ Lowest \ Low} \times -100"
+        },
+            "MACD": {
+            "full_name": "Moving Average Convergence Divergence (MACD)",
+            "description": "MACD is a trend-following momentum indicator that shows the relationship between two moving averages of a security’s price.",
+            "how_it_works": "MACD is calculated by subtracting the 26-period Exponential Moving Average (EMA) from the 12-period EMA. The result of that calculation is the MACD line. A nine-day EMA of the MACD, called the 'signal line,' is then plotted on top of the MACD line.",
+            "usefulness": "MACD can help traders identify potential buy or sell opportunities around crossovers of the MACD line and the signal line, recognize potential overbought or oversold conditions, and confirm the strength of a trend.",
+            "calculation": r"MACD = 12-Period \ EMA - 26-Period \ EMA \ and \ Signal \ Line = 9-Period \ EMA \ of \ MACD"
+        },
+        "Bollinger Bands": {
+            "full_name": "Bollinger Bands",
+            "description": "Bollinger Bands consist of a middle band being an N-period simple moving average (SMA), an upper band at K times an N-period standard deviation above the middle band, and a lower band at K times an N-period standard deviation below the middle band.",
+            "how_it_works": "Bollinger Bands are able to adapt to volatility in the price of a stock. A band squeeze denotes a period of low volatility and is considered by traders to be a potential indicator of future increased volatility.",
+            "usefulness": "Bollinger Bands can help traders identify periods of high or low volatility, recognize potential buy or sell opportunities, and determine overbought or oversold conditions.",
+            "calculation": r"Middle \ Band = 20-day \ SMA, \ Upper \ Band = 20-day \ SMA + (20-day \ standard \ deviation \times 2), \ Lower \ Band = 20-day \ SMA - (20-day \ standard \ deviation \times 2)"
+        },
+        "Standard Deviation": {
+            "full_name": "Standard Deviation",
+            "description": "Standard Deviation is a statistical measure of volatility. It represents how spread out the numbers are in a data set.",
+            "how_it_works": "In finance, standard deviation is used to measure price volatility and can help gauge the risk associated with a particular investment.",
+            "usefulness": "Standard Deviation can help traders and investors understand the volatility of an investment, gauge the risk associated with a particular security or portfolio, and determine the dispersion of returns.",
+            "calculation": r"Standard \ Deviation = \sqrt{\frac{\sum (X - \text{Mean})^2}{N}}"
+        },
+        "Net Income": {
+            "full_name": "Net Income",
+            "description": "Net Income represents a company's total earnings or profit.",
+            "how_it_works": "It's calculated by subtracting total expenses from total revenues. It provides a clear picture of the overall profitability of a company over a specific period of time.",
+            "usefulness": "Net Income is a key metric to assess a company's profitability and is often used by investors to compare the profitability of companies within the same industry.",
+            "calculation": r"\text{Net Income} = \text{Total Revenues} - \text{Total Expenses}"
+        },
+            "ROA": {
+            "full_name": "Return on Assets (ROA)",
+            "description": "ROA is a measure of how effectively a company's assets are being used to generate profits.",
+            "how_it_works": "It's calculated by dividing net income by total assets. This ratio gives an idea of how efficiently the company is converting its investment in assets into net income.",
+            "usefulness": "ROA is useful for comparing the profitability of companies in the same industry and for understanding if a company is generating enough profit from its assets.",
+            "calculation": r"\text{ROA} = \frac{\text{Net Income}}{\text{Total Assets}}"
+        },
+
+        "Debt": {
+            "full_name": "Debt",
+            "description": "Debt refers to the amount of money borrowed by a company and due for repayment.",
+            "how_it_works": "Companies can raise capital either through equity (like issuing shares) or through debt (like taking loans).",
+            "usefulness": "Analyzing a company's debt levels helps investors understand its financial health and its ability to meet its financial obligations."
+        },
+            "ROE": {
+            "full_name": "Return on Equity (ROE)",
+            "description": "ROE measures a company's profitability by revealing how much profit a company generates with the money shareholders have invested.",
+            "how_it_works": "It's calculated by dividing net income by shareholder's equity. This ratio indicates how well the company is generating earnings from its equity investments.",
+            "usefulness": "ROE is useful for comparing the profitability of companies in the same sector and understanding the efficiency of generating profits from shareholders' equity.",
+            "calculation": r"\text{ROE} = \frac{\text{Net Income}}{\text{Shareholder's Equity}}"
+        },
+
+        "Free Cash Flow": {
+            "full_name": "Free Cash Flow",
+            "description": "Free Cash Flow (FCF) represents the cash a company generates after accounting for cash outflows to support operations and maintain its capital assets.",
+            "how_it_works": "It's the cash produced by the company's normal business operations after deducting capital expenditures.",
+            "usefulness": "FCF is a key indicator of a company's financial flexibility and its ability to generate cash. It's often used by investors to assess the quality of a company's earnings.",
+            "calculation": r"\text{FCF} = \text{Operating Cash Flow} - \text{Capital Expenditures}"
+        },
+
+        "ROCE": {
+            "full_name": "Return on Capital Employed (ROCE)",
+            "description": "ROCE is a financial metric that determines how efficiently a company is generating profits from its capital.",
+            "how_it_works": "It's calculated by dividing Earnings Before Interest and Tax (EBIT) by capital employed. It gives an idea of how well the company is using its capital to generate profits.",
+            "usefulness": "ROCE is useful for comparing the profitability and efficiency of companies in the same sector.",
+            "calculation": r"\text{ROCE} = \frac{\text{Earnings Before Interest and Tax (EBIT)}}{\text{Capital Employed}}"
+        },
+
+        "Basic EPS": {
+            "full_name": "Basic Earnings Per Share (EPS)",
+            "description": "EPS measures the amount of net income earned per share of stock outstanding.",
+            "how_it_works": "It's calculated by dividing the net income by the average number of shares outstanding during a period.",
+            "usefulness": "EPS is a key metric used by investors to assess a company's profitability on a per-share basis.",
+            "calculation": r"\text{EPS} = \frac{\text{Net Income} - \text{Dividends on Preferred Stock}}{\text{Average Outstanding Shares}}"
+        },
+
+        "Current Ratio": {
+            "full_name": "Current Ratio",
+            "description": "The current ratio is a liquidity ratio that measures a company's ability to cover its short-term obligations with its short-term assets.",
+            "how_it_works": "It's calculated by dividing current assets by current liabilities. A ratio above 1 indicates that the company has more assets than liabilities.",
+            "usefulness": "The current ratio helps investors assess a company's short-term financial health and its ability to pay off its short-term liabilities with its short-term assets.",
+            "calculation": r"\text{Current Ratio} = \frac{\text{Current Assets}}{\text{Current Liabilities}}"
+        },
+
+        "Net Profit Margin": {
+            "full_name": "Net Profit Margin",
+            "description": "Net Profit Margin is a profitability ratio that shows how much of each dollar of revenues is kept as net profit.",
+            "how_it_works": "It's calculated by dividing net profit by total revenue and then multiplying by 100 to get a percentage.",
+            "usefulness": "The net profit margin helps investors assess how effectively a company is converting its revenues into actual profit.",
+            "calculation": r"\text{Net Profit Margin} = \frac{\text{Net Profit}}{\text{Total Revenue}} \times 100\%"
+        },
+
+        "DE Ratio": {
+            "full_name": "Debt-to-Equity (DE) Ratio",
+            "description": "The DE ratio is a measure of a company's financial leverage, indicating the proportion of equity and debt a company is using to finance its assets.",
+            "how_it_works": "It's calculated by dividing total liabilities by shareholder's equity. A high DE ratio indicates that a company may have too much debt.",
+            "usefulness": "The DE ratio helps investors understand the risk associated with a company's debt levels.",
+            "calculation": r"\text{DE Ratio} = \frac{\text{Total Liabilities}}{\text{Shareholder's Equity}}"
+        },
+        "MFI" : {
+            "full_name": "Money Flow Index (MFI)",
+            "description": "The Money Flow Index (MFI) is a momentum indicator that measures the inflow and outflow of money into an asset over a specific period of time.",
+            "how_it_works": "MFI takes both price and volume into consideration. A value above 80 is generally considered overbought, while a value below 20 is considered oversold.",
+            "usefulness": "MFI can be used to identify potential price reversals and validate price movements. It's also useful for spotting divergences between price and volume momentum.",
+            "calculation": r"\text{MFI} = 100 - \left( \frac{100}{1 + \text{Money Ratio}} \right) \text{ where Money Ratio} = \frac{\text{Positive Money Flow}}{\text{Negative Money Flow}}"
+        },
+        "Pivot Points": {
+            "full_name": "Pivot Points",
+            "description": "Pivot Points are horizontal support and resistance levels used to determine potential price movements.",
+            "how_it_works": "Pivot Points are used as predictive indicators. If the market opens above the pivot point, then the bias for the day is bullish, and if it opens below the pivot point, the bias is bearish.",
+            "usefulness": "They provide traders with levels to place stop losses, take profits, or identify entry points.",
+            "calculation": r"""
+            \begin{align*}
+            \text{Pivot Point (PP)} & : \frac{\text{High} + \text{Low} + \text{Close}}{3} \\
+            \text{Resistance 1 (R1)} & : 2 \times \text{PP} - \text{Low} \\
+            \text{Resistance 2 (R2)} & : \text{PP} + \text{High} - \text{Low} \\
+            \text{Resistance 3 (R3)} & : \text{High} + 2(\text{PP} - \text{Low}) \\
+            \text{Support 1 (S1)} & : 2 \times \text{PP} - \text{High} \\
+            \text{Support 2 (S2)} & : \text{PP} - \text{High} + \text{Low} \\
+            \text{Support 3 (S3)} & : \text{Low} - 2(\text{High} - \text{PP})
+            \end{align*}
+            """
+        }
+        # ... add the rest of the indicators similarly
+    }
+    
+    return indicators
