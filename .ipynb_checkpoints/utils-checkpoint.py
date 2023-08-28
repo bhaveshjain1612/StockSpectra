@@ -114,7 +114,7 @@ def top_pick_strategy(strategy, df):
         
     elif strategy == "Momentum Chaser" :
         result['info'] = "This strategy is for investors looking to capitalize on current market trends. It targets stocks that have shown strong recent performance and are expected to continue their upward trajectory."
-        result['df'] = df[((df['Risk 1-2Months']=='High') | df['Risk 1-2Months']=='Mid'))
+        result['df'] = df[((df['Risk 1-2Months']=='High') | (df['Risk 1-2Months']=='Mid'))
                          & ((df['Outlook 1-2Months']=='very positive'))
                          & (df['Risk >1Year']=='High') 
                          & ((df['Outlook >1Year']=='very positive'))
