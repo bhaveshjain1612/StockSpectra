@@ -63,11 +63,11 @@ def collective(df):
     name = col1.text_input('Enter name')
         
     # Filter by Dividend
-    dividend = col1.selectbox("Dividend", strategy_allotting(strategy)[3])
+    dividend = col1.selectbox("Dividend", ['All','Yes','No'])
         
     #_________________ALL COLUMN 2 FILTERS_____________________________    
     #Filter based on Risk
-    risk_filter = col2.multiselect('Risk/Reward Preference',np.insert(df["Risk "+strategy.replace(" ","")].unique(), 0, "All"), strategy_allotting(strategy)[0])
+    risk_filter = col2.multiselect('Risk/Reward Preference',np.insert(df["Risk "+strategy.replace(" ","")].unique(), 0, "All"), ['All'])
     if 'All' in risk_filter or risk_filter ==[]:
         risk_filter = df["Risk "+strategy.replace(" ","")].unique()    
         
@@ -83,7 +83,7 @@ def collective(df):
     
     #_________________ALL COLUMN 3 FILTERS_____________________________    
     # Filter by stock rank (outlook)
-    stkrank_filter = col3.multiselect('Outlook Preference',np.insert(df["Outlook "+strategy.replace(" ","")].unique(), 0, "All"), strategy_allotting(strategy)[1])
+    stkrank_filter = col3.multiselect('Outlook Preference',np.insert(df["Outlook "+strategy.replace(" ","")].unique(), 0, "All"), ['All'])
     if 'All' in stkrank_filter or stkrank_filter ==[]:
         stkrank_filter = df["Outlook "+strategy.replace(" ","")].unique()    
         
@@ -97,7 +97,7 @@ def collective(df):
     
     #_________________ALL COLUMN 4 FILTERS_____________________________    
     # Filter by financial rank
-    finrank_filter = col4.multiselect('Company YoY financials', np.insert(df['finrank'].unique(), 0, "All"), strategy_allotting(strategy)[2])     
+    finrank_filter = col4.multiselect('Company YoY financials', np.insert(df['finrank'].unique(), 0, "All"), ['All'])     
     if 'All' in finrank_filter or finrank_filter ==[]:
         finrank_filter = df['finrank'].unique()
         
