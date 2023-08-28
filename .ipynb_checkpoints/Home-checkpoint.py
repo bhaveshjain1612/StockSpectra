@@ -211,7 +211,7 @@ def potential_breakout(df):
     st.info('''These are some stocks that have the possibility of shifting from a bearish trend to a strong bullish trend. However, This change is always uncertain. Please proceed with caution''', icon="ℹ️")
     
     #creating sols in dahsboard
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3. col4 = st.columns(4)
     
     exchange_p = col1.selectbox("Exchange", ("NSE", "BSE"), key = 'pb_exchange')
     
@@ -219,7 +219,7 @@ def potential_breakout(df):
     
     pb=pb[pb['Symbol'].isin(load_data("backend_data/breakout.csv")['Symbol'])]
     
-    compare_link_symbols = f'http://localhost:8501/Compare_Stocks/?symbols={",".join(list(pb["Symbol"])).replace(".","_")}'
+    compare_link_symbols = f'http://stockspectra.streamlit.app/Compare_Stocks/?symbols={",".join(list(pb["Symbol"])).replace(".","_")}'
     col4.header("[Compare Stocks]("+compare_link_symbols+")")
 
     #Select column to sort by
