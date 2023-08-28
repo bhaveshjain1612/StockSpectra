@@ -54,12 +54,28 @@ The home page of StockSpectra serves as the primary entry point for users, offer
 
 #### Top Picks:
   - **Description**: This tab showcases stocks that have strong financials and are poised for potential growth. These stocks are filtered based on their financial rank, outlook, risk, and dividend yield.
-  - **Logic for Selection**:
-    - The stocks are filtered to only include those with a strong financial rank.
-    - They should have a positive or very positive outlook for both short-term (1-2 months) and long-term (>1 year).
-    - The risk for short-term should be mid to low, and for long-term, it should be low.
-    - Only stocks with a dividend yield greater than 0 are considered.
-  - **Usage**: Users can select the stock exchange (NSE or BSE) and sort the displayed stocks based on various criteria like name, latest close, dividend yield, and change percentage.
+  - **Multiple Strategies**: With different kinds of investors in the market, this section allows the user to see today's top picks for one of the ten selected strategies. These strategies aim to simplify some of the work further with preset filters, unique to each strategy. And don't worry, a description accompanies the strategy so you know what exactly is the basis of picking the stocks.
+    1. *Short-Term High Gains Strategy*: Targets stocks that are expected to provide significant returns in the short term. While there's a high risk associated with these stocks, the very positive short-term outlook suggests potential for quick gains.
+    
+    2. *Stable Growth Strategy*: Focuses on stocks that have a stable growth trajectory. The low long-term risk and positive outlook over a year suggest that these stocks are likely to grow steadily over time.
+    
+    3. *High Dividend Yield Strategy*: Targets stocks that pay dividends. The focus is on companies with a strong or mid-level financial year-over-year strength, indicating they have the capacity to continue paying dividends.
+    
+    4. **Defensive Strategy*: For investors who want to minimize risk. The focus is on stocks with low risk in both the short and long term, a neutral or positive outlook, and a strong financial track record. The inclusion of dividends provides an additional source of income.
+    
+    5. *Aggressive Growth Strategy*: For investors with a high risk tolerance, targeting stocks that have the potential for significant growth. While there's a higher level of risk, the very positive outlook suggests substantial potential returns.
+    
+    6. *Conservative Income Strategy*: For investors seeking a steady income with minimal risk. Stocks selected under this strategy are expected to have a consistent dividend payout and exhibit low volatility.
+    
+    7. *Turnaround Play*: Targets stocks that are currently underperforming but are expected to rebound in the long term. It's a speculative play, betting on the company's potential to turn its fortunes around.
+    
+    8. *Balanced Portfolio Strategy*: Aims to maintain a balanced portfolio with a mix of growth and value stocks. It's suitable for investors seeking moderate growth with controlled risk.
+    
+    9. *Value Play*: Targets undervalued stocks that are expected to appreciate over time. The focus is on companies that are currently overlooked by the market but have strong fundamentals.
+    
+    10. *Momentum Chaser*: For investors looking to capitalize on current market trends. It targets stocks that have shown strong recent performance and are expected to continue their upward trajectory.
+
+- **Usage**: Users can select the strategy, and stock exchange (NSE or BSE) and sort the displayed stocks based on various criteria like name, latest close, dividend yield, and change percentage.
 
 #### Top Price Changes:
   - **Description**: Displays stocks that have seen significant price changes. Users can view either the top gainers or top losers.
