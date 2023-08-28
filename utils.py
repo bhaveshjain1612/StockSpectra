@@ -73,31 +73,31 @@ def top_pick_strategy(strategy, df):
         
     elif strategy == "Defensive Strategy" :
         result['info'] = "This strategy is for investors who want to minimize risk. The focus is on stocks with low risk in both the short and long term, a neutral or positive outlook, and a strong financial track record. The inclusion of dividends provides an additional source of income."
-        result['df'] = 
+        #result['df'] = 
         
     elif strategy == "Aggressive Growth Strategy" :
         result['info'] = "This strategy is for investors with a high risk tolerance, targeting stocks that have the potential for significant growth. While there's a higher level of risk, the very positive outlook suggests substantial potential returns."
-        result['df'] = 
+        #result['df'] = 
         
     elif strategy == "Conservative Income Strategy" :
         result['info'] = "This strategy is for investors seeking a steady income with minimal risk. Stocks selected under this strategy are expected to have a consistent dividend payout and exhibit low volatility."
-        result['df'] = 
+        #result['df'] = 
         
     elif strategy == "Turnaround Play" :
         result['info'] = "This strategy targets stocks that are currently underperforming but are expected to rebound in the long term. It's a speculative play, betting on the company's potential to turn its fortunes around."
-        result['df'] = 
+        #result['df'] = 
         
     elif strategy == "Balanced Portfolio Strategy" :
         result['info'] = "This strategy aims to maintain a balanced portfolio with a mix of growth and value stocks. It's suitable for investors seeking moderate growth with controlled risk."
-        result['df'] = 
+        #result['df'] = 
         
     elif strategy == "Value Play" :
         result['info'] = "This strategy targets undervalued stocks that are expected to appreciate over time. The focus is on companies that are currently overlooked by the market but have strong fundamentals"
-        result['df'] = 
+        #result['df'] = 
         
     elif strategy == "Momentum Chaser" :
         result['info'] = "This strategy is for investors looking to capitalize on current market trends. It targets stocks that have shown strong recent performance and are expected to continue their upward trajectory."
-        result['df'] = 
+        #result['df'] = 
         
     
     return result
