@@ -154,17 +154,36 @@ def collective(df):
         
 #function for top picks
 def top_picks(df):
-    st.info('''These are handpicked stocks that have positive oultooks for short and long term both with low- mid risk. They also yield Dividends and have strong YoY financials''', icon="ℹ️")
     #creating sols in dahsboard
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     
-    exchange_p = col1.selectbox("Exchange", ("NSE", "BSE"), key = 'tp_exchange')
+    strategies = [
+    "Short-Term High Gains Strategy",
+    "Stable Growth Strategy",
+    "High Dividend Yield Strategy",
+    "Defensive Strategy",
+    "Aggressive Growth Strategy",
+    "Conservative Income Strategy",
+    "Turnaround Play",
+    "Balanced Portfolio Strategy",
+    "Value Play",
+    "Momentum Chaser",
+    "Long-Term Stability Play"
+]
+
+    # Create a selectbox in Streamlit
+    selected_strategy = col1.selectbox('Choose a Stock-Picking Strategy:', strategies)
+    
+    exchange_p = col2.selectbox("Exchange", ("NSE", "BSE"), key = 'tp_exchange')
     tp = df[df['Exchange']==exchange_p]
     
     #Select column to sort by
-    sort_by = col2.selectbox('Order by' , ("Name","Latest Close","Dividend Yield","Change (%)"),key='tp_sortby')
+    sort_by = col3.selectbox('Order by' , ("Name","Latest Close","Dividend Yield","Change (%)"),key='tp_sortby')
     # Sorting Method 
-    sort_type = col3.selectbox('Order method', ("None","Ascending","Descending") ,key='tp_sorttype')
+    sort_type = col4.selectbox('Order method', ("None","Ascending","Descending") ,key='tp_sorttype')
+    
+    st.info(strategy_alloting(selected_strategy)['info'], icon="ℹ️")
+    
 
     #selecting companies with high short volatility, mid to low in mid ter and low in long term
     tp = tp[tp['finrank']=='strong']

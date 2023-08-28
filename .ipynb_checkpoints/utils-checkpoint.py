@@ -37,15 +37,34 @@ def industryview(df,universe):
     return df
 
 #allot strategy based on selected filter
-def strategy_allotting(argument):
-    switcher = {
-        "> 1 Year": [['Low'],['positive','neutral'],['strong','mid'],("Yes","All","No")],
-        "5-6 Months": [['Low','Mid'],['positive','neutral'],['strong'],("All","Yes","No")],
-        "1-2 Months": [['Mid','High'],['positive'],['All'],("All","Yes","No")],
-    }
-
-    #return switcher.get(argument, [['All'],['All'],['All'],("All","Yes","No")])
-    return [['All'],['All'],['All'],("All","Yes","No")]
+def strategy_allotting(strategy):
+    
+    result = {}
+    
+    if strategy == "Short-Term High Gains Strategy" :
+        result['info'] = "This strategy targets stocks that are expected to provide significant returns in the short term. While there's a high risk associated with these stocks, the very positive short-term outlook suggests potential for quick gains."
+    elif strategy == "Stable Growth Strategy" :
+        result['info'] = "This strategy focuses on stocks that have a stable growth trajectory. The low long-term risk and positive outlook over a year suggest that these stocks are likely to grow steadily over time."
+    elif strategy == "High Dividend Yield Strategy" :
+        result['info'] = "This strategy targets stocks that pay dividends. The focus is on companies with a strong or mid-level financial year-over-year strength, indicating they have the capacity to continue paying dividends."
+    elif strategy == "Defensive Strategy" :
+        result['info'] = "This strategy is for investors who want to minimize risk. The focus is on stocks with low risk in both the short and long term, a neutral or positive outlook, and a strong financial track record. The inclusion of dividends provides an additional source of income."
+    elif strategy == "Aggressive Growth Strategy" :
+        result['info'] = "This strategy is for investors with a high risk tolerance, targeting stocks that have the potential for significant growth. While there's a higher level of risk, the very positive outlook suggests substantial potential returns."
+    elif strategy == "Conservative Income Strategy" :
+        result['info'] = "This strategy is for investors seeking a steady income with minimal risk. Stocks selected under this strategy are expected to have a consistent dividend payout and exhibit low volatility."
+    elif strategy == "Turnaround Play" :
+        result['info'] = "This strategy targets stocks that are currently underperforming but are expected to rebound in the long term. It's a speculative play, betting on the company's potential to turn its fortunes around."
+    elif strategy == "Balanced Portfolio Strategy" :
+        result['info'] = "This strategy aims to maintain a balanced portfolio with a mix of growth and value stocks. It's suitable for investors seeking moderate growth with controlled risk."
+    elif strategy == "Value Play" :
+        result['info'] = "This strategy targets undervalued stocks that are expected to appreciate over time. The focus is on companies that are currently overlooked by the market but have strong fundamentals"
+    elif strategy == "Momentum Chaser" :
+        result['info'] = "This strategy is for investors looking to capitalize on current market trends. It targets stocks that have shown strong recent performance and are expected to continue their upward trajectory."
+    elif strategy == "Long-Term Stability Play" :
+        result['info'] = "This strategy focuses on stocks that are expected to provide stable returns over the long term, with a consistent dividend payout and strong financial health."
+    
+    return result
 
 ######################################################################################################################################
 # In Depth Functions
