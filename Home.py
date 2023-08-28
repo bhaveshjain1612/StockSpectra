@@ -173,7 +173,6 @@ def top_picks(df):
     selected_strategy = col1.selectbox('Choose a Stock-Picking Strategy:', strategies)
     
     exchange_p = col2.selectbox("Exchange", ("NSE", "BSE"), key = 'tp_exchange')
-    tp = df[df['Exchange']==exchange_p]
     
     #Select column to sort by
     sort_by = col3.selectbox('Order by' , ("Name","Latest Close","Dividend Yield","Change (%)"),key='tp_sortby')
@@ -191,6 +190,7 @@ def top_picks(df):
     tp = tp[tp['Dividend Yield']>0]
     '''
     tp = top_pick_strategy(selected_strategy, df)['df']
+    tp = tp[tp['Exchange']==exchange_p]
     
     tp = tp[['Name','Symbol','Sector','Industry','Latest Close','Close_change_1d','Dividend Yield']].rename(columns={'Close_change_1d':'Change (%)'}).drop_duplicates(subset=['Name']).set_index('Name').round(2)
     

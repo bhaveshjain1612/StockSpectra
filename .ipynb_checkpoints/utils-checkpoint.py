@@ -47,8 +47,8 @@ def top_pick_strategy(strategy, df):
         
     elif strategy == "Stable Growth Strategy" :
         result['info'] = "This strategy focuses on stocks that have a stable growth trajectory. The low long-term risk and positive outlook over a year suggest that these stocks are likely to grow steadily over time."
-        result['df'] = df[(df['Risk 1-2Months']=='Low') | (df['Risk1-2 Months']=='Mid')
-                         & (df['Outlook 1-2Months']=='positive') | (df['Outlook1-2 Months']=='neutral')
+        result['df'] = df[(df['Risk 1-2Months']=='Low') | (df['Risk 1-2 Months']=='Mid')
+                         & (df['Outlook 1-2Months']=='positive') | (df['Outlook 1-2 Months']=='neutral')
                          & (df['Risk >1Year']=='Low')
                          & (df['Outlook >1Year']=='very positive')
                          & (df['finrank']=='strong')]
