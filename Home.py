@@ -154,23 +154,21 @@ def collective(df):
         
 #function for top picks
 def top_picks(df):
-    #creating sols in dahsboard
-    col1, col2, col3, col4 = st.columns(4)
-    
     strategies = [
-    "Short-Term High Gains Strategy",
-    "Stable Growth Strategy",
-    "High Dividend Yield Strategy",
-    "Defensive Strategy",
-    "Aggressive Growth Strategy",
-    "Conservative Income Strategy",
-    "Turnaround Play",
-    "Balanced Portfolio Strategy",
-    "Value Play",
-    "Momentum Chaser",
-    "Long-Term Stability Play"
-]
-
+        "Short-Term High Gains Strategy",
+        "Stable Growth Strategy",
+        "High Dividend Yield Strategy",
+        "Defensive Strategy",
+        "Aggressive Growth Strategy",
+        "Conservative Income Strategy",
+        "Turnaround Play",
+        "Balanced Portfolio Strategy",
+        "Value Play",
+        "Momentum Chaser"
+    ]
+    
+    #creating sols in dahsboard
+    col1, col2, col3, col4 = st.columns([2,1,1,1])
     # Create a selectbox in Streamlit
     selected_strategy = col1.selectbox('Choose a Stock-Picking Strategy:', strategies)
     
@@ -181,9 +179,9 @@ def top_picks(df):
     sort_by = col3.selectbox('Order by' , ("Name","Latest Close","Dividend Yield","Change (%)"),key='tp_sortby')
     # Sorting Method 
     sort_type = col4.selectbox('Order method', ("None","Ascending","Descending") ,key='tp_sorttype')
-    
+    #display strategy info
     st.info(top_pick_strategy(selected_strategy)['info'], icon="ℹ️")
-
+    '''
     #selecting companies with high short volatility, mid to low in mid ter and low in long term
     tp = tp[tp['finrank']=='strong']
     tp = tp[(tp['Outlook 1-2Months']=='positive') | (tp['Outlook 1-2Months']=='very positive')]
@@ -191,7 +189,9 @@ def top_picks(df):
     tp = tp[(tp['Risk 1-2Months']=='Mid') | (tp['Risk 1-2Months']=='High')]
     tp = tp[ (tp['Risk >1Year']=='Mid')]
     tp = tp[tp['Dividend Yield']>0]
-
+    '''
+    tp = top_pick_strategy(selected_strategy)['df']
+    
     tp = tp[['Name','Symbol','Sector','Industry','Latest Close','Close_change_1d','Dividend Yield']].rename(columns={'Close_change_1d':'Change (%)'}).drop_duplicates(subset=['Name']).set_index('Name').round(2)
     
     if sort_type != "None":
@@ -223,7 +223,7 @@ def top_price_changes(df):
         add_links(tg)
     
 
-#function for top gainers
+#function for potentiual breakouts
 def potential_breakout(df):
     
     st.info('''These are some stocks that have the possibility of shifting from a bearish trend to a strong bullish trend. However, This change is always uncertain. Please proceed with caution''', icon="ℹ️")
