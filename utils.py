@@ -36,30 +36,19 @@ def industryview(df,universe):
 
     return df
 
-#allot strategy based on selected filter
-def strategy_allotting(argument):
-    switcher = {
-        "> 1 Year": [['Low'],['positive','neutral'],['strong','mid'],("Yes","All","No")],
-        "5-6 Months": [['Low','Mid'],['positive','neutral'],['strong'],("All","Yes","No")],
-        "1-2 Months": [['Mid','High'],['positive'],['All'],("All","Yes","No")],
-    }
-
-    #return switcher.get(argument, [['All'],['All'],['All'],("All","Yes","No")])
-    return [['All'],['All'],['All'],("All","Yes","No")]
-
 def top_pick_strategy(strategy, df):
     result = {}
     
     if strategy == "Short-Term High Gains Strategy" :
         result['info'] = "This strategy targets stocks that are expected to provide significant returns in the short term. While there's a high risk associated with these stocks, the very positive short-term outlook suggests potential for quick gains."
-        result['df'] = df[(df['Risk 1-2 Months']=='High')
-                         & (df['Outlook 1-2 Months']=='very positive')
+        result['df'] = df[(df['Risk 1-2Months']=='High')
+                         & (df['Outlook 1-2Months']=='very positive')
                          & (df['finrank']=='strong')]
         
     elif strategy == "Stable Growth Strategy" :
         result['info'] = "This strategy focuses on stocks that have a stable growth trajectory. The low long-term risk and positive outlook over a year suggest that these stocks are likely to grow steadily over time."
-        result['df'] = df[(df['Risk 1-2 Months']=='Low') | (df['Risk 1-2 Months']=='Mid')
-                         & (df['Outlook 1-2 Months']=='positive') | (df['Outlook 1-2 Months']=='neutral')
+        result['df'] = df[(df['Risk 1-2Months']=='Low') | (df['Risk1-2 Months']=='Mid')
+                         & (df['Outlook 1-2Months']=='positive') | (df['Outlook1-2 Months']=='neutral')
                          & (df['Risk >1Year']=='Low')
                          & (df['Outlook >1Year']=='very positive')
                          & (df['finrank']=='strong')]
