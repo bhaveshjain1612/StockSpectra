@@ -389,7 +389,7 @@ def load_insights(data,input_symbol):
     with tab3:
         generate_financials(data)
     with tab4:
-        generate_news(data.Symbol.values[0])
+        generate_news(data.Name.values[0])
     #st.dataframe(data)
 
 def main():
