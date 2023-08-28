@@ -25,7 +25,7 @@ def get_news(name):
 
         return urls
 
-    url = "https://news.google.com/search?q="+name[:-3]+"&hl=en-IN&gl=IN&ceid=IN%3Aen"
+    url = "https://news.google.com/search?q="+name.replace(" ","%20")+"&hl=en-IN&gl=IN&ceid=IN%3Aen"
     class_name = "xrnccd"
     element_urls = find_elements_with_class(url, class_name)
     
@@ -80,7 +80,7 @@ def get_details(df):
 
     return df
 
-names = pd.read_csv("db_firmo.csv").Symbol.unique()
+names = pd.read_csv("db_firmo.csv").Name.unique()
 for n in tqdm(names):
     #print(n.replace(" ","_"))
     links = get_news(n)
