@@ -150,6 +150,13 @@ This section provides a deeper dive into the financial health and performance of
 #### Stock Technicals
 For users interested in technical analysis, the "Stock Technicals" section provides various technical indicators and metrics for each stock. This can help users make more informed decisions based on technical patterns and signals.
 
+### Feedback
+ Feedback is something that is appreciated a lot. Hence, this page allows users to drop in their views.
+
+### Glossary
+
+A page containing definitions, formulae, and use cases of some of the in-app technical jargon. This can be accessed independently, or the specific ey word glossary directly from the icon beside the technical/financial indicator.
+
 ## **StockSpectra Backend Data Flow Overview**
 
 Welcome to the heart of StockSpectra! Let's take a quick tour of how we ensure you get the latest and most accurate stock and news data.
