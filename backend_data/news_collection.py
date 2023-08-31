@@ -82,7 +82,8 @@ def get_details(df):
 
 names = pd.read_csv("db_firmo.csv").Name.unique()
 for n in tqdm(names):
-    #print(n.replace(" ","_"))
-    links = get_news(n)
-    #news = get_details(links)
-    links.to_csv("news_articles/"+n.replace(".","_")+".csv")
+    try:
+        links = get_news(n)
+        links.to_csv("news_articles/"+n.replace(".","_")+".csv")
+    except:
+        continue
