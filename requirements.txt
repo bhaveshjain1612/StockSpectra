@@ -8,3 +8,4 @@ plotly==5.15.0
 newspaper3k==0.2.8
 gspread==5.10.0
 oauth2client==4.1.3
+pandas==2.0.3
