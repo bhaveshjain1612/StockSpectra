@@ -876,11 +876,14 @@ def allot_outlook(df):
             short_term_score += short_term_weights['macd']
 
         # Bollinger Bands logic
-        price_position = (row['Latest Close'] - row['Latest RollingMean']) / (row['Latest UpperBand2'] - row['Latest LowerBand2'])
-        if price_position < -0.5:
-            short_term_score += short_term_weights['bollinger']
-        elif price_position > 0.5:
-            short_term_score -= short_term_weights['bollinger']
+        try:
+            price_position = (row['Latest Close'] - row['Latest RollingMean']) / (row['Latest UpperBand2'] - row['Latest LowerBand2'])
+            if price_position < -0.5:
+                short_term_score += short_term_weights['bollinger']
+            elif price_position > 0.5:
+                short_term_score -= short_term_weights['bollinger']
+        except:
+            short_term_score = short_term_score
 
         # Price change logic
         if row['Close_change_1d'] > 0:
@@ -900,7 +903,6 @@ def allot_outlook(df):
             long_term_score += 1
         else:
             long_term_score -= 1
-            
             
         # if DIvidend
         if row['Dividend Rate'] != 'Not Found':
