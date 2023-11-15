@@ -319,7 +319,7 @@ if __name__ == "__main__":
     if st.session_state.hide:
         secret = st.container()
         with secret:
-            s.title("StockSpectra")
+            st.title("StockSpectra")
             st.header('''**Disclaimer: Educational Purpose Only**''')
             st.write(disclaimer_text1)
             st.write(disclaimer_text2)
