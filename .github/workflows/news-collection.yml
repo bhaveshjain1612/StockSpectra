@@ -5,7 +5,7 @@ on:
       - cron: "30 3 * * *"
       - cron: "30 6 * * *"
       - cron: "30 12 * * *"
-      #- cron: "30 16 * * *"
+      - cron: "30 16 * * *"
       - cron: "30 18 * * *"
   #push:
   #  branches:
